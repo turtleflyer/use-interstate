@@ -1,9 +1,0 @@
-{
-  "packages": ["packages/smart-hooks/*", "lab/*"],
-  "command": {
-    "bootstrap": {
-      "hoist": "**"
-    }
-  },
-  "version": "independent"
-}

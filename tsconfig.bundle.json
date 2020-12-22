@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./ts",
+    "rootDir": ".",
+    "declaration": true
+  },
+  "files": ["./src/useInterstate.tsx"]
+}

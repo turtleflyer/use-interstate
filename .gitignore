@@ -1,6 +1,4 @@
 node_modules
 lib/
-lab/
-lerna-debug.log
 .vscode/
 ts/
