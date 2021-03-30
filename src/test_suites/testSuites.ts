@@ -4,7 +4,7 @@ import './assets/expectNumberToBeConsideringFlag';
 import './assets/expectTriggersNumber';
 import type { TestFlags } from './assets/testFlags';
 import { flagManager } from './assets/testFlags';
-import type { RunTestCase, TestCase, TestParameters } from './assets/TestTypes';
+import type { RunTestCase, TestParameters } from './assets/TestTypes';
 import { testCreateAndInitInterstate } from './test_cases/testCreateAndInitInterstate';
 import { testInitInterstate } from './test_cases/testInitInterstate';
 import { testReadInterstateAcceptSelector } from './test_cases/testReadInterstateAcceptSelector';
@@ -25,14 +25,13 @@ export const testSuites = (packagePath: string): void => {
   const parsedPackagePath = path.relative('..', packagePath);
 
   describe.each([
-    ['test logic only', { SHOULD_TEST_PERFORMANCE: false }],
-    ['test performance too', { SHOULD_TEST_PERFORMANCE: true }],
+    ['test logic', {}],
+    ['test implementation details', { SHOULD_TEST_IMPLEMENTATION: true }],
+    ['test performance', { SHOULD_TEST_PERFORMANCE: true }],
   ])('Test useInterstate correctness (%s)', (_name: string, flags: Partial<TestFlags>): void => {
     const testParameters = {} as TestParameters;
-
-    beforeAll(() => {
-      flagManager.set(flags);
-    });
+    flagManager.reset();
+    flagManager.set(flags);
 
     beforeEach(() => {
       jest.isolateModules(() => {
@@ -43,31 +42,53 @@ export const testSuites = (packagePath: string): void => {
 
     afterEach(cleanup);
 
-    if (!flags.SHOULD_TEST_PERFORMANCE) {
-      runTestCases(
-        testCreateAndInitInterstate,
-        testInitInterstate,
-        testReadInterstateKeyInterface,
-        testReadInterstateKeysInterface,
-        testReadInterstateAcceptSelector,
-        testSetInterstateCheckedByReadInterstate
-      );
-    }
-
-    runTestCases(
+    const allTests = [
+      testCreateAndInitInterstate,
+      testInitInterstate,
+      testReadInterstateKeyInterface,
+      testReadInterstateKeysInterface,
+      testReadInterstateAcceptSelector,
+      testSetInterstateCheckedByReadInterstate,
       testUseInterstateKeyInterface,
       testUseInterstateKeysInterface,
       testUseInterstateSchemaObjInterface,
       testUseInterstateSchemaFnInterface,
       testUseInterstateAcceptSelector,
       testUnsuccessfulChangingInterface,
-      testScenariosWithSiblings
-    );
+      testScenariosWithSiblings,
+    ];
 
-    function runTestCases(...tests: readonly TestCase[]): void {
-      test.each(tests)('%s', (_n: string, runTest: RunTestCase) => {
-        runTest(testParameters);
-      });
-    }
+    const testsWithNoDetailsOnFlagCase = {
+      SHOULD_TEST_IMPLEMENTATION: [
+        testCreateAndInitInterstate,
+        testInitInterstate,
+        testReadInterstateKeyInterface,
+        testReadInterstateKeysInterface,
+        testReadInterstateAcceptSelector,
+        testSetInterstateCheckedByReadInterstate,
+      ],
+
+      SHOULD_TEST_PERFORMANCE: [
+        testCreateAndInitInterstate,
+        testInitInterstate,
+        testReadInterstateKeyInterface,
+        testReadInterstateKeysInterface,
+        testReadInterstateAcceptSelector,
+        testSetInterstateCheckedByReadInterstate,
+      ],
+    };
+
+    test.each(
+      allTests.filter(
+        (test) =>
+          !Object.entries(flags).some((entry) => {
+            const [flag, v] = entry as [keyof TestFlags, boolean];
+
+            return v && testsWithNoDetailsOnFlagCase[flag].some((t) => t === test);
+          })
+      )
+    )('%s', (_n: string, runTest: RunTestCase) => {
+      runTest(testParameters);
+    });
   });
 };

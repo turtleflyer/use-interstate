@@ -5,7 +5,7 @@ export type TestFlags = {
 };
 
 const defFlags: TestFlags = {
-  SHOULD_TEST_IMPLEMENTATION: true,
+  SHOULD_TEST_IMPLEMENTATION: false,
   SHOULD_TEST_PERFORMANCE: false,
 };
 

@@ -9,7 +9,7 @@ describe('Test correctness of test tools', () => {
   test('flag manager works', () => {
     flagManager.reset();
 
-    expect(flagManager.read('SHOULD_TEST_IMPLEMENTATION')).toBeTruthy();
+    expect(flagManager.read('SHOULD_TEST_IMPLEMENTATION')).toBeFalsy();
     expect(flagManager.read('SHOULD_TEST_PERFORMANCE')).toBeFalsy();
 
     flagManager.set({ SHOULD_TEST_IMPLEMENTATION: false, SHOULD_TEST_PERFORMANCE: true });
@@ -19,7 +19,7 @@ describe('Test correctness of test tools', () => {
 
     flagManager.reset();
 
-    expect(flagManager.read('SHOULD_TEST_IMPLEMENTATION')).toBeTruthy();
+    expect(flagManager.read('SHOULD_TEST_IMPLEMENTATION')).toBeFalsy();
     expect(flagManager.read('SHOULD_TEST_PERFORMANCE')).toBeFalsy();
 
     flagManager.reset();
