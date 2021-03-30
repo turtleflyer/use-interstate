@@ -1,14 +1,10 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import type { TestCase, UseInterstateImport } from '../assets/TestTypes';
+import type { TestCase, TestParameters } from '../assets/TestTypes';
 
 export const testReadInterstateAcceptSelector: TestCase = [
   'readInterstate.acceptSelector works',
 
-  ({
-    useInterstateImport: { goInterstate },
-  }: {
-    useInterstateImport: UseInterstateImport;
-  }): void => {
+  ({ useInterstateImport: { goInterstate } }: TestParameters): void => {
     const symbolKey = Symbol('symbol_key');
     const { setInterstate, readInterstate } = goInterstate<{
       foo: number;
