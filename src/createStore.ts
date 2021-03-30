@@ -1,211 +1,158 @@
-import type { TrueObjectAssign } from './CommonTypes';
-import { createSettersListEntry } from './createSettersListEntry';
-import { createStoreState } from './createStoreState';
-import { createThrowError, UseInterstateErrorCodes } from './errorHandle';
-import { isSettersListSubscribed } from './isSettersListSubscribed';
-import { removeSetterEntry } from './removeSetterEntry';
-import type { SettersWatchList, SettersWatchListEntry } from './SettersLists';
-import type { MapValue, MapValueSettersListEntry } from './StoreMap';
-import { isSetterListEntryErrorChunk } from './StoreMap';
-import type { InitializeState, Store } from './StoreState';
+import { createState } from './createState';
+import { getEntriesOfEnumerableKeys } from './getEntriesOfEnumerableKeys';
+import { isFunctionParameter } from './isFunctionParameter';
+import type { LinkedList, LinkedListEntry, LinkedListFilled } from './LinkedList';
+import { addLinkedListEntry, removeLinkedListEntry, traverseLinkedList } from './LinkedList';
+import type { StateEntry, Trigger, TriggersListEntry, WayToAccessValue } from './State';
 import type {
-  InterstateInitializeParam,
-  InterstateParam,
-  Setter,
-  StateKey,
-} from './UseInterstateInterface';
+  GetStateUsingSelector,
+  GetValue,
+  InitState,
+  ReactInitKey,
+  ReactKeyMethods,
+  ReactTriggerMethods,
+  SetValue,
+  Store,
+} from './Store';
+import type { Interstate, InterstateSelector, UseInterstateInitParam } from './UseInterstateTypes';
 
-declare function fixControlFlowAnalysis(): never;
+export function createStore<M extends Interstate>(): Store<M> {
+  const { stateMap, getAccessHandler, clearState } = createState<M>();
+  //
+  // `reactCleaningWatchList` is list of "abandoned" triggers. Trigger in React can get abandoned if
+  // rendering of component is interrupted due to possible scenario in concurrent mode of React. It
+  // gets registered in store most often duplicating trigger registered on second run of same
+  // component. On earliest next render of any component with `useInterstate`
+  // `removeTriggerFromKeyList` is being traversed through and every clean up function is being
+  // called. It removes abandoned (not survived by next render stage) trigger. On `useEffect` run of
+  // every component with `useInterstatePlain` it removes related function from
+  // `removeTriggerFromKeyList`.
+  type ReactCleaningWatchList = LinkedList<ReactCleaningWatchListEntry>;
 
-function isFunction(p: unknown): p is (...arg: never[]) => unknown {
-  return typeof p === 'function';
-}
-
-const initParamIsFunction: <T extends unknown>(
-  p: InterstateInitializeParam<T>
-) => p is InterstateInitializeParam<T> & (() => T) = isFunction as never;
-
-const paramIsFunction: <T extends unknown>(
-  p: InterstateParam<T>
-) => p is (a: T) => T = isFunction as never;
-
-function isDefined<T extends unknown>(val: T | undefined, isSetUp: boolean): val is T {
-  return isSetUp;
-}
-
-export function createStore(): Store {
-  const storeState = createStoreState();
-
-  const throwError = createThrowError(storeState);
-
-  const { storeMap, settersWatchList, renderTask, effectTask } = storeState;
-
-  const initializeState: InitializeState = <T extends unknown>(
-    key: StateKey,
-    initValue: InterstateInitializeParam<T> | undefined
-  ) => {
-    const considerMapEntryValue = storeMap.get(key) as MapValue<T> | undefined;
-    if (!considerMapEntryValue) {
-      throwError(UseInterstateErrorCodes.UNEXPECTED_ERROR, { key });
-      fixControlFlowAnalysis();
-    }
-
-    const mapEntryValue: MapValue<T> = considerMapEntryValue;
-
-    const { isValueSetUp: isValueSetUpWhileInit, initStatus: initStatusWhileInit } = mapEntryValue;
-
-    if (initValue !== undefined && (initStatusWhileInit || !isValueSetUpWhileInit)) {
-      const evalValue = initParamIsFunction(initValue) ? initValue() : (initValue as T);
-
-      if (initStatusWhileInit) {
-        if (initStatusWhileInit.value !== evalValue) {
-          throwError(UseInterstateErrorCodes.CONCURRENTLY_PROVIDED_INIT_VALUE, { key });
-        }
-      } else {
-        (Object.assign as TrueObjectAssign)(mapEntryValue, {
-          value: evalValue,
-          initStatus: { value: evalValue },
-          isValueSetUp: true,
-        });
-      }
-    }
-
-    return {
-      getValue() {
-        const { value, isValueSetUp, initStatus } = mapEntryValue;
-
-        if (!isValueSetUp && !initStatus) {
-          throwError(UseInterstateErrorCodes.ACCESS_VALUE_NOT_BEEN_SET, { key });
-        }
-
-        return value as T;
-      },
-
-      setValue(value: InterstateParam<T>) {
-        const { caughtError, triggerRegistered, isValueSetUp, value: curVal } = mapEntryValue;
-
-        if (caughtError !== undefined) {
-          throwError(caughtError, { key });
-        }
-
-        if (triggerRegistered) {
-          throwError(UseInterstateErrorCodes.MULTIPLE_ATTEMPT_SET_STATE, { key });
-        }
-
-        if (!isDefined(curVal, isValueSetUp)) {
-          throwError(UseInterstateErrorCodes.ACCESS_VALUE_NOT_BEEN_SET, { key });
-          fixControlFlowAnalysis();
-        }
-
-        const evalVal = paramIsFunction(value) ? value(curVal) : value;
-
-        if (!Object.is(curVal, evalVal)) {
-          mapEntryValue.value = evalVal;
-
-          if (isSettersListSubscribed(mapEntryValue, { throwError, key })) {
-            mapEntryValue.triggerRegistered = true;
-
-            let setterEntry: MapValueSettersListEntry | undefined = mapEntryValue.start;
-            while (setterEntry) {
-              if (isSetterListEntryErrorChunk(setterEntry)) {
-                throwError(UseInterstateErrorCodes.UNEXPECTED_ERROR, { key });
-              }
-
-              setterEntry.setter({});
-              setterEntry = setterEntry.next;
-            }
-          }
-        }
-      },
-
-      addSetter(setter: Setter) {
-        const { end, caughtError } = mapEntryValue;
-
-        if (caughtError !== undefined) {
-          return null;
-        }
-
-        if (isSetterListEntryErrorChunk(end)) {
-          throwError(UseInterstateErrorCodes.UNEXPECTED_ERROR, { key });
-        }
-
-        function removeSetterFromKeyList() {
-          // eslint-disable-next-line @typescript-eslint/no-use-before-define
-          removeSetterEntry(setterEntry, mapEntryValue, {
-            throwError,
-            key,
-          });
-        }
-
-        function removeSetterFromWatchList() {
-          // eslint-disable-next-line @typescript-eslint/no-use-before-define
-          removeSetterEntry(watchListEntry, settersWatchList, {
-            throwError,
-            key,
-          });
-        }
-
-        const setterEntry = createSettersListEntry<MapValueSettersListEntry, MapValue>(
-          {
-            setter,
-            errorChunk: false,
-            removeFromWatchList: removeSetterFromWatchList,
-          },
-          mapEntryValue,
-          {
-            throwError,
-            key,
-          }
-        );
-
-        const watchListEntry = createSettersListEntry<SettersWatchListEntry, SettersWatchList>(
-          { removeFromStore: removeSetterFromKeyList },
-          settersWatchList,
-          { throwError, key }
-        );
-
-        return {
-          removeSetterFromKeyList,
-          removeSetterFromWatchList,
-        };
-      },
-    };
+  type ReactCleaningWatchListEntry = LinkedListEntry<ReactCleaningWatchListEntry> & {
+    readonly removeTriggerFromKeyList: () => void;
   };
 
-  function runRenderTask(key: StateKey) {
-    renderTask.run();
+  let reactCleaningWatchList: ReactCleaningWatchList = {};
+  let [reactRenderTaskDone, reactEffectTaskDone] = [false, false];
+  let reactRenderTasksPool: (() => void)[] = [];
+  let reactEffectTasksPool: (() => void)[] = [];
 
-    if (!storeMap.has(key)) {
-      storeMap.set(key, {
-        isValueSetUp: false,
+  const initState: InitState<M> = <K extends keyof M>(initParam?: Pick<M, K>) => {
+    clearState();
+    reactCleaningWatchList = {};
+    [reactRenderTaskDone, reactEffectTaskDone] = [false, false];
+
+    initParam &&
+      getEntriesOfEnumerableKeys(initParam).forEach(([key, value]) => {
+        stateMap.set(key, { stateValue: { value } });
+      });
+  };
+
+  const getValue: GetValue<M> = <K extends keyof M>(key: K): M[K] =>
+    stateMap.get(key)?.stateValue?.value as M[K];
+
+  const getStateUsingSelector: GetStateUsingSelector<M> = <R>(
+    selector: InterstateSelector<M, R>,
+    wayToAccessValue: WayToAccessValue<M>
+  ): R => {
+    const handler = getAccessHandler(wayToAccessValue);
+
+    return selector(handler);
+  };
+
+  const setValue: SetValue<M> = <K extends keyof M>(key: K, value: M[K]): void => {
+    const stateEntry: StateEntry<M[K]> = stateMap.get(key);
+    const oldValue = stateEntry.stateValue;
+    stateEntry.stateValue = { value };
+
+    if (
+      !stateEntry.reactTriggersList.triggersFired &&
+      !(oldValue && Object.is(oldValue.value, value))
+    ) {
+      traverseLinkedList(stateEntry.reactTriggersList, ({ trigger }) => {
+        trigger();
+      });
+
+      if (stateEntry.reactTriggersList.start) {
+        stateEntry.reactTriggersList.triggersFired = true;
+        reactRenderTasksPool.push(() => (stateEntry.reactTriggersList.triggersFired = false));
+      }
+    }
+  };
+
+  const reactRenderTask = (): void => {
+    if (!reactRenderTaskDone) {
+      [reactRenderTaskDone, reactEffectTaskDone] = [true, false];
+
+      traverseLinkedList(reactCleaningWatchList, ({ removeTriggerFromKeyList }) => {
+        removeTriggerFromKeyList();
+      });
+
+      reactRenderTasksPool.forEach((task) => task());
+      reactRenderTasksPool = [];
+      reactCleaningWatchList = {};
+    }
+  };
+
+  const reactEffectTask = (): void => {
+    if (!reactEffectTaskDone) {
+      [reactEffectTaskDone, reactRenderTaskDone] = [true, false];
+      reactEffectTasksPool.forEach((task) => task());
+      reactEffectTasksPool = [];
+    }
+  };
+
+  const reactInitKey: ReactInitKey<M> = <K extends keyof M>(
+    key: K,
+    initP?: UseInterstateInitParam<M[K]>
+  ): ReactKeyMethods => {
+    const stateEntry: StateEntry<M[K]> = stateMap.get(key);
+
+    if (initP !== undefined && !stateEntry.stateValue) {
+      stateEntry.stateValue = { value: isFunctionParameter(initP) ? initP() : initP };
+
+      traverseLinkedList(stateEntry.reactTriggersList, ({ trigger }) => {
+        reactEffectTasksPool.push(() => {
+          trigger();
+        });
       });
     }
 
-    const mapValue = storeMap.get(key) as MapValue<unknown>;
+    const addTrigger = (trigger: Trigger): ReactTriggerMethods => {
+      const triggerEntry = addLinkedListEntry(stateEntry.reactTriggersList, { trigger });
 
-    const { value, isValueSetUp } = mapValue;
+      const removeTriggerFromKeyList = (): void => {
+        removeLinkedListEntry(
+          stateEntry.reactTriggersList as LinkedListFilled<TriggersListEntry>,
+          triggerEntry
+        );
+      };
 
-    const { memValuesMap } = storeState;
-
-    if (!memValuesMap.has(key)) {
-      memValuesMap.set(key, isValueSetUp ? { value } : undefined);
-
-      (Object.assign as TrueObjectAssign)(mapValue, {
-        caughtError: undefined,
-        triggerRegistered: false,
-        initStatus: undefined,
+      const watchListEntry = addLinkedListEntry(reactCleaningWatchList, {
+        removeTriggerFromKeyList,
       });
-    }
-  }
 
-  function runEffectTask() {
-    effectTask.run();
-  }
+      const removeTriggerFromWatchList = (): void => {
+        removeLinkedListEntry(
+          reactCleaningWatchList as LinkedListFilled<ReactCleaningWatchListEntry>,
+          watchListEntry
+        );
+      };
+
+      return { removeTriggerFromKeyList, removeTriggerFromWatchList };
+    };
+
+    return { addTrigger };
+  };
 
   return {
-    initializeState,
-    runRenderTask,
-    runEffectTask,
-    throwError,
+    initState,
+    getValue,
+    getStateUsingSelector,
+    setValue,
+    reactInitKey,
+    reactRenderTask,
+    reactEffectTask,
   };
 }
