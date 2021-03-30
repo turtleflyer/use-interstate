@@ -5,5 +5,7 @@
     "rootDir": ".",
     "declaration": true
   },
-  "files": ["./src/useInterstate.tsx"]
+  "files": [
+    "./src/useInterstate.ts"
+  ]
 }
