@@ -20,9 +20,9 @@ export const testUseInterstateSchemaObjInterface: TestCase = [
       [symbolKey]: object;
     }>();
 
+    const triggersCounter = createTriggersCounter();
     const testComponentID = 'test_component';
     const TestComponent = createListenerComponent({ useInterstate });
-    const triggersCounter = createTriggersCounter();
     let effectCounter = 0;
 
     expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(0);

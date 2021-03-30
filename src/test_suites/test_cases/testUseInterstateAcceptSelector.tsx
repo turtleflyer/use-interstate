@@ -21,9 +21,9 @@ export const testUseInterstateAcceptSelector: TestCase = [
       [symbolKey]: object;
     }>();
 
+    const triggersCounter = createTriggersCounter();
     const testComponentID = 'test_component';
     const TestComponent = createListenerComponent({ useInterstate });
-    const triggersCounter = createTriggersCounter();
     let effectCounter = 0;
 
     initInterstate({ foo: 100, 77: 'hi', [symbolKey]: { a: true } });
