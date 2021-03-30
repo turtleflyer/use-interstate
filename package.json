@@ -1,6 +1,6 @@
 {
   "name": "use-interstate",
-  "version": "0.1.0",
+  "version": "0.1.1-alpha.0",
   "description": "Powerful and reliable global state management solution for React",
   "repository": {
     "type": "git",
