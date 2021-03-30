@@ -1,28 +1,21 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import babel from '@rollup/plugin-babel';
 import commonjs from '@rollup/plugin-commonjs';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import { terser } from 'rollup-plugin-terser';
 import pkg from './package.json';
 
-const basePluginTransforRuntimeSettings = {
+const basePluginTransformRuntimeSettings = {
   corejs: false,
   helpers: true,
-  // eslint-disable-next-line global-require
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   version: require('@babel/runtime/package.json').version,
   regenerator: true,
 };
 
-// eslint-disable-next-line camelcase
 const createRollupConfESM_CJS = (babelPlugins, output, externalBabelRuntime) => ({
   input: './ts/src/useInterstate.js',
 
-  external: [
-    externalBabelRuntime,
-    'react',
-    '@smart-hooks/use-smart-memo',
-    '@smart-hooks/helper-traverse-scheme-keys',
-  ],
+  external: [externalBabelRuntime, 'react'],
 
   plugins: [
     babel({
@@ -41,7 +34,7 @@ export default [
     [
       [
         '@babel/plugin-transform-runtime',
-        { ...basePluginTransforRuntimeSettings, useESModules: true },
+        { ...basePluginTransformRuntimeSettings, useESModules: true },
       ],
     ],
     [{ file: pkg.module, format: 'es' }],
@@ -52,7 +45,7 @@ export default [
     [
       [
         '@babel/plugin-transform-runtime',
-        { ...basePluginTransforRuntimeSettings, useESModules: false },
+        { ...basePluginTransformRuntimeSettings, useESModules: false },
       ],
     ],
     [{ file: pkg.main, format: 'cjs' }],
