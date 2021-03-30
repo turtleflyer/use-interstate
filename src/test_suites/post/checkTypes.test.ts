@@ -1,909 +1,993 @@
-/* eslint-disable prefer-const */
-/* eslint-disable react-hooks/rules-of-hooks */
-/* eslint-disable no-useless-computed-key */
+/* eslint-disable @typescript-eslint/no-magic-numbers */
+/* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-empty-function */
-import { FC } from 'react';
-import type { Reveal, ToBeExact } from '@~internal/check-types';
+import type { IsEqual, IsTrue } from '@~internal/check-types';
 import type {
-  GetUseInterstate,
-  InterstateInitializeObject,
-  InterstateInitializeParam,
-  InterstateParam,
-  InterstateSettersObject,
-  InterstateStateObject,
+  AcceptSelector,
+  AcceptSelectorDev,
+  GoInterstate,
+  InitInterstate,
+  InitInterstateDev,
+  Interstate,
+  InterstateKey,
+  InterstateMethods,
+  InterstateMethodsDev,
+  InterstateSelector,
+  ReadInterstate,
+  ReadInterstateDev,
   SetInterstate,
-  StateKey,
+  SetInterstateDev,
+  SetInterstateParam,
+  SetInterstateSchemaParam,
+  SetInterstateSchemaParamFn,
+  SetInterstateSchemaParamObj,
   UseInterstate,
-  UseInterstateError,
-  UseInterstateErrorMethods,
+  UseInterstateDev,
+  UseInterstateInitParam,
+  UseInterstateSchemaParam,
+  UseInterstateSchemaParamFn,
+  UseInterstateSchemaParamObj
 } from '../../../lib/use-interstate';
-import {
-  getUseInterstate,
-  getUseInterstateErrorsHandleMethods,
-  isUseInterstateError,
-  useInterstate,
-} from '../../../lib/use-interstate';
+import { goInterstate } from '../../../lib/use-interstate';
 
 describe('Check types', () => {
   test('types are consistent', () => {
-    const testIt = () => {
-      type C01 = Reveal<ToBeExact<typeof getUseInterstate, GetUseInterstate>>;
-      type C02 = Reveal<ToBeExact<StateKey, number | string | symbol>>;
+    const testSuite = () => {
+      const symbolKey = Symbol('uniqueSymbol');
 
-      const symbolKey = Symbol('jee');
+      const { initInterstate, useInterstate, readInterstate, setInterstate } = goInterstate();
 
-      let u01 = 'ni';
-      const u02 = () => 'ni';
-      const u03 = () => () => {};
-      const u04 = () => undefined;
-      const u05 = () => {};
-      const u06 = undefined;
+      type TestCase00 = [
+        IsTrue<IsEqual<typeof goInterstate, GoInterstate>>,
+        IsTrue<IsEqual<InterstateKey, string | symbol>>,
+        IsTrue<IsEqual<Interstate, Record<string | symbol, unknown>>>
+      ];
 
-      const tu01 = useInterstate('1', u01);
-      const tu02 = useInterstate('1', u02);
-      const tu03 = useInterstate('1', u03);
-      const tu04 = useInterstate('1', u04);
-      const tu05 = useInterstate('1', u05);
-      const tu06 = useInterstate('1', u06);
-      const tu07 = useInterstate('1');
-      const tu08 = useInterstate(1, u02);
-      const tu09 = useInterstate(Symbol('1'), u02);
-      const tu10 = useInterstate<string>(Symbol('1'), u01);
-      const tu11 = useInterstate<string>(Symbol('1'), u02);
-      const tu12 = useInterstate<string | boolean>(Symbol('1'), u01);
-      const tu13 = useInterstate<string | boolean>(Symbol('1'), u02);
-      const tu14 = useInterstate<undefined>(Symbol('1'), u05);
-      const tu15 = useInterstate<string>(Symbol('1'), u06);
+      const tii00 = { a: undefined, 33: () => 5 as const, [symbolKey]: 'boo' };
 
-      type CU01 = Reveal<
-        ToBeExact<
-          typeof tu01,
-          readonly [() => string, SetInterstate<string>] & {
-            get: () => string;
-            set: () => SetInterstate<string>;
-            both: () => readonly [string, SetInterstate<string>];
-          }
-        >
-      >;
-      type CU02 = Reveal<
-        ToBeExact<
-          typeof tu02,
-          readonly [() => string, SetInterstate<string>] & {
-            get: () => string;
-            set: () => SetInterstate<string>;
-            both: () => readonly [string, SetInterstate<string>];
-          }
-        >
-      >;
-      type CU03 = Reveal<
-        ToBeExact<
-          typeof tu03,
-          readonly [() => () => void, SetInterstate<() => void>] & {
-            get: () => () => void;
-            set: () => SetInterstate<() => void>;
-            both: () => readonly [() => void, SetInterstate<() => void>];
-          }
-        >
-      >;
-      type CU04 = Reveal<
-        ToBeExact<
-          typeof tu04,
-          readonly [() => undefined, SetInterstate<undefined>] & {
-            get: () => undefined;
-            set: () => SetInterstate<undefined>;
-            both: () => readonly [undefined, SetInterstate<undefined>];
-          }
-        >
-      >;
-      type CU05 = Reveal<
-        ToBeExact<
-          typeof tu05,
-          readonly [() => undefined, SetInterstate<undefined>] & {
-            get: () => undefined;
-            set: () => SetInterstate<undefined>;
-            both: () => readonly [undefined, SetInterstate<undefined>];
-          }
-        >
-      >;
-      type CU06 = Reveal<
-        ToBeExact<
-          typeof tu06,
-          readonly [() => unknown, SetInterstate<unknown>] & {
-            get: () => unknown;
-            set: () => SetInterstate<unknown>;
-            both: () => readonly [unknown, SetInterstate<unknown>];
-          }
-        >
-      >;
-      type CU07 = Reveal<
-        ToBeExact<
-          typeof tu07,
-          readonly [() => unknown, SetInterstate<unknown>] & {
-            get: () => unknown;
-            set: () => SetInterstate<unknown>;
-            both: () => readonly [unknown, SetInterstate<unknown>];
-          }
-        >
-      >;
-      type CU08 = Reveal<
-        ToBeExact<
-          typeof tu08,
-          readonly [() => string, SetInterstate<string>] & {
-            get: () => string;
-            set: () => SetInterstate<string>;
-            both: () => readonly [string, SetInterstate<string>];
-          }
-        >
-      >;
-      type CU09 = Reveal<
-        ToBeExact<
-          typeof tu09,
-          readonly [() => string, SetInterstate<string>] & {
-            get: () => string;
-            set: () => SetInterstate<string>;
-            both: () => readonly [string, SetInterstate<string>];
-          }
-        >
-      >;
-      type CU10 = Reveal<
-        ToBeExact<
-          typeof tu10,
-          readonly [() => string, SetInterstate<string>] & {
-            get: () => string;
-            set: () => SetInterstate<string>;
-            both: () => readonly [string, SetInterstate<string>];
-          }
-        >
-      >;
-      type CU11 = Reveal<
-        ToBeExact<
-          typeof tu11,
-          readonly [() => string, SetInterstate<string>] & {
-            get: () => string;
-            set: () => SetInterstate<string>;
-            both: () => readonly [string, SetInterstate<string>];
-          }
-        >
-      >;
-      type CU12 = Reveal<
-        ToBeExact<
-          typeof tu12,
-          readonly [() => string | boolean, SetInterstate<string | boolean>] & {
-            get: () => string | boolean;
-            set: () => SetInterstate<string | boolean>;
-            both: () => readonly [string | boolean, SetInterstate<string | boolean>];
-          }
-        >
-      >;
-      type CU13 = Reveal<
-        ToBeExact<
-          typeof tu13,
-          readonly [() => string | boolean, SetInterstate<string | boolean>] & {
-            get: () => string | boolean;
-            set: () => SetInterstate<string | boolean>;
-            both: () => readonly [string | boolean, SetInterstate<string | boolean>];
-          }
-        >
-      >;
-      type CU14 = Reveal<
-        ToBeExact<
-          typeof tu14,
-          readonly [() => undefined, SetInterstate<undefined>] & {
-            get: () => undefined;
-            set: () => SetInterstate<undefined>;
-            both: () => readonly [undefined, SetInterstate<undefined>];
-          }
-        >
-      >;
-      type CU15 = Reveal<
-        ToBeExact<
-          typeof tu15,
-          readonly [() => string, SetInterstate<string>] & {
-            get: () => string;
-            set: () => SetInterstate<string>;
-            both: () => readonly [string, SetInterstate<string>];
-          }
-        >
-      >;
+      const ii00 = initInterstate(tii00);
+      const ii01 = initInterstate();
+      const ii02 = initInterstate({});
+
+      type TestCase01 = [
+        IsTrue<IsEqual<typeof ii00, Omit<InterstateMethods<never>, 'initInterstate'>>>,
+        IsTrue<IsEqual<typeof ii01, Omit<InterstateMethods<never>, 'initInterstate'>>>,
+        IsTrue<IsEqual<typeof ii02, Omit<InterstateMethods<never>, 'initInterstate'>>>
+      ];
 
       // @ts-expect-error
-      const tuErr01 = useInterstate('1', (c: number) => c + 1);
+      initInterstate((a: unknown) => ({}));
       // @ts-expect-error
-      const tuErr02 = useInterstate<string | boolean[]>(77, () => ['a']);
+      initInterstate((a: unknown) => ({ a: 'no' }));
 
-      type T1 = string;
-      type T2 = (a: boolean) => number;
-      type T3 = number | boolean;
-      type T4 = (() => string) | boolean[];
+      let tui00 = 'ni'; // eslint-disable-line prefer-const
+      const tui01 = () => 'ni';
+      const tui02 = () => () => {};
+      const tui03 = () => undefined;
+      const tui04 = undefined;
 
-      type CSI1 = Reveal<ToBeExact<SetInterstate<T1>, (p: InterstateParam<string>) => void>>;
-      type CSI2 = Reveal<
-        ToBeExact<SetInterstate<T2>, (p: InterstateParam<(a: boolean) => number>) => void>
-      >;
-      type CSI3 = Reveal<
-        ToBeExact<SetInterstate<T3>, (p: InterstateParam<number | boolean>) => void>
-      >;
-      type CSI4 = Reveal<
-        ToBeExact<SetInterstate<T4>, (p: InterstateParam<(() => string) | boolean[]>) => void>
-      >;
+      const ui000 = useInterstate('1', tui00);
+      const ui010 = useInterstate('1', tui01);
+      const ui02 = useInterstate('1', tui02);
+      const ui03 = useInterstate('1', tui03);
+      const ui040 = useInterstate('1', tui04);
+      const ui06 = useInterstate('1');
+      const ui011 = useInterstate('1', tui01);
+      const ui012 = useInterstate(symbolKey, tui01);
+      const ui001 = useInterstate<string>(symbolKey, tui00);
+      const ui013 = useInterstate<string>(symbolKey, tui01);
+      const ui002 = useInterstate<string | boolean>(symbolKey, tui00);
+      const ui014 = useInterstate<string | boolean>(symbolKey, tui01);
+      const ui041 = useInterstate<string>(symbolKey, tui04);
 
-      type CIP1 = Reveal<ToBeExact<InterstateParam<T1>, string | ((p: string) => string)>>;
-      type CIP2 = Reveal<
-        ToBeExact<InterstateParam<T2>, (p: (a: boolean) => number) => (a: boolean) => number>
-      >;
-      type CIP3 = Reveal<
-        ToBeExact<
-          InterstateParam<T3>,
-          number | boolean | ((p: number | boolean) => number | boolean)
-        >
-      >;
-      type CIP4 = Reveal<
-        ToBeExact<
-          InterstateParam<T4>,
-          boolean[] | ((p: (() => string) | boolean[]) => (() => string) | boolean[])
-        >
-      >;
-
-      const m01 = { a: 1, 2: 'uy' };
-      const m02 = { [symbolKey]: false };
-      const m03 = { a: () => 'nis', 2: () => () => {} };
-      const m04 = { a: undefined, 2: () => undefined, [symbolKey]: () => {} };
-
-      const tm01 = useInterstate(m01);
-      const tm02 = useInterstate(m02);
-      const tm03 = useInterstate(m03);
-      const tm05 = useInterstate<{ [symbolKey]: number | boolean }>(m02);
-      const tm06 = useInterstate<{ a: string; 2: () => void }>(m03);
-      const tm07 = useInterstate<{ a: unknown; 2: undefined; [symbolKey]: undefined }>(m04);
-      const tm08 = useInterstate<{
-        a: string | boolean;
-        2: (() => string) | undefined;
-        [symbolKey]: number | undefined;
-      }>(m04);
-
-      type CM01 = Reveal<
-        ToBeExact<
-          typeof tm01,
-          readonly [
-            () => { a: number; 2: string },
-            { a: SetInterstate<number>; 2: SetInterstate<string> }
-          ] & {
-            get: () => { a: number; 2: string };
-            set: () => { a: SetInterstate<number>; 2: SetInterstate<string> };
-            both: () => readonly [
-              { a: number; 2: string },
-              { a: SetInterstate<number>; 2: SetInterstate<string> }
-            ];
-          }
-        >
-      >;
-      type CM02 = Reveal<
-        ToBeExact<
-          typeof tm02,
-          readonly [() => { [symbolKey]: boolean }, { [symbolKey]: SetInterstate<boolean> }] & {
-            get: () => { [symbolKey]: boolean };
-            set: () => { [symbolKey]: SetInterstate<boolean> };
-            both: () => readonly [
-              { [symbolKey]: boolean },
-              { [symbolKey]: SetInterstate<boolean> }
-            ];
-          }
-        >
-      >;
-      type CM03 = Reveal<
-        ToBeExact<
-          typeof tm03,
-          readonly [
-            () => { a: string; 2: () => void },
-            { a: SetInterstate<string>; 2: SetInterstate<() => void> }
-          ] & {
-            get: () => { a: string; 2: () => void };
-            set: () => { a: SetInterstate<string>; 2: SetInterstate<() => void> };
-            both: () => readonly [
-              { a: string; 2: () => void },
-              { a: SetInterstate<string>; 2: SetInterstate<() => void> }
-            ];
-          }
-        >
-      >;
-
-      type CM05 = Reveal<
-        ToBeExact<
-          typeof tm05,
-          readonly [
-            () => { [symbolKey]: number | boolean },
-            { [symbolKey]: SetInterstate<number | boolean> }
-          ] & {
-            get: () => { [symbolKey]: number | boolean };
-            set: () => { [symbolKey]: SetInterstate<number | boolean> };
-            both: () => readonly [
-              { [symbolKey]: number | boolean },
-              { [symbolKey]: SetInterstate<number | boolean> }
-            ];
-          }
-        >
-      >;
-      type CM06 = Reveal<
-        ToBeExact<
-          typeof tm06,
-          readonly [
-            () => { a: string; 2: () => void },
-            { a: SetInterstate<string>; 2: SetInterstate<() => void> }
-          ] & {
-            get: () => { a: string; 2: () => void };
-            set: () => { a: SetInterstate<string>; 2: SetInterstate<() => void> };
-            both: () => readonly [
-              { a: string; 2: () => void },
-              { a: SetInterstate<string>; 2: SetInterstate<() => void> }
-            ];
-          }
-        >
-      >;
-      type CM07 = Reveal<
-        ToBeExact<
-          typeof tm07,
-          readonly [
-            () => { a: unknown; 2: undefined; [symbolKey]: undefined },
-            {
-              a: SetInterstate<unknown>;
-              2: SetInterstate<undefined>;
-              [symbolKey]: SetInterstate<undefined>;
-            }
-          ] & {
-            get: () => { a: unknown; 2: undefined; [symbolKey]: undefined };
-            set: () => {
-              a: SetInterstate<unknown>;
-              2: SetInterstate<undefined>;
-              [symbolKey]: SetInterstate<undefined>;
-            };
-            both: () => readonly [
-              { a: unknown; 2: undefined; [symbolKey]: undefined },
-              {
-                a: SetInterstate<unknown>;
-                2: SetInterstate<undefined>;
-                [symbolKey]: SetInterstate<undefined>;
-              }
-            ];
-          }
-        >
-      >;
-      type CM08 = Reveal<
-        ToBeExact<
-          typeof tm08,
-          readonly [
-            () => {
-              a: string | boolean;
-              2: (() => string) | undefined;
-              [symbolKey]: number | undefined;
-            },
-            {
-              a: SetInterstate<string | boolean>;
-              2: SetInterstate<(() => string) | undefined>;
-              [symbolKey]: SetInterstate<number | undefined>;
-            }
-          ] & {
-            get: () => {
-              a: string | boolean;
-              2: (() => string) | undefined;
-              [symbolKey]: number | undefined;
-            };
-            set: () => {
-              a: SetInterstate<string | boolean>;
-              2: SetInterstate<(() => string) | undefined>;
-              [symbolKey]: SetInterstate<number | undefined>;
-            };
-            both: () => readonly [
-              {
-                a: string | boolean;
-                2: (() => string) | undefined;
-                [symbolKey]: number | undefined;
-              },
-              {
-                a: SetInterstate<string | boolean>;
-                2: SetInterstate<(() => string) | undefined>;
-                [symbolKey]: SetInterstate<number | undefined>;
-              }
-            ];
-          }
-        >
-      >;
+      type TestCase02 = [
+        IsTrue<IsEqual<typeof ui000, string>>,
+        IsTrue<IsEqual<typeof ui010, string>>,
+        IsTrue<IsEqual<typeof ui02, () => void>>,
+        IsTrue<IsEqual<typeof ui03, undefined>>,
+        IsTrue<IsEqual<typeof ui040, unknown>>,
+        IsTrue<IsEqual<typeof ui06, unknown>>,
+        IsTrue<IsEqual<typeof ui011, string>>,
+        IsTrue<IsEqual<typeof ui012, string>>,
+        IsTrue<IsEqual<typeof ui001, string>>,
+        IsTrue<IsEqual<typeof ui013, string>>,
+        IsTrue<IsEqual<typeof ui002, string | boolean>>,
+        IsTrue<IsEqual<typeof ui014, string | boolean>>,
+        IsTrue<IsEqual<typeof ui041, string>>
+      ];
 
       // @ts-expect-error
-      const tmErr01 = useInterstate({ a: (p: string) => 1 });
+      useInterstate('1', (c: unknown) => null);
+      // @ts-expect-error
+      useInterstate('1', (c: unknown) => ({}));
+      // @ts-expect-error
+      useInterstate('1', (c: number) => c + 1);
+      // @ts-expect-error
+      useInterstate<string | boolean[]>(77, () => ['a']);
+      // @ts-expect-error
+      useInterstate(1);
 
-      interface State {
+      const tuim00 = { a: 1, 2: 'uy' } as const;
+      const tuim01 = { [symbolKey]: false };
+      const tuim02 = { a: () => 'nis', 2: () => () => {} };
+      const tuim03 = { a: undefined, 2: () => undefined };
+      const tuim04 = () =>
+        ({
+          yes: () => 'no',
+          low: 'high',
+          7: undefined,
+        } as const);
+      const tuim05 = () => ({
+        yes: () => 'no',
+        low: 'high',
+        7: undefined,
+      });
+
+      const uim00 = useInterstate(tuim00);
+      const uim010 = useInterstate(tuim01);
+      const uim011 = useInterstate<{ [symbolKey]: number | boolean }>(tuim01);
+      const uim020 = useInterstate(tuim02);
+      const uim021 = useInterstate<{ a: string; 2: () => undefined | void }>(tuim02);
+      const uim030 = useInterstate(tuim03);
+      const uim031 = useInterstate<{ a: unknown; 2: undefined }>(tuim03);
+      const uim032 = useInterstate<{
+        readonly a: string | boolean;
+        readonly 2: (() => string) | undefined;
+      }>(tuim03);
+      const uim04 = useInterstate(tuim04);
+      const uim05 = useInterstate(tuim05);
+      const uim06 = useInterstate(['33', 'a', symbolKey]);
+      const uim07 = useInterstate<{ 33: null; a: () => string; [symbolKey]: { b: 7 } }>([
+        '33',
+        'a',
+        symbolKey,
+      ] as const);
+
+      type TestCase03 = [
+        IsTrue<IsEqual<typeof uim00, { a: 1; 2: 'uy' }>>,
+        IsTrue<IsEqual<typeof uim010, { [symbolKey]: boolean }>>,
+        IsTrue<IsEqual<typeof uim011, { [symbolKey]: number | boolean }>>,
+        IsTrue<IsEqual<typeof uim020, { a: string; 2: () => void }>>,
+        IsTrue<IsEqual<typeof uim021, { a: string; 2: () => undefined | void }>>,
+        IsTrue<IsEqual<typeof uim030, { a: unknown; 2: undefined }>>,
+        IsTrue<IsEqual<typeof uim031, { a: unknown; 2: undefined }>>,
+        IsTrue<IsEqual<typeof uim032, { a: string | boolean; 2: (() => string) | undefined }>>,
+        IsTrue<IsEqual<typeof uim04, { yes: () => string; low: 'high'; 7: undefined }>>,
+        IsTrue<IsEqual<typeof uim05, { yes: () => string; low: string; 7: undefined }>>,
+        IsTrue<IsEqual<typeof uim06, { 33: unknown; a: unknown; [symbolKey]: unknown }>>,
+        IsTrue<IsEqual<typeof uim07, { 33: null; a: () => string; [symbolKey]: { b: 7 } }>>
+      ];
+
+      // @ts-expect-error
+      useInterstate();
+      // @ts-expect-error
+      useInterstate({ a: (p: unknown) => 'no' });
+      // @ts-expect-error
+      useInterstate({ a: (p: unknown) => ({}) });
+      // @ts-expect-error
+      useInterstate((x: unknown) => 3);
+      // @ts-expect-error
+      useInterstate((x: unknown) => ({}));
+      // @ts-expect-error
+      useInterstate([33]);
+
+      const uias00 = useInterstate.acceptSelector((state: { a: boolean; b: boolean[] }) => [
+        ...state.b,
+        state.a,
+      ]);
+      const uias01 = useInterstate.acceptSelector(
+        (state: { [symbolKey]: number; 33: (x: number) => string }) => state[33](state[symbolKey])
+      );
+      const uias02 = useInterstate.acceptSelector((state) =>
+        'foo' in state ? (state as { foo: number }).foo : null
+      );
+
+      type TestCase04 = [
+        IsTrue<IsEqual<typeof uias00, boolean[]>>,
+        IsTrue<IsEqual<typeof uias01, string>>,
+        IsTrue<IsEqual<typeof uias02, number | null>>
+      ];
+
+      // @ts-expect-error
+      useInterstate.acceptSelector((state: unknown, x: unknown) => 3);
+      // @ts-expect-error
+      useInterstate.acceptSelector((state: unknown, x: unknown) => ({}));
+
+      const ri00 = readInterstate('a');
+      const ri01 = readInterstate<string>('1');
+      const ri02 = readInterstate<1>(symbolKey);
+
+      type TestCase05 = [
+        IsTrue<IsEqual<typeof ri00, unknown>>,
+        IsTrue<IsEqual<typeof ri01, string>>,
+        IsTrue<IsEqual<typeof ri02, 1>>
+      ];
+
+      // @ts-expect-error
+      readInterstate(1);
+
+      const rim00 = readInterstate(['12', 'foo', symbolKey]);
+      const rim01 = readInterstate<{ 77: 'a'; b: true; [symbolKey]: number }>([
+        '77',
+        'b',
+        symbolKey,
+      ]);
+      const rim02 = readInterstate<{ 77: 'a'; b: true }>(['77', 'b'] as const);
+      const rim03 = readInterstate(['77']);
+      const rim04 = readInterstate(['1', '2', '3'] as const);
+
+      type TestCase06 = [
+        IsTrue<IsEqual<typeof rim00, { 12: unknown; foo: unknown; [symbolKey]: unknown }>>,
+        IsTrue<IsEqual<typeof rim01, { 77: 'a'; b: true; [symbolKey]: number }>>,
+        IsTrue<IsEqual<typeof rim02, { 77: 'a'; b: true }>>,
+        IsTrue<IsEqual<typeof rim03, { 77: unknown }>>,
+        IsTrue<IsEqual<typeof rim04, { 1: unknown; 2: unknown; 3: unknown }>>
+      ];
+
+      // @ts-expect-error
+      readInterstate<{ b: true; [symbolKey]: number }>(['a', symbolKey]);
+      // @ts-expect-error
+      readInterstate([77]);
+      // @ts-expect-error
+      readInterstate<{ 77: 'a' }>([77]);
+
+      const rias00 = readInterstate.acceptSelector((state: { a: boolean; b: boolean[] }) => [
+        ...state.b,
+        state.a,
+      ]);
+      const rias01 = readInterstate.acceptSelector(
+        (state: { [symbolKey]: number; 33: (x: number) => string }) => state[33](state[symbolKey])
+      );
+      const rias02 = readInterstate.acceptSelector((state) =>
+        'foo' in state ? (state as { foo: number }).foo : null
+      );
+
+      type TestCase07 = [
+        IsTrue<IsEqual<typeof rias00, boolean[]>>,
+        IsTrue<IsEqual<typeof rias01, string>>,
+        IsTrue<IsEqual<typeof rias02, number | null>>
+      ];
+
+      // @ts-expect-error
+      readInterstate.acceptSelector((state: unknown, x: unknown) => 3);
+      // @ts-expect-error
+      readInterstate.acceptSelector((state: unknown, x: unknown) => ({}));
+
+      setInterstate('a', 1);
+      setInterstate('7', '1');
+      setInterstate(symbolKey, true);
+      setInterstate('foo', undefined);
+      setInterstate('foo', () => undefined);
+      setInterstate('b', (state: number) => state + 1);
+      setInterstate('c', (a) => `${a}`);
+      setInterstate<number | string>('c', (a) => `${a}`);
+
+      // @ts-expect-error
+      setInterstate('c', (a: number) => `${a}`);
+      // @ts-expect-error
+      setInterstate('c', (a: number) => ({}));
+      // @ts-expect-error
+      setInterstate('c', (a: null, b: unknown) => null);
+      // @ts-expect-error
+      setInterstate('c', (a: unknown, b: unknown) => ({}));
+      // @ts-expect-error
+      setInterstate<null>('c', (a: number) => null);
+      // @ts-expect-error
+      setInterstate(7, undefined);
+
+      setInterstate({ a: 1, 2: () => 'go', [symbolKey]: undefined });
+      setInterstate<{ a: number | string; 2: string | string[] }>({ a: 1, 2: () => 'go' });
+      setInterstate(() => ({ foo: undefined, 77: () => 3, [symbolKey]: [1, 2, 3] }));
+      setInterstate({ 11: () => {}, foo: () => () => {} });
+      setInterstate((state: { a: string }) => ({ ...state, a: 'no' }));
+      setInterstate((state: { foo: unknown }) => ({ foo: state.foo, 77: () => 3 }));
+      setInterstate({ a: (state: number) => state });
+      setInterstate((state: { a: number }) => ({ foo: state.a + 1 }));
+      setInterstate((state: { a: number; b: number }) => ({ foo: state.a + 1, b: state.a + 1 }));
+      setInterstate((state: { a: number }): { a: 1 | 2; b: boolean } => ({
+        a: state.a > 0 ? 1 : 2,
+        b: state.a > 0,
+      }));
+      setInterstate<{ a: string[] }>((state) => ({ a: Object.keys(state) }));
+      setInterstate((state) => ({ a: Object.keys(state) }));
+
+      // @ts-expect-error
+      setInterstate((a: unknown, b: string) => ({ a, b }));
+      // @ts-expect-error
+      setInterstate((a: unknown, b: unknown) => ({}));
+      // @ts-expect-error
+      setInterstate({ a: (x: boolean) => ({ 77: x }) });
+      // @ts-expect-error
+      setInterstate({ a: (x: number, y: number) => x + y });
+      // @ts-expect-error
+      setInterstate({ a: (x: unknown, y: unknown) => [x, y] });
+      // @ts-expect-error
+      setInterstate({ a: (x: unknown, y: unknown) => ({}) });
+      // @ts-expect-error
+      setInterstate((state: { a: number }) => ({ a: state.a.toString() }));
+      // @ts-expect-error
+      setInterstate((state: { a: -1 | 1 }): { a: number; b: boolean } => ({
+        a: state.a > 0 ? 1 : 2,
+        b: state.a > 0,
+      }));
+      // @ts-expect-error
+      setInterstate((state: { a: number }) => ({ a: 'wrong' }));
+      // @ts-expect-error
+      setInterstate<{ a: string }>((state: { a: number }) => ({ a: 'wrong' }));
+
+      type State = {
         a: string;
         2: (boolean | number)[];
         [symbolKey]: (() => unknown) | { b: number | object };
         77: undefined;
         fun: unknown;
         go: null | undefined | string[];
-      }
-      const g = getUseInterstate<State>();
-      type G = Reveal<ToBeExact<typeof g, { Scope: FC; useInterstate: UseInterstate<State> }>>;
-      const { useInterstate: useInterstateDefined } = g;
+        foo: {};
+      };
 
-      const d01 = 'la';
-      const d02 = () => [true];
-      const d03 = { b: 1 };
-      const d04 = () => undefined;
-      const d05 = () => {};
+      const withInitInterstate = goInterstate<State>();
+      const { initInterstate: initInterstateDefined } = withInitInterstate;
+      const getUseInterstate = withInitInterstate.initInterstate();
+      const {
+        useInterstate: useInterstateDefined,
+        readInterstate: readInterstateDefined,
+        setInterstate: setInterstateDefined,
+      } = getUseInterstate;
 
-      const td01 = useInterstateDefined('a', d01);
-      const td02 = useInterstateDefined(2, d02);
-      const td03 = useInterstateDefined(symbolKey, d03);
-      const td04 = useInterstateDefined(77, d04);
-      const td05 = useInterstateDefined(77, d05);
-      const td06 = useInterstateDefined('fun', undefined);
-      const td07 = useInterstateDefined('go', d04);
-      const td08 = useInterstateDefined('go', undefined);
-      const td09 = useInterstateDefined(2, undefined);
-      const td10 = useInterstateDefined<2 | 'a'>('a', d01);
+      type TestCase08 = [
+        IsTrue<
+          IsEqual<
+            typeof withInitInterstate,
+            {
+              initInterstate: InitInterstate<State>;
+              useInterstate: UseInterstate<State>;
+              readInterstate: ReadInterstate<State>;
+              setInterstate: SetInterstate<State>;
+            }
+          >
+        >,
+        IsTrue<
+          IsEqual<
+            typeof getUseInterstate,
+            {
+              useInterstate: UseInterstate<State>;
+              readInterstate: ReadInterstate<State>;
+              setInterstate: SetInterstate<State>;
+            }
+          >
+        >,
+        IsTrue<IsEqual<typeof useInterstateDefined.acceptSelector, AcceptSelector<State>>>
+      ];
 
-      type CD01 = Reveal<
-        ToBeExact<
-          typeof td01,
-          readonly [() => string, SetInterstate<string>] & {
-            get: () => string;
-            set: () => SetInterstate<string>;
-            both: () => readonly [string, SetInterstate<string>];
-          }
-        >
-      >;
-      type CD02 = Reveal<
-        ToBeExact<
-          typeof td02,
-          readonly [() => (boolean | number)[], SetInterstate<(boolean | number)[]>] & {
-            get: () => (boolean | number)[];
-            set: () => SetInterstate<(boolean | number)[]>;
-            both: () => readonly [(boolean | number)[], SetInterstate<(boolean | number)[]>];
-          }
-        >
-      >;
-      type CD03 = Reveal<
-        ToBeExact<
-          typeof td03,
-          readonly [
-            () => (() => unknown) | { b: number | object },
-            SetInterstate<(() => unknown) | { b: number | object }>
-          ] & {
-            get: () => (() => unknown) | { b: number | object };
-            set: () => SetInterstate<(() => unknown) | { b: number | object }>;
-            both: () => readonly [
-              (() => unknown) | { b: number | object },
-              SetInterstate<(() => unknown) | { b: number | object }>
-            ];
-          }
-        >
-      >;
-      type CD04 = Reveal<
-        ToBeExact<
-          typeof td04,
-          readonly [() => undefined, SetInterstate<undefined>] & {
-            get: () => undefined;
-            set: () => SetInterstate<undefined>;
-            both: () => readonly [undefined, SetInterstate<undefined>];
-          }
-        >
-      >;
-      type CD05 = Reveal<
-        ToBeExact<
-          typeof td05,
-          readonly [() => undefined, SetInterstate<undefined>] & {
-            get: () => undefined;
-            set: () => SetInterstate<undefined>;
-            both: () => readonly [undefined, SetInterstate<undefined>];
-          }
-        >
-      >;
-      type CD06 = Reveal<
-        ToBeExact<
-          typeof td06,
-          readonly [() => unknown, SetInterstate<unknown>] & {
-            get: () => unknown;
-            set: () => SetInterstate<unknown>;
-            both: () => readonly [unknown, SetInterstate<unknown>];
-          }
-        >
-      >;
-      type CD07 = Reveal<
-        ToBeExact<
-          typeof td07,
-          readonly [
-            () => null | undefined | string[],
-            SetInterstate<null | undefined | string[]>
-          ] & {
-            get: () => null | undefined | string[];
-            set: () => SetInterstate<null | undefined | string[]>;
-            both: () => readonly [
-              null | undefined | string[],
-              SetInterstate<null | undefined | string[]>
-            ];
-          }
-        >
-      >;
-      type CD08 = Reveal<
-        ToBeExact<
-          typeof td08,
-          readonly [
-            () => null | undefined | string[],
-            SetInterstate<null | undefined | string[]>
-          ] & {
-            get: () => null | undefined | string[];
-            set: () => SetInterstate<null | undefined | string[]>;
-            both: () => readonly [
-              null | undefined | string[],
-              SetInterstate<null | undefined | string[]>
-            ];
-          }
-        >
-      >;
-      type CD09 = Reveal<
-        ToBeExact<
-          typeof td09,
-          readonly [() => (boolean | number)[], SetInterstate<(boolean | number)[]>] & {
-            get: () => (boolean | number)[];
-            set: () => SetInterstate<(boolean | number)[]>;
-            both: () => readonly [(boolean | number)[], SetInterstate<(boolean | number)[]>];
-          }
-        >
-      >;
-      type CD10 = Reveal<
-        ToBeExact<
-          typeof td10,
-          readonly [
-            () => string | (boolean | number)[],
-            SetInterstate<string | (boolean | number)[]>
-          ] & {
-            get: () => string | (boolean | number)[];
-            set: () => SetInterstate<string | (boolean | number)[]>;
-            both: () => readonly [
-              string | (boolean | number)[],
-              SetInterstate<string | (boolean | number)[]>
-            ];
-          }
-        >
-      >;
+      initInterstateDefined({
+        a: 'no',
+        '2': [100],
+        [symbolKey]: { b: 3 },
+        77: undefined,
+        fun: () => 3,
+      });
+      initInterstateDefined();
+      initInterstateDefined({});
 
       // @ts-expect-error
-      const tdErr01 = useInterstateDefined('1', () => 1);
+      initInterstateDefined({ [symbolKey]: () => () => 3, b: null });
       // @ts-expect-error
-      const tdErr02 = useInterstateDefined<string | boolean[]>(77, () => ['a']);
+      initInterstateDefined((x: unknown) => ({ a: 'no' }));
       // @ts-expect-error
-      const tdErr03 = useInterstateDefined(symbolKey, d02);
-      // @ts-expect-error
-      const tdErr04 = useInterstateDefined<string>('a', d01);
-      // @ts-expect-error
-      const tdErr05 = useInterstateDefined(1, undefined);
-      // @ts-expect-error
-      const tdErr06 = useInterstateDefined(1);
-      // @ts-expect-error
-      const tdErr07 = useInterstateDefined('go', (y: boolean) => ['no']);
+      initInterstateDefined((x: unknown) => ({}));
 
-      const s01 = { a: () => 'hurray' };
-      const s02 = {
+      const tuid00 = 'la';
+      const tuid01 = () => [true];
+      const tuid02 = { b: 1 };
+      const tuid03 = () => undefined;
+      const tuid04 = undefined;
+
+      const uid000 = useInterstateDefined('a', tuid00);
+      const uid01 = useInterstateDefined('2', tuid01);
+      const uid02 = useInterstateDefined(symbolKey, tuid02);
+      const uid030 = useInterstateDefined('77', tuid03);
+      const uid040 = useInterstateDefined('fun', tuid04);
+      const uid031 = useInterstateDefined('go', tuid03);
+      const uid041 = useInterstateDefined('go', tuid04);
+      const uid042 = useInterstateDefined('2', tuid04);
+      const uid001 = useInterstateDefined<'2' | 'a'>('a', tuid00);
+
+      type TestCase09 = [
+        IsTrue<IsEqual<typeof uid000, string>>,
+        IsTrue<IsEqual<typeof uid01, (boolean | number)[]>>,
+        IsTrue<IsEqual<typeof uid02, (() => unknown) | { b: number | object }>>,
+        IsTrue<IsEqual<typeof uid030, undefined>>,
+        IsTrue<IsEqual<typeof uid040, unknown>>,
+        IsTrue<IsEqual<typeof uid031, null | undefined | string[]>>,
+        IsTrue<IsEqual<typeof uid041, null | undefined | string[]>>,
+        IsTrue<IsEqual<typeof uid042, (boolean | number)[]>>,
+        IsTrue<IsEqual<typeof uid001, string | (boolean | number)[]>>
+      ];
+
+      // @ts-expect-error
+      useInterstateDefined();
+      // @ts-expect-error
+      useInterstateDefined('fun', (x: unknown) => x);
+      // @ts-expect-error
+      useInterstateDefined('fun', (x: unknown) => ({}));
+      // @ts-expect-error
+      useInterstateDefined('a', (x: string) => x);
+      // @ts-expect-error
+      useInterstateDefined('1', () => 1);
+      // @ts-expect-error
+      useInterstateDefined<string[]>(77, () => ['a']);
+      // @ts-expect-error
+      useInterstateDefined(symbolKey, tuid01);
+      // @ts-expect-error
+      useInterstateDefined<string>('a', tuid00);
+      // @ts-expect-error
+      useInterstateDefined(2);
+
+      const tuidm00 = { a: () => 'hurray' };
+      const tuidm01 = {
         a: 'tree',
-        [77]: () => undefined,
+        '77': () => undefined,
         [symbolKey]: { b: { bb: 6 } },
         fun: () => () => {},
       };
-      const s03 = { [symbolKey]: () => () => 'eh' };
-      const s04 = {
+      const tuidm02 = { [symbolKey]: () => () => 'eh' };
+      const tuidm03 = {
         a: undefined,
-        [2]: undefined,
+        2: undefined,
         [symbolKey]: undefined,
-        [77]: undefined,
-        fun: undefined,
-        go: undefined,
+      };
+      const tuidm04 = () =>
+        ({
+          a: 'omg',
+          [symbolKey]: () => 'zzz',
+          fun: undefined,
+        } as const);
+
+      const uidm00 = useInterstateDefined(tuidm00);
+      const uidm01 = useInterstateDefined(tuidm01);
+      const uidm02 = useInterstateDefined(tuidm02);
+      const uidm03 = useInterstateDefined(tuidm03);
+      const uidm04 = useInterstateDefined(tuidm04);
+      const uidm05 = useInterstateDefined(['a', '2', symbolKey]);
+
+      type TestCase10 = [
+        IsTrue<IsEqual<typeof uidm00, { a: string }>>,
+        IsTrue<
+          IsEqual<
+            typeof uidm01,
+            {
+              a: string;
+              77: undefined;
+              [symbolKey]: (() => unknown) | { b: number | object };
+              fun: unknown;
+            }
+          >
+        >,
+        IsTrue<IsEqual<typeof uidm02, { [symbolKey]: (() => unknown) | { b: number | object } }>>,
+        IsTrue<
+          IsEqual<
+            typeof uidm03,
+            {
+              a: string;
+              2: (boolean | number)[];
+              [symbolKey]: (() => unknown) | { b: number | object };
+            }
+          >
+        >,
+        IsTrue<
+          IsEqual<
+            typeof uidm04,
+            { a: string; [symbolKey]: (() => unknown) | { b: number | object }; fun: unknown }
+          >
+        >,
+        IsTrue<
+          IsEqual<
+            typeof uidm05,
+            {
+              a: string;
+              2: (boolean | number)[];
+              [symbolKey]: (() => unknown) | { b: number | object };
+            }
+          >
+        >
+      ];
+
+      // @ts-expect-error
+      useInterstateDefined({ a: () => 1, [symbolKey]: { b: 6 } });
+      // @ts-expect-error
+      useInterstateDefined({ [symbolKey]: () => 'eh' });
+      // @ts-expect-error
+      useInterstateDefined({ [symbolKey]: () => () => 'eh', b: null });
+      // @ts-expect-error
+      useInterstateDefined({ a: 'bo', er: 2 });
+      // @ts-expect-error
+      useInterstateDefined<'a' | 77>({ a: 'bo', fun: 3 });
+      // @ts-expect-error
+      useInterstateDefined((x: unknown) => ({ a: 'bo' }));
+      // @ts-expect-error
+      useInterstateDefined((x: unknown) => ({}));
+      // @ts-expect-error
+      useInterstateDefined((x: unknown) => ({ fun: 3 }));
+      // @ts-expect-error
+      useInterstateDefined({ fun: (x: unknown) => 3 });
+      // @ts-expect-error
+      useInterstateDefined({ fun: (x: unknown) => ({}) });
+      // @ts-expect-error
+      useInterstateDefined(['a', 'sad']);
+      // @ts-expect-error
+      useInterstateDefined([2, 77]);
+
+      const twsd00 = (state: { a: string; fun: unknown }) =>
+        typeof state.fun === 'string' ? state.fun : state.a;
+      const twsd01 = (state: {
+        [symbolKey]: (() => unknown) | { b: number | object } | number;
+        go: null | undefined | string[];
+      }) => {
+        const s = state[symbolKey];
+        return typeof s === 'function' ? (s() as string) : typeof s === 'number' ? s : state.go;
       };
 
-      const ts01 = useInterstateDefined(s01);
-      const ts02 = useInterstateDefined(s02);
-      const ts03 = useInterstateDefined(s03);
-      const ts04 = useInterstateDefined(s04);
+      const uiasd00 = useInterstateDefined.acceptSelector(twsd00);
+      const uiasd01 = useInterstateDefined.acceptSelector(twsd01);
+      const uiasd02 = useInterstateDefined.acceptSelector((state) => state[77]);
+      const uiasd03 = useInterstateDefined.acceptSelector((state) => state);
+      const uiasd04 = useInterstateDefined.acceptSelector(({ 2: two }) => two);
+      const uiasd05 = useInterstateDefined.acceptSelector(({ a, go }) => ({
+        [a]: go,
+      }));
 
-      type CS01 = Reveal<
-        ToBeExact<
-          typeof ts01,
-          readonly [() => { a: string }, { a: SetInterstate<string> }] & {
-            get: () => { a: string };
-            set: () => { a: SetInterstate<string> };
-            both: () => readonly [{ a: string }, { a: SetInterstate<string> }];
-          }
+      type TestCase11 = [
+        IsTrue<IsEqual<typeof uiasd00, string>>,
+        IsTrue<IsEqual<typeof uiasd01, string | number | null | undefined | string[]>>,
+        IsTrue<IsEqual<typeof uiasd02, undefined>>,
+        IsTrue<IsEqual<typeof uiasd03, State>>,
+        IsTrue<IsEqual<typeof uiasd04, (boolean | number)[]>>,
+        IsTrue<IsEqual<typeof uiasd05, { [x: string]: null | undefined | string[] }>>
+      ];
+
+      // @ts-expect-error
+      useInterstateDefined.acceptSelector((state: { a: number; fun: unknown }) => [
+        state.a,
+        state.fun,
+      ]);
+      // @ts-expect-error
+      useInterstateDefined.acceptSelector((state: State, x: unknown) => 3);
+      // @ts-expect-error
+      useInterstateDefined.acceptSelector((state: State, x: unknown) => ({}));
+
+      const rid00 = readInterstateDefined('go');
+      const rid01 = readInterstateDefined('2');
+      const rid02 = readInterstateDefined(symbolKey);
+
+      type TestCase12 = [
+        IsTrue<IsEqual<typeof rid00, null | undefined | string[]>>,
+        IsTrue<IsEqual<typeof rid01, (boolean | number)[]>>,
+        IsTrue<IsEqual<typeof rid02, (() => unknown) | { b: number | object }>>
+      ];
+
+      // @ts-expect-error
+      readInterstateDefined<string>(1);
+      // @ts-expect-error
+      readInterstateDefined<{ b: string }>(symbolKey);
+      // @ts-expect-error
+      readInterstateDefined(2);
+
+      const ridm00 = readInterstateDefined(['77', 'a', symbolKey]);
+      const ridm01 = readInterstateDefined(['77', 'go'] as const);
+
+      type TestCase13 = [
+        IsTrue<
+          IsEqual<
+            typeof ridm00,
+            { 77: undefined; a: string; [symbolKey]: (() => unknown) | { b: number | object } }
+          >
+        >,
+        IsTrue<IsEqual<typeof ridm01, { 77: undefined; go: null | undefined | string[] }>>
+      ];
+
+      // @ts-expect-error
+      readInterstateDefined(['go', 3]);
+      // @ts-expect-error
+      readInterstateDefined([2]);
+
+      const riasd00 = readInterstateDefined.acceptSelector(twsd00);
+      const riasd01 = readInterstateDefined.acceptSelector(twsd01);
+      const riasd02 = readInterstateDefined.acceptSelector((state) => state[77]);
+      const riasd03 = readInterstateDefined.acceptSelector((state) => state);
+
+      type TestCase14 = [
+        IsTrue<IsEqual<typeof riasd00, string>>,
+        IsTrue<IsEqual<typeof riasd01, string | number | null | undefined | string[]>>,
+        IsTrue<IsEqual<typeof riasd02, undefined>>,
+        IsTrue<IsEqual<typeof riasd03, State>>
+      ];
+
+      // @ts-expect-error
+      readInterstateDefined.acceptSelector((state: { a: number; fun: unknown }) => [
+        state.a,
+        state.fun,
+      ]);
+      // @ts-expect-error
+      readInterstateDefined.acceptSelector((state: State, x: unknown) => 3);
+      // @ts-expect-error
+      readInterstateDefined.acceptSelector((state: State, x: unknown) => ({}));
+
+      setInterstateDefined('a', 'yes');
+      setInterstateDefined('77', undefined);
+      setInterstateDefined(symbolKey, { b: 2 });
+      setInterstateDefined('fun', () => {});
+      setInterstateDefined('go', (a?: string[] | null) => [...(a || []), 'stop']);
+
+      // @ts-expect-error
+      setInterstateDefined('fun', (a: unknown, b: unknown) => 3);
+      // @ts-expect-error
+      setInterstateDefined('fun', (a: unknown, b: unknown) => ({}));
+      // @ts-expect-error
+      setInterstateDefined('a', (a: string, b: string) => a + b);
+      // @ts-expect-error
+      setInterstateDefined('77', 77);
+      // @ts-expect-error
+      setInterstateDefined(77, undefined);
+      // @ts-expect-error
+      setInterstateDefined('go', (a?: string[] | null) => a && a[0]);
+      // @ts-expect-error
+      setInterstateDefined<null>('a', () => null);
+      // @ts-expect-error
+      setInterstateDefined<unknown>('2', [true]);
+      // @ts-expect-error
+      setInterstateDefined(2, [true]);
+
+      setInterstateDefined({ a: 'star' });
+      setInterstateDefined({ a: 'star', 2: () => [true], [symbolKey]: { b: 2 } });
+      setInterstateDefined(() => ({
+        '2': [3],
+        77: undefined,
+        fun: () => 3,
+        [symbolKey]: { b: [1, 2, 3] },
+      }));
+      setInterstateDefined({ [symbolKey]: () => () => {} });
+      setInterstateDefined((state: { a: string }) => ({
+        fun: undefined,
+        77: undefined,
+        go: [state.a],
+      }));
+      setInterstateDefined((state) => ({
+        fun: undefined,
+        77: undefined,
+        go: [state.a],
+      }));
+      setInterstateDefined({ a: (x: string) => `${x}new` });
+      setInterstateDefined((state) => ({}));
+
+      // @ts-expect-error
+      setInterstateDefined((state: { a: number }) => ({
+        77: undefined,
+      }));
+      // @ts-expect-error
+      setInterstateDefined((state: { fake: number }) => ({
+        fun: true,
+      }));
+
+      // @ts-expect-error
+      setInterstateDefined((a: unknown, b: unknown) => ({ fun: 3 }));
+      // @ts-expect-error
+      setInterstateDefined((a: unknown, b: unknown) => ({}));
+      // @ts-expect-error
+      setInterstateDefined({ a: (x: boolean) => ({ 77: x }) });
+      // @ts-expect-error
+      setInterstateDefined({ fun: (x: unknown, y: unknown) => x });
+      // @ts-expect-error
+      setInterstateDefined({ fun: (x: unknown, y: unknown) => ({}) });
+
+      type TestCase15 = [
+        IsTrue<IsEqual<UseInterstateInitParam<string>, string | (() => string)>>,
+        IsTrue<
+          IsEqual<UseInterstateInitParam<string | undefined>, string | (() => string | undefined)>
+        >,
+        IsTrue<
+          IsEqual<
+            UseInterstateInitParam<string | boolean>,
+            string | boolean | (() => string | boolean)
+          >
+        >,
+        IsTrue<
+          IsEqual<UseInterstateInitParam<() => number | boolean>, () => () => number | boolean>
+        >,
+        IsTrue<
+          IsEqual<
+            UseInterstateInitParam<number | (() => { foo: string })>,
+            number | (() => number | (() => { foo: string }))
+          >
         >
-      >;
-      type CS02 = Reveal<
-        ToBeExact<
-          typeof ts02,
-          readonly [
-            () => {
-              a: string;
-              77: undefined;
-              [symbolKey]: (() => unknown) | { b: number | object };
-              fun: unknown;
-            },
+      ];
+
+      type TestCase16 = [
+        IsTrue<
+          IsEqual<
+            UseInterstateSchemaParamObj<{
+              one: string;
+              [symbolKey]: number | undefined | null;
+            }>,
             {
-              a: SetInterstate<string>;
-              77: SetInterstate<undefined>;
-              [symbolKey]: SetInterstate<(() => unknown) | { b: number | object }>;
-              fun: SetInterstate<unknown>;
+              one: string | (() => string) | undefined;
+              [symbolKey]: number | null | undefined | (() => number | undefined | null);
             }
-          ] & {
-            get: () => {
-              a: string;
-              77: undefined;
-              [symbolKey]: (() => unknown) | { b: number | object };
-              fun: unknown;
-            };
-            set: () => {
-              a: SetInterstate<string>;
-              77: SetInterstate<undefined>;
-              [symbolKey]: SetInterstate<(() => unknown) | { b: number | object }>;
-              fun: SetInterstate<unknown>;
-            };
-            both: () => readonly [
-              {
-                a: string;
-                77: undefined;
-                [symbolKey]: (() => unknown) | { b: number | object };
-                fun: unknown;
-              },
-              {
-                a: SetInterstate<string>;
-                77: SetInterstate<undefined>;
-                [symbolKey]: SetInterstate<(() => unknown) | { b: number | object }>;
-                fun: SetInterstate<unknown>;
-              }
-            ];
-          }
-        >
-      >;
-      type CS03 = Reveal<
-        ToBeExact<
-          typeof ts03,
-          readonly [
-            () => { [symbolKey]: (() => unknown) | { b: number | object } },
-            { [symbolKey]: SetInterstate<(() => unknown) | { b: number | object }> }
-          ] & {
-            get: () => { [symbolKey]: (() => unknown) | { b: number | object } };
-            set: () => { [symbolKey]: SetInterstate<(() => unknown) | { b: number | object }> };
-            both: () => readonly [
-              { [symbolKey]: (() => unknown) | { b: number | object } },
-              { [symbolKey]: SetInterstate<(() => unknown) | { b: number | object }> }
-            ];
-          }
-        >
-      >;
-      type CS04 = Reveal<
-        ToBeExact<
-          typeof ts04,
-          readonly [
-            () => {
-              a: string;
-              2: (boolean | number)[];
-              [symbolKey]: (() => unknown) | { b: number | object };
-              77: undefined;
-              fun: unknown;
-              go: null | undefined | string[];
-            },
+          >
+        >,
+        IsTrue<
+          IsEqual<
+            UseInterstateSchemaParamFn<{
+              one: string;
+              [symbolKey]: number | undefined | null;
+            }>,
+            () => { one: string; [symbolKey]: number | undefined | null }
+          >
+        >,
+        IsTrue<
+          IsEqual<
+            UseInterstateSchemaParamObj<
+              { one: string; [symbolKey]: number | undefined | null },
+              typeof symbolKey
+            >,
             {
-              a: SetInterstate<string>;
-              2: SetInterstate<(boolean | number)[]>;
-              [symbolKey]: SetInterstate<(() => unknown) | { b: number | object }>;
-              77: SetInterstate<undefined>;
-              fun: SetInterstate<unknown>;
-              go: SetInterstate<null | undefined | string[]>;
+              [symbolKey]: number | null | undefined | (() => number | undefined | null);
             }
-          ] & {
-            get: () => {
-              a: string;
-              2: (boolean | number)[];
-              [symbolKey]: (() => unknown) | { b: number | object };
-              77: undefined;
-              fun: unknown;
-              go: null | undefined | string[];
-            };
-            set: () => {
-              a: SetInterstate<string>;
-              2: SetInterstate<(boolean | number)[]>;
-              [symbolKey]: SetInterstate<(() => unknown) | { b: number | object }>;
-              77: SetInterstate<undefined>;
-              fun: SetInterstate<unknown>;
-              go: SetInterstate<null | undefined | string[]>;
-            };
-            both: () => readonly [
-              {
-                a: string;
-                2: (boolean | number)[];
-                [symbolKey]: (() => unknown) | { b: number | object };
-                77: undefined;
-                fun: unknown;
-                go: null | undefined | string[];
-              },
-              {
-                a: SetInterstate<string>;
-                2: SetInterstate<(boolean | number)[]>;
-                [symbolKey]: SetInterstate<(() => unknown) | { b: number | object }>;
-                77: SetInterstate<undefined>;
-                fun: SetInterstate<unknown>;
-                go: SetInterstate<null | undefined | string[]>;
-              }
-            ];
-          }
-        >
-      >;
+          >
+        >,
+        IsTrue<
+          IsEqual<
+            UseInterstateSchemaParamFn<
+              { one: string; [symbolKey]: number | undefined | null },
+              typeof symbolKey
+            >,
+            () => { [symbolKey]: number | undefined | null }
+          >
+        >,
 
-      // @ts-expect-error
-      const tsErr01 = useInterstateDefined({ a: () => 1, [symbolKey]: { b: { bb: 6 } } });
-      // @ts-expect-error
-      const tsErr02 = useInterstateDefined({ [symbolKey]: () => 'eh' });
-      // @ts-expect-error
-      const tsErr03 = useInterstateDefined({ [symbolKey]: () => () => 'eh', b: null });
-      // @ts-expect-error
-      const tsErr04 = useInterstateDefined({ a: 'bo', er: 2 });
+        IsTrue<
+          IsEqual<
+            UseInterstateSchemaParam<{}>,
+            UseInterstateSchemaParamObj<{}> | UseInterstateSchemaParamFn<{}>
+          >
+        >,
+        IsTrue<
+          IsEqual<
+            UseInterstateSchemaParam<{ a: number; 33: string; [symbolKey]: () => boolean }>,
+            | UseInterstateSchemaParamObj<{
+                a: number;
+                33: string;
+                [symbolKey]: () => boolean;
+              }>
+            | UseInterstateSchemaParamFn<{
+                a: number;
+                33: string;
+                [symbolKey]: () => boolean;
+              }>
+          >
+        >,
 
-      const e01 = new Error() as UseInterstateError;
-      const e02 = new Error();
+        UseInterstateSchemaParamObj<
+          { one: string; [symbolKey]: number | undefined | null },
+          // @ts-expect-error
+          typeof symbolKey | 'two'
+        >
+      ];
 
-      const te01 = getUseInterstateErrorsHandleMethods(e01);
-      const te02 = getUseInterstateErrorsHandleMethods(e02);
+      type TestCase17 = [
+        IsTrue<IsEqual<InterstateSelector<{ a: number }>, (readState: { a: number }) => unknown>>,
+        IsTrue<
+          IsEqual<
+            InterstateSelector<{ foo: boolean; 77: 'go'; [symbolKey]: { x: string } }, 5>,
+            (readState: { foo: boolean; 77: 'go'; [symbolKey]: { x: string } }) => 5
+          >
+        >
+      ];
 
-      type CE01 = Reveal<ToBeExact<typeof te01, UseInterstateErrorMethods>>;
-      type CE02 = Reveal<ToBeExact<typeof te02, undefined>>;
+      type TestCase18 = [
+        IsTrue<IsEqual<SetInterstateParam<string>, string | ((a: string) => string)>>,
+        IsTrue<
+          IsEqual<
+            SetInterstateParam<string | undefined>,
+            string | undefined | ((a: string | undefined) => string | undefined)
+          >
+        >,
+        IsTrue<
+          IsEqual<
+            SetInterstateParam<string | boolean>,
+            string | boolean | ((a: string | boolean) => string | boolean)
+          >
+        >,
+        IsTrue<
+          IsEqual<
+            SetInterstateParam<() => number | boolean>,
+            (a: () => number | boolean) => () => number | boolean
+          >
+        >,
+        IsTrue<
+          IsEqual<
+            SetInterstateParam<number | (() => { foo: string })>,
+            number | ((a: number | (() => { foo: string })) => number | (() => { foo: string }))
+          >
+        >,
+        IsTrue<
+          IsEqual<
+            SetInterstateParam<(a: boolean) => number>,
+            (p: (a: boolean) => number) => (a: boolean) => number
+          >
+        >,
+        IsTrue<IsEqual<SetInterstateParam<{}>, {} | ((x: {}) => {})>>
+      ];
 
-      const tee01 = isUseInterstateError(e01);
-      const tee02 = isUseInterstateError(e02);
-
-      type CEE01 = Reveal<ToBeExact<typeof tee01, boolean>>;
-      type CEE02 = Reveal<ToBeExact<typeof tee02, boolean>>;
-
-      type CUIP01 = Reveal<ToBeExact<InterstateInitializeParam<string>, string | (() => string)>>;
-      type CUIP02 = Reveal<
-        ToBeExact<
-          InterstateInitializeParam<string | undefined>,
-          string | ((() => string) | (() => undefined | void))
-        >
-      >;
-      type CUIP03 = Reveal<
-        ToBeExact<
-          InterstateInitializeParam<string | boolean>,
-          string | boolean | (() => string) | (() => true) | (() => false)
-        >
-      >;
-      type CUIP04 = Reveal<
-        ToBeExact<InterstateInitializeParam<() => number | boolean>, () => () => number | boolean>
-      >;
-      type CUIP05 = Reveal<
-        ToBeExact<
-          InterstateInitializeParam<number | (() => { foo: string })>,
-          number | (() => number) | (() => () => { foo: string })
-        >
-      >;
-
-      type CUP01 = Reveal<ToBeExact<InterstateParam<string>, string | ((a: string) => string)>>;
-      type CUP02 = Reveal<
-        ToBeExact<
-          InterstateParam<string | undefined>,
-          string | undefined | ((a: string | undefined) => string | undefined)
-        >
-      >;
-      type CUP03 = Reveal<
-        ToBeExact<
-          InterstateParam<string | boolean>,
-          string | boolean | ((a: string | boolean) => string | boolean)
-        >
-      >;
-      type CUP04 = Reveal<
-        ToBeExact<
-          InterstateParam<() => number | boolean>,
-          (a: () => number | boolean) => () => number | boolean
-        >
-      >;
-      type CUP05 = Reveal<
-        ToBeExact<
-          InterstateParam<number | (() => { foo: string })>,
-          number | ((a: number | (() => { foo: string })) => number | (() => { foo: string }))
-        >
-      >;
-
-      type OS01 = Reveal<
-        ToBeExact<
-          InterstateStateObject<{ one: string; [symbolKey]: number | undefined | null }>,
-          { readonly one: string; readonly [symbolKey]: number | undefined | null }
-        >
-      >;
-      type OS02 = Reveal<
-        ToBeExact<
-          InterstateStateObject<
-            { one: string; [symbolKey]: number | undefined | null },
-            typeof symbolKey
-          >,
-          { readonly [symbolKey]: number | undefined | null }
-        >
-      >;
-      type OSErr03 = InterstateStateObject<
-        { one: string; [symbolKey]: number | undefined | null },
-        // @ts-expect-error
-        typeof symbolKey | 'two'
-      >;
-
-      type OI01 = Reveal<
-        ToBeExact<
-          InterstateInitializeObject<{ one: string; [symbolKey]: number | undefined | null }>,
-          {
-            readonly one: string | (() => string) | undefined;
-            readonly [symbolKey]:
-              | number
-              | null
-              | (() => number)
-              | (() => undefined | void)
-              | (() => null)
-              | undefined;
-          }
-        >
-      >;
-      type OI02 = Reveal<
-        ToBeExact<
-          InterstateInitializeObject<
-            { one: string; [symbolKey]: number | undefined | null },
-            typeof symbolKey
-          >,
-          {
-            readonly [symbolKey]:
-              | number
-              | null
-              | (() => number)
-              | (() => undefined | void)
-              | (() => null)
-              | undefined;
-          }
-        >
-      >;
-      type OI0Err3 = InterstateInitializeObject<
-        { one: string; [symbolKey]: number | undefined | null },
-        // @ts-expect-error
-        typeof symbolKey | 'two'
-      >;
-
-      type OSE01 = Reveal<
-        ToBeExact<
-          InterstateSettersObject<{ one: string; [symbolKey]: number | undefined | null }>,
-          {
-            readonly one: SetInterstate<string>;
-            readonly [symbolKey]: (
-              a:
+      type TestCase19 = [
+        IsTrue<
+          IsEqual<
+            SetInterstateSchemaParamObj<{
+              one: string;
+              [symbolKey]: number | undefined | null;
+            }>,
+            {
+              one: string | ((p: string) => string);
+              [symbolKey]:
                 | number
                 | undefined
                 | null
-                | ((p: number | undefined | null) => number | undefined | null)
-            ) => void;
-          }
-        >
-      >;
-      type OSE02 = Reveal<
-        ToBeExact<
-          InterstateSettersObject<
-            { one: string; [symbolKey]: number | undefined | null },
-            typeof symbolKey
-          >,
-          {
-            readonly [symbolKey]: (
-              a:
+                | ((p: number | undefined | null) => number | undefined | null);
+            }
+          >
+        >,
+        IsTrue<
+          IsEqual<
+            SetInterstateSchemaParamFn<{
+              one: string;
+              [symbolKey]: number | undefined | null;
+            }>,
+            (p: {
+              one: string;
+              [symbolKey]: number | undefined | null;
+            }) => { one: string; [symbolKey]: number | undefined | null }
+          >
+        >,
+        IsTrue<
+          IsEqual<
+            SetInterstateSchemaParamObj<
+              { one: string; [symbolKey]: number | undefined | null },
+              typeof symbolKey
+            >,
+            {
+              [symbolKey]:
                 | number
                 | undefined
                 | null
-                | ((p: number | undefined | null) => number | undefined | null)
-            ) => void;
-          }
+                | ((p: number | undefined | null) => number | undefined | null);
+            }
+          >
+        >,
+        IsTrue<
+          IsEqual<
+            SetInterstateSchemaParamFn<
+              { one: string; [symbolKey]: number | undefined | null },
+              typeof symbolKey
+            >,
+            (p: {
+              one: string;
+              [symbolKey]: number | undefined | null;
+            }) => { [symbolKey]: number | undefined | null }
+          >
+        >,
+
+        IsTrue<
+          IsEqual<
+            SetInterstateSchemaParam<{}>,
+            SetInterstateSchemaParamObj<{}> | SetInterstateSchemaParamFn<{}>
+          >
+        >,
+        IsTrue<
+          IsEqual<
+            SetInterstateSchemaParam<{ a: number; 33: string; [symbolKey]: () => boolean }>,
+            | SetInterstateSchemaParamObj<{
+                a: number;
+                33: string;
+                [symbolKey]: () => boolean;
+              }>
+            | SetInterstateSchemaParamFn<{
+                a: number;
+                33: string;
+                [symbolKey]: () => boolean;
+              }>
+          >
+        >,
+
+        SetInterstateSchemaParamObj<
+          { one: string; [symbolKey]: number | undefined | null },
+          // @ts-expect-error
+          typeof symbolKey | 'two'
         >
-      >;
-      type OSEErr03 = InterstateSettersObject<
-        { one: string; [symbolKey]: number | undefined | null },
-        // @ts-expect-error
-        typeof symbolKey | 'two'
-      >;
+      ];
+
+      const imdef = <M extends Interstate>(a: InterstateMethodsDev<M>) => a;
+      const imde00: InterstateMethodsDev<Interstate> = {} as InterstateMethods<Interstate>;
+      const imde01: InterstateMethodsDev<State> = {} as InterstateMethods<State>;
+      const imde02: InterstateMethodsDev<Interstate> = {} as InterstateMethods<never>;
+      const imde03 = imdef({} as InterstateMethods<Interstate>);
+      const imde04 = imdef({} as InterstateMethods<State>);
+      const imde05 = imdef({} as InterstateMethods<never>);
+
+      type TestCase20 = [
+        IsTrue<IsEqual<typeof imde03, InterstateMethodsDev<Interstate>>>,
+        IsTrue<IsEqual<typeof imde04, InterstateMethodsDev<State>>>,
+        IsTrue<IsEqual<typeof imde05, InterstateMethodsDev<Interstate>>>
+      ];
+
+      const iidef = <M extends Interstate>(a: InitInterstateDev<M>) => a;
+      const iide00: InitInterstateDev<Interstate> = {} as InitInterstate<Interstate>;
+      const iide01: InitInterstateDev<State> = {} as InitInterstate<State>;
+      const iide02: InitInterstateDev<Interstate> = {} as InitInterstate<never>;
+      const iide03 = iidef({} as InitInterstate<Interstate>);
+      const iide04 = iidef({} as InitInterstate<State>);
+      const iide05 = iidef({} as InitInterstate<never>);
+
+      type TestCase21 = [
+        IsTrue<IsEqual<typeof iide03, InitInterstateDev<Interstate>>>,
+        IsTrue<IsEqual<typeof iide04, InitInterstateDev<State>>>,
+        IsTrue<IsEqual<typeof iide05, InitInterstateDev<Interstate>>>
+      ];
+
+      const uidef = <M extends Interstate>(a: UseInterstateDev<M>) => a;
+      const uide00: UseInterstateDev<Interstate> = {} as UseInterstate<Interstate>;
+      const uide01: UseInterstateDev<State> = {} as UseInterstate<State>;
+      const uide02: UseInterstateDev<Interstate> = {} as UseInterstate<never>;
+      const uide03 = uidef({} as UseInterstate<Interstate>);
+      const uide04 = uidef({} as UseInterstate<State>);
+      const uide05 = uidef({} as UseInterstate<never>);
+
+      type TestCase22 = [
+        IsTrue<IsEqual<typeof uide03, UseInterstateDev<Interstate>>>,
+        IsTrue<IsEqual<typeof uide04, UseInterstateDev<State>>>,
+        IsTrue<IsEqual<typeof uide05, UseInterstateDev<Interstate>>>
+      ];
+
+      const asdef = <M extends Interstate>(a: AcceptSelectorDev<M>) => a;
+      const asde00: AcceptSelectorDev<Interstate> = {} as AcceptSelector<Interstate>;
+      const asde01: AcceptSelectorDev<State> = {} as AcceptSelector<State>;
+      const asde02: AcceptSelectorDev<Interstate> = {} as AcceptSelector<never>;
+      const asde03 = asdef({} as AcceptSelector<Interstate>);
+      const asde04 = asdef({} as AcceptSelector<State>);
+      const asde05 = asdef({} as AcceptSelector<never>);
+
+      type TestCase23 = [
+        IsTrue<IsEqual<typeof asde03, AcceptSelectorDev<Interstate>>>,
+        IsTrue<IsEqual<typeof asde04, AcceptSelectorDev<State>>>,
+        IsTrue<IsEqual<typeof asde05, AcceptSelectorDev<Interstate>>>
+      ];
+
+      const ridef = <M extends Interstate>(a: ReadInterstateDev<M>) => a;
+      const ride00: ReadInterstateDev<Interstate> = {} as ReadInterstate<Interstate>;
+      const ride01: ReadInterstateDev<State> = {} as ReadInterstate<State>;
+      const ride02: ReadInterstateDev<Interstate> = {} as ReadInterstate<never>;
+      const ride03 = ridef({} as ReadInterstate<Interstate>);
+      const ride04 = ridef({} as ReadInterstate<State>);
+      const ride05 = ridef({} as ReadInterstate<never>);
+
+      type TestCase24 = [
+        IsTrue<IsEqual<typeof ride03, ReadInterstateDev<Interstate>>>,
+        IsTrue<IsEqual<typeof ride04, ReadInterstateDev<State>>>,
+        IsTrue<IsEqual<typeof ride05, ReadInterstateDev<Interstate>>>
+      ];
+
+      const sidef = <M extends Interstate>(a: SetInterstateDev<M>) => a;
+      const side00: SetInterstateDev<Interstate> = {} as SetInterstate<Interstate>;
+      const side01: SetInterstateDev<State> = {} as SetInterstate<State>;
+      const side02: SetInterstateDev<Interstate> = {} as SetInterstate<never>;
+      const side03 = sidef({} as SetInterstate<Interstate>);
+      const side04 = sidef({} as SetInterstate<State>);
+      const side05 = sidef({} as SetInterstate<never>);
+
+      type TestCase25 = [
+        IsTrue<IsEqual<typeof side03, SetInterstateDev<Interstate>>>,
+        IsTrue<IsEqual<typeof side04, SetInterstateDev<State>>>,
+        IsTrue<IsEqual<typeof side05, SetInterstateDev<Interstate>>>
+      ];
     };
   });
 });

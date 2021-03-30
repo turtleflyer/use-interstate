@@ -1,6 +1,7 @@
-import mainTestSuit from '../mainTestSuit';
 import { flagManager } from '../assets/testFlags';
+import { testSuites } from '../testSuites';
 
+flagManager.reset();
 flagManager.set({ SHOULD_TEST_IMPLEMENTATION: false });
 
-mainTestSuit('../../../lib/use-interstate.cjs.js');
+testSuites('../../../lib/use-interstate.cjs.js');
