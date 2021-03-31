@@ -1,7 +1,5 @@
-import type { _fixInfer } from './fixInferKey';
 import type {
   Interstate,
-  InterstateMethods,
   InterstateSelector,
   SetInterstateParam,
   SetInterstateSchemaParam,
@@ -20,12 +18,12 @@ export interface InterstateMethodsDev<M extends Interstate> {
 }
 
 export type InitInterstateDev<M extends Interstate> = {
-  <K extends keyof M>(initParam?: Pick<M, K>): Omit<InterstateMethods<M>, 'initInterstate'>;
+  <K extends keyof M>(initParam?: Pick<M, K> | never): Omit<
+    InterstateMethodsDev<M>,
+    'initInterstate'
+  >;
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  <K extends keyof M>(i: never): Omit<InterstateMethods<M>, 'initInterstate'>;
-
-  [_fixInfer]?: M;
+  (i: never): Omit<InterstateMethodsDev<M>, 'initInterstate'>;
 };
 
 export type UseInterstateDev<M extends Interstate> = {
@@ -52,6 +50,4 @@ export type SetInterstateDev<M extends Interstate = never> = {
   <K extends keyof M>(key: K, set: SetInterstateParam<M[K]>): void;
 
   <K extends keyof M>(set: SetInterstateSchemaParam<M, K>): void;
-
-  [_fixInfer]?: M;
 };

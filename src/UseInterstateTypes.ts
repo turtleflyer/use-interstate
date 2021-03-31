@@ -1,5 +1,3 @@
-import type { _fixInfer } from './fixInferKey';
-
 export type InterstateKey = string | symbol;
 
 export type Interstate = Record<InterstateKey, unknown>;
@@ -17,16 +15,11 @@ export interface InterstateMethods<M extends Interstate> {
 }
 
 export type InitInterstate<M extends Interstate = never> = [M] extends [never]
-  ? {
-      <S extends Interstate>(initParam?: S & EliminateFunction<S>): Omit<
-        InterstateMethods<M>,
-        'initInterstate'
-      >;
-
-      [_fixInfer]?: Interstate;
-    }
-  : <K extends ExtraStringKeys<M>, SI = Pick<M, K>>(
-      initParam?: Pick<M, K> & SI & EliminateFunction<SI>
+  ? <S extends Interstate>(
+      initParam?: S & EliminateFunction<S>
+    ) => Omit<InterstateMethods<never>, 'initInterstate'>
+  : <K extends ExtraStringKeys<M>>(
+      initParam?: Pick<M, K> & EliminateNever<K>
     ) => Omit<InterstateMethods<M>, 'initInterstate'>;
 
 export type UseInterstate<M extends Interstate = never> = ([M] extends [never]
@@ -49,13 +42,10 @@ export type UseInterstate<M extends Interstate = never> = ([M] extends [never]
       <S extends Interstate>(keys: readonly OnlyStringKeys<S>[]): S;
     }
   : {
-      <K extends OnlyStringKeys<M>, TI = UseInterstateInitParam<M[K]>>(
-        key: K,
-        init?: UseInterstateInitParam<M[K]> & TI & EliminateFunction<TI, []>
-      ): M[K];
+      <K extends OnlyStringKeys<M>>(key: K, init?: UseInterstateInitParam<M[K]>): M[K];
 
-      <K extends ExtraStringKeys<M>, SI = UseInterstateSchemaParam<M, K>>(
-        initState: UseInterstateSchemaParam<M, K> & SI & EliminateFunctionsAlsoInProperties<SI, []>
+      <K extends ExtraStringKeys<M>>(
+        initState: UseInterstateSchemaParam<M, K> & EliminateNever<K>
       ): Pick<M, K>;
 
       <K extends OnlyStringKeys<M>>(keys: readonly K[]): Pick<M, K>;
@@ -120,16 +110,9 @@ export type SetInterstate<M extends Interstate = never> = [M] extends [never]
       <S0 extends Interstate, S1 extends Interstate>(set: SetInterstateFnParam<S0, S1>): void;
     }
   : {
-      <K extends OnlyStringKeys<M>, TI = SetInterstateParam<M[K]>>(
-        key: K,
-        set: SetInterstateParam<M[K]> & TI & EliminateFunction<TI, [x?: any]>
-      ): void;
+      <K extends OnlyStringKeys<M>>(key: K, set: SetInterstateParam<M[K]>): void;
 
-      <K extends ExtraStringKeys<M>, SI = SetInterstateSchemaParam<M, K>>(
-        set: SetInterstateSchemaParam<M, K> & SI & EliminateFunctionsAlsoInProperties<SI, [x?: any]>
-      ): void;
-
-      [_fixInfer]?: M;
+      <K extends ExtraStringKeys<M>>(set: SetInterstateSchemaParam<M, K> & EliminateNever<K>): void;
     };
 
 export type SetInterstateParam<T> = Exclude<T, (...x: any) => any> | ((prevValue: T) => T);
@@ -156,6 +139,8 @@ export type OnlyStringKeys<S> = StringifyNumber<keyof S>;
 export type ExtraStringKeys<S> = keyof S | StringifyNumber<keyof S>;
 
 type StringifyNumber<T> = T extends number ? `${T}` : T;
+
+type EliminateNever<T> = T extends never ? never : unknown;
 
 type EliminateFunction<F, AllowedArgs extends any[] = never> = F extends (...x: infer A) => any
   ? A extends AllowedArgs
