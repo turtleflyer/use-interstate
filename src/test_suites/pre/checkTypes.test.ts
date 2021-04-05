@@ -630,6 +630,10 @@ describe('Check types', () => {
         go: [state.a],
       }));
       setInterstateDefined({ a: (x: string) => `${x}new` });
+      setInterstateDefined((state) => ({
+        77: undefined,
+        go: [state.a],
+      }));
 
       // @ts-expect-error
       setInterstateDefined((state: { a: number }) => ({

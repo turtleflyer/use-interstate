@@ -113,6 +113,8 @@ export type SetInterstate<M extends Interstate = never> = [M] extends [never]
       <K extends OnlyStringKeys<M>>(key: K, set: SetInterstateParam<M[K]>): void;
 
       <K extends ExtraStringKeys<M>>(set: SetInterstateSchemaParam<M, K> & EliminateNever<K>): void;
+
+      <K extends ExtraStringKeys<M>>(set: SetInterstateSchemaParamFn<M, K>): void;
     };
 
 export type SetInterstateParam<T> = Exclude<T, (...x: any) => any> | ((prevValue: T) => T);
