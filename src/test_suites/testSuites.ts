@@ -12,6 +12,7 @@ import { testReadInterstateKeyInterface } from './test_cases/testReadInterstateK
 import { testReadInterstateKeysInterface } from './test_cases/testReadInterstateKeysInterface';
 import { testScenariosWithSiblings } from './test_cases/testScenariosWithSiblings';
 import { testSetInterstateCheckedByReadInterstate } from './test_cases/testSetInterstateCheckedByReadInterstate';
+import { testSetInterstateCheckedByUseInterstate } from './test_cases/testSetInterstateCheckedByUseInterstate';
 import { testUnsuccessfulChangingInterface } from './test_cases/testUnsuccessfulChangingInterface';
 import { testUseInterstateAcceptSelector } from './test_cases/testUseInterstateAcceptSelector';
 import { testUseInterstateKeyInterface } from './test_cases/testUseInterstateKeyInterface';
@@ -56,6 +57,7 @@ export const testSuites = (packagePath: string): void => {
       testUseInterstateAcceptSelector,
       testUnsuccessfulChangingInterface,
       testScenariosWithSiblings,
+      testSetInterstateCheckedByUseInterstate,
     ];
 
     const testsWithNoDetailsOnFlagCase = {

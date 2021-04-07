@@ -19,7 +19,7 @@ export const testUseInterstateKeyInterface: TestCase = [
       77: string;
       [symbolKey]: object;
     }>();
-    
+
     const triggersCounter = createTriggersCounter();
     const testComponentID = 'test_component';
     const TestComponent = createListenerComponent({ useInterstate });
@@ -48,6 +48,12 @@ export const testUseInterstateKeyInterface: TestCase = [
     expect([triggersCounter, 'foo']).triggersNumberToBe(1);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
+
+    act(() => setInterstate('foo', 0));
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe('0');
+    expect([triggersCounter, 'foo']).triggersNumberToBe(1);
+    expect(effectCounter).numberToBeConsideringFlag(0);
 
     initInterstate();
     rerender(<StrictMode />);

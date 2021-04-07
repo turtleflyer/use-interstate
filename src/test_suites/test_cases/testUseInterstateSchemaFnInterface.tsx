@@ -61,6 +61,16 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
+    act(() => setInterstate('foo', 200));
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
+      '{"77":"hi","foo":200,"symbol(0)":{"a":true}}'
+    );
+    expect([triggersCounter, 'foo']).triggersNumberToBe(1);
+    expect([triggersCounter, '77']).triggersNumberToBe(1);
+    expect([triggersCounter, symbolKey]).triggersNumberToBe(1);
+    expect(effectCounter).numberToBeConsideringFlag(0);
+
     act(() => setInterstate('77', 'lo'));
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
@@ -87,6 +97,27 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
       '{"77":"no","foo":210,"symbol(0)":{"c":null}}'
+    );
+    expect([triggersCounter, 'foo']).triggersNumberToBe(1);
+    expect([triggersCounter, '77']).triggersNumberToBe(1);
+    expect([triggersCounter, symbolKey]).triggersNumberToBe(1);
+    expect(effectCounter).numberToBeConsideringFlag(1);
+    effectCounter = 0;
+
+    act(() => setInterstate({ 77: 'no' }));
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
+      '{"77":"no","foo":210,"symbol(0)":{"c":null}}'
+    );
+    expect([triggersCounter, 'foo']).triggersNumberToBe(1);
+    expect([triggersCounter, '77']).triggersNumberToBe(1);
+    expect([triggersCounter, symbolKey]).triggersNumberToBe(1);
+    expect(effectCounter).numberToBeConsideringFlag(0);
+
+    act(() => setInterstate({ foo: 15, 77: 'no', [symbolKey]: { 1: true } }));
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
+      '{"77":"no","foo":15,"symbol(0)":{"1":true}}'
     );
     expect([triggersCounter, 'foo']).triggersNumberToBe(1);
     expect([triggersCounter, '77']).triggersNumberToBe(1);

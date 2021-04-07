@@ -61,6 +61,16 @@ export const testUseInterstateKeysInterface: TestCase = [
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
+    act(() => setInterstate('foo', 100));
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
+      '{"77":"undefined","foo":100,"symbol(0)":"undefined"}'
+    );
+    expect([triggersCounter, 'foo']).triggersNumberToBe(1);
+    expect([triggersCounter, '77']).triggersNumberToBe(1);
+    expect([triggersCounter, symbolKey]).triggersNumberToBe(1);
+    expect(effectCounter).numberToBeConsideringFlag(0);
+
     act(() => setInterstate('77', 'hi'));
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
@@ -87,6 +97,27 @@ export const testUseInterstateKeysInterface: TestCase = [
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
       '{"77":"lo","foo":300,"symbol(0)":{"b":false}}'
+    );
+    expect([triggersCounter, 'foo']).triggersNumberToBe(1);
+    expect([triggersCounter, '77']).triggersNumberToBe(1);
+    expect([triggersCounter, symbolKey]).triggersNumberToBe(1);
+    expect(effectCounter).numberToBeConsideringFlag(1);
+    effectCounter = 0;
+
+    act(() => setInterstate({ 77: 'lo' }));
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
+      '{"77":"lo","foo":300,"symbol(0)":{"b":false}}'
+    );
+    expect([triggersCounter, 'foo']).triggersNumberToBe(1);
+    expect([triggersCounter, '77']).triggersNumberToBe(1);
+    expect([triggersCounter, symbolKey]).triggersNumberToBe(1);
+    expect(effectCounter).numberToBeConsideringFlag(0);
+
+    act(() => setInterstate({ foo: 15, 77: 'lo', [symbolKey]: { 1: null } }));
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
+      '{"77":"lo","foo":15,"symbol(0)":{"1":null}}'
     );
     expect([triggersCounter, 'foo']).triggersNumberToBe(1);
     expect([triggersCounter, '77']).triggersNumberToBe(1);
