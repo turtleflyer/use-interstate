@@ -64,25 +64,29 @@ export const testSuites = (packagePath: string): void => {
     ];
 
     /**
-     * Tests are grouped by the flags they need to be set.
+     * Tests are grouped by the flags that they have test cases related to.
      */
-    const testsWithNoDetailsOnFlagCase = {
+    const testsGroupedByFlags = {
       SHOULD_TEST_IMPLEMENTATION: [
-        testCreateAndInitInterstate,
-        testInitInterstate,
-        testReadInterstateKeyInterface,
-        testReadInterstateKeysInterface,
-        testReadInterstateAcceptSelector,
-        testSetInterstateCheckedByReadInterstate,
+        testUseInterstateKeyInterface,
+        testUseInterstateKeysInterface,
+        testUseInterstateSchemaObjInterface,
+        testUseInterstateSchemaFnInterface,
+        testUseInterstateAcceptSelector,
+        testUnsuccessfulChangingInterface,
+        testScenariosWithSiblings,
+        testSetInterstateCheckedByUseInterstate,
       ],
 
       SHOULD_TEST_PERFORMANCE: [
-        testCreateAndInitInterstate,
-        testInitInterstate,
-        testReadInterstateKeyInterface,
-        testReadInterstateKeysInterface,
-        testReadInterstateAcceptSelector,
-        testSetInterstateCheckedByReadInterstate,
+        testUseInterstateKeyInterface,
+        testUseInterstateKeysInterface,
+        testUseInterstateSchemaObjInterface,
+        testUseInterstateSchemaFnInterface,
+        testUseInterstateAcceptSelector,
+        testUnsuccessfulChangingInterface,
+        testScenariosWithSiblings,
+        testSetInterstateCheckedByUseInterstate,
       ],
     };
 
@@ -90,18 +94,18 @@ export const testSuites = (packagePath: string): void => {
       /**
        * Filtering the tests by the flags they need to be set.
        */
-      allTests.filter(
-        (test) =>
+      allTests.filter((test) =>
+        /**
+         * Checking the flags if the test is in the list of that.
+         */
+        (Object.entries(flags) as [keyof TestFlags, boolean][]).every(
           /**
-           * Checking the flags if no one is in the conflict with requirements for the test.
+           * If the `flag` is set and the test is in the list `testsGroupedByFlags[flag]`, it means
+           * that the test should be run.
            */
-          !(Object.entries(flags) as [keyof TestFlags, boolean][]).some(
-            /**
-             * If the `flag` is set and the test is in the list
-             * `testsWithNoDetailsOnFlagCase[flag]`, it means that the test should be run.
-             */
-            ([flag, v]) => v && testsWithNoDetailsOnFlagCase[flag].some((t) => t === test)
-          )
+          ([flag, v]) =>
+            v && testsGroupedByFlags[flag].some((testInFlagList) => testInFlagList === test)
+        )
       )
     )('%s', (_n: string, runTest: RunTestCase) => {
       runTest(testParameters);
