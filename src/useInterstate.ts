@@ -90,8 +90,6 @@ export const initInterstate = (<M extends object>(
     useEffect(reactEffectTask);
 
     const [{ useGetState }] = useState(() => {
-      let buildStructure: (readonly [key: K, initParam: () => M[K]])[] | null = null;
-
       // eslint-disable-next-line no-shadow
       const useGetState = (key: {}, init?: UseInterstateInitParam<M[K]>): M[K] | Pick<M, K> => {
         /**
@@ -105,31 +103,28 @@ export const initInterstate = (<M extends object>(
          * interesting only for single key subscription when one can dynamically change the
          * subscription to a new key. For multi-key interfaces changing parameters is prohibited.
          */
-        if (buildStructure === null) {
-          switch (typeof keyOrKeysOrInitParam) {
-            case 'object':
-              buildStructure = isArray(keyOrKeysOrInitParam)
-                ? keyOrKeysOrInitParam.map((k) => [k, () => useInterstatePlain(k)])
-                : getEntriesOfEnumerableKeys(keyOrKeysOrInitParam).map(([k, initV]) => [
-                    k,
-                    () => useInterstatePlain(k, () => initV),
-                  ]);
+        const [buildStructure] = useState(
+          (): (readonly [key: K, initParam: () => M[K]])[] | null => {
+            switch (typeof keyOrKeysOrInitParam) {
+              case 'object':
+                return isArray(keyOrKeysOrInitParam)
+                  ? keyOrKeysOrInitParam.map((k) => [k, () => useInterstatePlain(k)])
+                  : getEntriesOfEnumerableKeys(keyOrKeysOrInitParam).map(([k, initV]) => [
+                      k,
+                      () => useInterstatePlain(k, () => initV),
+                    ]);
 
-              break;
+              case 'function':
+                return getEntriesOfEnumerableKeys(keyOrKeysOrInitParam()).map(([k, initV]) => [
+                  k,
+                  () => useInterstatePlain(k, () => initV),
+                ]);
 
-            case 'function':
-              buildStructure = getEntriesOfEnumerableKeys(keyOrKeysOrInitParam()).map(
-                ([k, initV]) => [k, () => useInterstatePlain(k, () => initV)]
-              );
-
-              break;
-
-            default:
-              buildStructure = null;
-
-              break;
+              default:
+                return null;
+            }
           }
-        }
+        );
 
         return buildStructure
           ? (Object.fromEntries(buildStructure.map(([k, getV]) => [k, getV()])) as Pick<M, K>)
