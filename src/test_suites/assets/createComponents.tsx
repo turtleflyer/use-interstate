@@ -1,27 +1,19 @@
-import type { PropsWithChildren } from 'react';
+import type { PropsWithChildren, ReactElement } from 'react';
 import React, { useEffect } from 'react';
 import type { UseInterstateDev } from '../../DevTypes';
 import type {
-  ExtraStringKeys,
-  Interstate,
   InterstateSelector,
-  OnlyStringKeys,
   UseInterstateInitParam,
   UseInterstateSchemaParam,
 } from '../../UseInterstateTypes';
 
-type ListenerCompProps<M extends Interstate, K extends ExtraStringKeys<M>, R> = (
-  | AllPropsElseUndefined<StateKeyProps<M, K>>
-  | AllPropsElseUndefined<SchemaProps<M, K>>
-  | AllPropsElseUndefined<KeysProps<M, K & OnlyStringKeys<M>>>
-  | AllPropsElseUndefined<SelectorProps<M, R>>
-) & {
+interface TestProps {
   testId: string;
   renderFn?: () => void;
   effectFn?: () => void;
-};
+}
 
-interface StateKeyProps<M extends Interstate, K extends keyof M> {
+interface StateKeyProps<M extends object = any, K extends keyof M = any> {
   stateKey: K;
 
   initParam?: UseInterstateInitParam<M[K]>;
@@ -29,35 +21,33 @@ interface StateKeyProps<M extends Interstate, K extends keyof M> {
   interpretResult?: (v: M[K]) => string;
 }
 
-interface SchemaProps<M extends Interstate, K extends ExtraStringKeys<M>> {
+interface SchemaProps<M extends object = any, K extends keyof M = any> {
   initSchema: UseInterstateSchemaParam<M, K>;
 
   interpretResult?: (s: Pick<M, K>) => string;
 }
 
-interface KeysProps<M extends Interstate, K extends OnlyStringKeys<M>> {
+interface KeysProps<M extends object = any, K extends keyof M = any> {
   keys: readonly K[];
 
   interpretResult?: (s: Pick<M, K>) => string;
 }
 
-interface SelectorProps<M extends Interstate, R> {
+interface SelectorProps<M extends object = any, R = any> {
   selector: InterstateSelector<M, R>;
 
   interpretResult?: (v: R) => string;
 }
 
-type AllPropsElseUndefined<P> = P &
-  Omit<
-    {
-      stateKey?: undefined;
-      initParam?: undefined;
-      initSchema?: undefined;
-      keys?: undefined;
-      selector?: undefined;
-    },
-    keyof P
-  >;
+type PropsWithRemainingUndefined<
+  C extends StateKeyProps | SchemaProps | KeysProps | SelectorProps
+> = C &
+  TestProps &
+  {
+    [P in keyof (StateKeyProps & SchemaProps & KeysProps & SelectorProps) as P extends keyof C
+      ? never
+      : P]?: undefined;
+  };
 
 let symbolsCounter = 0;
 
@@ -80,11 +70,11 @@ function separateAndProcessTypes(v: unknown): unknown {
 
 function processObject<T extends object>(v: T): Record<any, unknown> {
   return Object.fromEntries([
-    ...Object.entries(v).map(([key, keyV]) => [key, separateAndProcessTypes(keyV)] as const),
+    ...Object.entries(v).map(([key, keyV]) => [key, separateAndProcessTypes(keyV)]),
 
     ...Object.getOwnPropertySymbols(v)
       .filter((key) => Object.prototype.propertyIsEnumerable.call(v, key))
-      .map((key) => [interpretSymbol(), separateAndProcessTypes(v[key as keyof T])] as const),
+      .map((key) => [interpretSymbol(), separateAndProcessTypes(v[key as keyof T])]),
   ]);
 }
 
@@ -92,14 +82,49 @@ function interpretSymbol(): string {
   return `symbol(${symbolsCounter++})`;
 }
 
-export const createListenerComponent = <M extends Interstate>({
+type StateKeyPropsWithNoInitParam<M extends object, K extends keyof M> = Omit<
+  StateKeyProps<M, K>,
+  'initParam'
+> &
+  TestProps;
+
+export const createListenerComponent = <M extends object>({
   useInterstate,
 }: {
   useInterstate: UseInterstateDev<M>;
-}) =>
-  function ListenerComponent<K extends ExtraStringKeys<M>, R>(
-    props: PropsWithChildren<ListenerCompProps<M, K, R>>
-  ): JSX.Element {
+}): {
+  <K extends keyof M, InitPConstrain extends { initParam?: unknown }>(
+    props: (
+      InitPConstrain['initParam'] extends infer InitP
+        ? InitP extends (...x: any) => any
+          ? InitP extends () => M[K]
+            ? 'acceptable function'
+            : 'wrong function'
+          : InitP extends M[K]
+          ? 'acceptable param'
+          : 'wrong param'
+        : never
+    ) extends 'acceptable function' | 'acceptable param'
+      ? PropsWithChildren<StateKeyPropsWithNoInitParam<M, K>> & InitPConstrain
+      : PropsWithChildren<StateKeyPropsWithNoInitParam<M, K>> & { initParam?: undefined }
+  ): ReactElement;
+
+  <K extends keyof M, R>(
+    props: PropsWithChildren<
+      | PropsWithRemainingUndefined<SchemaProps<M, K>>
+      | PropsWithRemainingUndefined<KeysProps<M, K>>
+      | PropsWithRemainingUndefined<SelectorProps<M, R>>
+    >
+  ): ReactElement;
+} =>
+  function ListenerComponent<K extends keyof M, R>(
+    props: PropsWithChildren<
+      | PropsWithRemainingUndefined<StateKeyProps<M, K>>
+      | PropsWithRemainingUndefined<SchemaProps<M, K>>
+      | PropsWithRemainingUndefined<KeysProps<M, K>>
+      | PropsWithRemainingUndefined<SelectorProps<M, R>>
+    >
+  ): ReactElement {
     props.renderFn?.();
 
     useEffect(() => {

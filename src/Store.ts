@@ -1,9 +1,7 @@
 import type { Trigger, WayToAccessValue } from './State';
-import type { Interstate, InterstateSelector, UseInterstateInitParam } from './UseInterstateTypes';
+import type { InterstateSelector, UseInterstateInitParam } from './UseInterstateTypes';
 
-export interface Store<M extends Interstate> {
-  readonly initState: InitState<M>;
-
+export interface Store<M extends object> {
   readonly getValue: GetValue<M>;
 
   readonly getStateUsingSelector: GetStateUsingSelector<M>;
@@ -17,19 +15,19 @@ export interface Store<M extends Interstate> {
   readonly reactRenderTask: () => void;
 }
 
-export type InitState<M extends Interstate> = <K extends keyof M>(initParam?: Pick<M, K>) => void;
+export type InitState<M extends object> = (initParam: Partial<M>) => void;
 
-export type GetValue<M extends Interstate> = <K extends keyof M>(key: K) => M[K];
+export type GetValue<M extends object> = <K extends keyof M>(key: K) => M[K];
 
-export type GetStateUsingSelector<M extends Interstate> = <R>(
+export type GetStateUsingSelector<M extends object> = <R>(
   selector: InterstateSelector<M, R>,
 
   wayToAccessValue: WayToAccessValue<M>
 ) => R;
 
-export type SetValue<M extends Interstate> = <K extends keyof M>(key: K, value: M[K]) => void;
+export type SetValue<M extends object> = <K extends keyof M>(key: K, value: M[K]) => void;
 
-export type ReactInitKey<M extends Interstate> = <K extends keyof M>(
+export type ReactInitKey<M extends object> = <K extends keyof M>(
   key: K,
   initP?: UseInterstateInitParam<M[K]>
 ) => ReactKeyMethods;

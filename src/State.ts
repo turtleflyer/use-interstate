@@ -1,15 +1,12 @@
 import type { LinkedList, LinkedListEntry } from './LinkedList';
-import type { Interstate } from './UseInterstateTypes';
 
-export interface State<M extends Interstate = Interstate> {
+export interface State<M extends object> {
   readonly stateMap: StateMap<M>;
 
   readonly getAccessHandler: GetAccessHandler<M>;
-
-  readonly clearState: () => void;
 }
 
-export interface StateMap<M extends Interstate> {
+export interface StateMap<M extends object> {
   get: <K extends keyof M>(key: K) => StateEntry<M[K]>;
 
   set: <K extends keyof M>(
@@ -34,6 +31,6 @@ export type TriggersListEntry = LinkedListEntry<TriggersListEntry> & {
 
 export type Trigger = () => void;
 
-export type GetAccessHandler<M extends Interstate> = (wayToAccessValue: WayToAccessValue<M>) => M;
+export type GetAccessHandler<M extends object> = (wayToAccessValue: WayToAccessValue<M>) => M;
 
-export type WayToAccessValue<M extends Interstate> = <K extends keyof M>(key: K) => M[K];
+export type WayToAccessValue<M extends object> = <K extends keyof M>(key: K) => M[K];

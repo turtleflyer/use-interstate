@@ -13,6 +13,8 @@ const config: Config.InitialOptions & {
       tsconfig: 'tsconfig.test.json',
     },
   },
+  testEnvironment: 'jsdom',
+  testRunner: 'jest-jasmine2',
   moduleFileExtensions: ['js', 'json', 'jsx', 'ts', 'tsx', 'node', 'd.ts'],
 };
 

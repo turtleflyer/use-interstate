@@ -1,5 +1,7 @@
+import type * as testingLibraryReactImport from '@testing-library/react';
 import type * as useInterstateImport from '../../useInterstate';
-import type { TriggersCounter } from '../../__mocks__/createState';
+import type * as triggersCounterImport from '../../__mocks__/createState';
+import type * as createComponentsImport from '../assets/createComponents';
 
 export type TestCase = readonly [name: string, test: RunTestCase];
 
@@ -9,10 +11,13 @@ export interface TestParameters {
   useInterstateImport: UseInterstateImport;
 
   triggersCounterImport: TriggersCounterImport;
+
+  createComponentsImport: CreateComponentsImport;
+
+  testingLibraryReact: TestingLibraryReactImport;
 }
 
 export type UseInterstateImport = typeof useInterstateImport;
-
-interface TriggersCounterImport {
-  createTriggersCounter: () => TriggersCounter;
-}
+export type TriggersCounterImport = typeof triggersCounterImport;
+export type CreateComponentsImport = typeof createComponentsImport;
+export type TestingLibraryReactImport = typeof testingLibraryReactImport;

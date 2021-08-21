@@ -1,5 +1,5 @@
 import type {
-  Interstate,
+  _helpInfer,
   InterstateSelector,
   SetInterstateParam,
   SetInterstateSchemaParam,
@@ -7,9 +7,10 @@ import type {
   UseInterstateSchemaParam,
 } from './UseInterstateTypes';
 
-export interface InterstateMethodsDev<M extends Interstate> {
-  initInterstate: InitInterstateDev<M>;
-
+export type InitInterstateDev = <M extends object>(
+  initStateValues?: Partial<M>
+) => InterstateMethodsDev<M>;
+export interface InterstateMethodsDev<M extends object> {
   useInterstate: UseInterstateDev<M>;
 
   readInterstate: ReadInterstateDev<M>;
@@ -17,28 +18,23 @@ export interface InterstateMethodsDev<M extends Interstate> {
   setInterstate: SetInterstateDev<M>;
 }
 
-export type InitInterstateDev<M extends Interstate> = {
-  <K extends keyof M>(initParam?: Pick<M, K> | never): Omit<
-    InterstateMethodsDev<M>,
-    'initInterstate'
-  >;
-
-  (i: never): Omit<InterstateMethodsDev<M>, 'initInterstate'>;
-};
-
-export type UseInterstateDev<M extends Interstate> = {
-  acceptSelector: AcceptSelectorDev<M>;
-
+export type UseInterstateDev<M extends object> = {
   <K extends keyof M>(key: K, init?: UseInterstateInitParam<M[K]>): M[K];
 
   <K extends keyof M>(initState: UseInterstateSchemaParam<M, K>): Pick<M, K>;
 
   <K extends keyof M>(keys: readonly K[]): Pick<M, K>;
+
+  acceptSelector: AcceptSelectorDev<M>;
 };
 
-export type AcceptSelectorDev<M extends Interstate> = <R>(selector: InterstateSelector<M, R>) => R;
+export type AcceptSelectorDev<M extends object> = {
+  <R>(selector: InterstateSelector<M, R>): R;
 
-export type ReadInterstateDev<M extends Interstate> = {
+  [_helpInfer]?: M;
+};
+
+export type ReadInterstateDev<M extends object> = {
   acceptSelector: AcceptSelectorDev<M>;
 
   <K extends keyof M>(key: K): M[K];
@@ -46,8 +42,10 @@ export type ReadInterstateDev<M extends Interstate> = {
   <K extends keyof M>(keys: readonly K[]): Pick<M, K>;
 };
 
-export type SetInterstateDev<M extends Interstate = never> = {
+export type SetInterstateDev<M extends object = never> = {
   <K extends keyof M>(key: K, set: SetInterstateParam<M[K]>): void;
 
   <K extends keyof M>(set: SetInterstateSchemaParam<M, K>): void;
+
+  [_helpInfer]?: M;
 };

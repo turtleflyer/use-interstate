@@ -7,26 +7,27 @@ import type { StateEntry, Trigger, TriggersListEntry, WayToAccessValue } from '.
 import type {
   GetStateUsingSelector,
   GetValue,
-  InitState,
   ReactInitKey,
   ReactKeyMethods,
   ReactTriggerMethods,
   SetValue,
   Store,
 } from './Store';
-import type { Interstate, InterstateSelector, UseInterstateInitParam } from './UseInterstateTypes';
+import type { InterstateSelector, UseInterstateInitParam } from './UseInterstateTypes';
 
-export function createStore<M extends Interstate>(): Store<M> {
-  const { stateMap, getAccessHandler, clearState } = createState<M>();
-  //
-  // `reactCleaningWatchList` is list of "abandoned" triggers. Trigger in React can get abandoned if
-  // rendering of component is interrupted due to possible scenario in concurrent mode of React. It
-  // gets registered in store most often duplicating trigger registered on second run of same
-  // component. On earliest next render of any component with `useInterstate`
-  // `removeTriggerFromKeyList` is being traversed through and every clean up function is being
-  // called. It removes abandoned (not survived by next render stage) trigger. On `useEffect` run of
-  // every component with `useInterstatePlain` it removes related function from
-  // `removeTriggerFromKeyList`.
+export function createStore<M extends object>(initStateValues?: Partial<M>): Store<M> {
+  const { stateMap, getAccessHandler } = createState<M>();
+
+  /**
+   * `reactCleaningWatchList` is list of "abandoned" triggers. Trigger in React can get abandoned if
+   * rendering of component is interrupted due to possible scenario in concurrent mode of React. It
+   * gets registered in store most often duplicating trigger registered on second run of same
+   * component. On earliest next render of any component with `useInterstate`
+   * `removeTriggerFromKeyList` is being traversed through and every clean up function is being
+   * called. It removes abandoned (not survived by next render stage) trigger. On `useEffect` run of
+   * every component with `useInterstatePlain` it removes related function from
+   * `removeTriggerFromKeyList`.
+   */
   type ReactCleaningWatchList = LinkedList<ReactCleaningWatchListEntry>;
 
   type ReactCleaningWatchListEntry = LinkedListEntry<ReactCleaningWatchListEntry> & {
@@ -38,16 +39,12 @@ export function createStore<M extends Interstate>(): Store<M> {
   let reactRenderTasksPool: (() => void)[] = [];
   let reactEffectTasksPool: (() => void)[] = [];
 
-  const initState: InitState<M> = <K extends keyof M>(initParam?: Pick<M, K>) => {
-    clearState();
-    reactCleaningWatchList = {};
-    [reactRenderTaskDone, reactEffectTaskDone] = [false, false];
-
-    initParam &&
-      getEntriesOfEnumerableKeys(initParam).forEach(([key, value]) => {
-        stateMap.set(key, { stateValue: { value } });
-      });
-  };
+  initStateValues &&
+    getEntriesOfEnumerableKeys(initStateValues).forEach(
+      ([key, value]: [keyof M, M[keyof M] | undefined]): void => {
+        value === undefined || stateMap.set(key, { stateValue: { value } });
+      }
+    );
 
   const getValue: GetValue<M> = <K extends keyof M>(key: K): M[K] =>
     stateMap.get(key)?.stateValue?.value as M[K];
@@ -147,7 +144,6 @@ export function createStore<M extends Interstate>(): Store<M> {
   };
 
   return {
-    initState,
     getValue,
     getStateUsingSelector,
     setValue,

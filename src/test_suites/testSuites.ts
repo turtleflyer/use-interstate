@@ -1,4 +1,3 @@
-import { cleanup } from '@testing-library/react';
 import path from 'path';
 import './assets/expectNumberToBeConsideringFlag';
 import './assets/expectTriggersNumber';
@@ -29,19 +28,23 @@ export const testSuites = (packagePath: string): void => {
     ['test logic', {}],
     ['test implementation details', { SHOULD_TEST_IMPLEMENTATION: true }],
     ['test performance', { SHOULD_TEST_PERFORMANCE: true }],
-  ])('Test useInterstate correctness (%s)', (_name: string, flags: Partial<TestFlags>): void => {
+  ])('Test useInterstate correctness (%s)', (_name: string, flags: Partial<TestFlags>) => {
     const testParameters = {} as TestParameters;
     flagManager.reset();
     flagManager.set(flags);
+    let cleanup: () => void;
 
     beforeEach(() => {
       jest.isolateModules(() => {
         testParameters.useInterstateImport = require(parsedPackagePath);
         testParameters.triggersCounterImport = require('../createState');
+        testParameters.createComponentsImport = require('./assets/createComponents');
+        testParameters.testingLibraryReact = require('@testing-library/react');
+        ({ cleanup } = testParameters.testingLibraryReact);
       });
     });
 
-    afterEach(cleanup);
+    afterEach(() => cleanup());
 
     const allTests = [
       testCreateAndInitInterstate,
@@ -60,6 +63,9 @@ export const testSuites = (packagePath: string): void => {
       testSetInterstateCheckedByUseInterstate,
     ];
 
+    /**
+     * Tests are grouped by the flags they need to be set.
+     */
     const testsWithNoDetailsOnFlagCase = {
       SHOULD_TEST_IMPLEMENTATION: [
         testCreateAndInitInterstate,
@@ -81,13 +87,21 @@ export const testSuites = (packagePath: string): void => {
     };
 
     test.each(
+      /**
+       * Filtering the tests by the flags they need to be set.
+       */
       allTests.filter(
         (test) =>
-          !Object.entries(flags).some((entry) => {
-            const [flag, v] = entry as [keyof TestFlags, boolean];
-
-            return v && testsWithNoDetailsOnFlagCase[flag].some((t) => t === test);
-          })
+          /**
+           * Checking the flags if no one is in the conflict with requirements for the test.
+           */
+          !(Object.entries(flags) as [keyof TestFlags, boolean][]).some(
+            /**
+             * If the `flag` is set and the test is in the list
+             * `testsWithNoDetailsOnFlagCase[flag]`, it means that the test should be run.
+             */
+            ([flag, v]) => v && testsWithNoDetailsOnFlagCase[flag].some((t) => t === test)
+          )
       )
     )('%s', (_n: string, runTest: RunTestCase) => {
       runTest(testParameters);
