@@ -28,6 +28,10 @@ export const testInitInterstate: TestCase = [
     ({ readInterstate } = initInterstate(defState02));
     expectStateToBe(defState02);
 
+    const defState03: Partial<TestState> = { foo: 1, 77: undefined, [symbolKey]: undefined };
+    ({ readInterstate } = initInterstate(defState03));
+    expectStateToBe(defState03);
+
     function expectStateToBe<E extends Partial<TestState>>(expectedState: E): void {
       (
         [
