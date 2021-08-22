@@ -85,7 +85,7 @@ describe('Check types', () => {
       initInterstate<{ 1: string; a: number }>({ 1: 100 });
       // @ts-expect-error
       initInterstate<{ 1: number }>({ 1: 100, a: 'a' });
-      // something broken: @ts-expect-error
+      // @ts-expect-error
       initInterstate<{ 1: boolean }>([true]);
       // @ts-expect-error
       initInterstate<{ 1: boolean }>({ 0: true });

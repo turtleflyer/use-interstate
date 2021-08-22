@@ -39,11 +39,17 @@ export interface InitInterstate {
   ): never;
 
   <S extends object, DetectExplicitGenericUse = true>(
-    initStateValues: DetectExplicitGenericUse extends DetectExplicitGenericUse
-      ? FilterOut<S, 'must have keys' | 'must not be array' | 'must not be function'> extends true
-        ? Partial<S> & object
-        : never
-      : DetectExplicitGenericUse
+    initStateValues: FilterOut<
+      S,
+      'must have keys' | 'must not be array' | 'must not be function'
+    > extends true
+      ? DetectExplicitGenericUse extends true
+        ? Partial<S> &
+            (DetectExplicitGenericUse extends DetectExplicitGenericUse
+              ? unknown
+              : DetectExplicitGenericUse)
+        : S
+      : never
   ): InterstateMethods<
     DetectExplicitGenericUse extends true
       ? S
