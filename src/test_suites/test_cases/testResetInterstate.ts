@@ -41,10 +41,10 @@ export const testResetInterstate: TestCase = [
       [symbolKey]: { 0: null },
     });
 
-    resetInterstate({ foo: 1, 77: undefined, [symbolKey]: undefined });
+    resetInterstate({ foo: 200, 77: undefined, [symbolKey]: undefined });
 
     expect(readInterstate(['foo', 77, symbolKey])).toStrictEqual({
-      foo: 1,
+      foo: 200,
       77: undefined,
       [symbolKey]: undefined,
     });

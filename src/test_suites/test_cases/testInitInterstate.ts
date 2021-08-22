@@ -16,33 +16,40 @@ export const testInitInterstate: TestCase = [
 
     let readInterstate: ReadInterstate<TestState>;
 
-    const defState01: TestState = { foo: 100, 77: 'hi', [symbolKey]: { a: true } };
-    ({ readInterstate } = initInterstate(defState01));
-    expectStateToBe(defState01);
+    ({ readInterstate } = initInterstate({ foo: 100, 77: 'hi', [symbolKey]: { a: true } }));
+
+    expect(readInterstate(['foo', 77, symbolKey])).toStrictEqual({
+      foo: 100,
+      77: 'hi',
+      [symbolKey]: { a: true },
+    });
 
     ({ readInterstate } = initInterstate<TestState>());
-    expectStateToBe({});
-    expectStateToBe({ foo: undefined, 77: undefined, [symbolKey]: undefined });
 
-    const defState02: TestState = { foo: 1, 77: 'lo', [symbolKey]: { 0: null } };
-    ({ readInterstate } = initInterstate(defState02));
-    expectStateToBe(defState02);
+    expect(readInterstate(['foo', 77, symbolKey])).toStrictEqual({
+      foo: undefined,
+      77: undefined,
+      [symbolKey]: undefined,
+    });
 
-    const defState03: Partial<TestState> = { foo: 1, 77: undefined, [symbolKey]: undefined };
-    ({ readInterstate } = initInterstate(defState03));
-    expectStateToBe(defState03);
+    ({ readInterstate } = initInterstate({ foo: 1, 77: 'lo', [symbolKey]: { 0: null } }));
 
-    function expectStateToBe<E extends Partial<TestState>>(expectedState: E): void {
-      (
-        [
-          ...Object.getOwnPropertyNames(expectedState),
-          ...Object.getOwnPropertySymbols(expectedState),
-        ] as (keyof TestState)[]
-      ).forEach((key) => {
-        expect(readInterstate(key)).toStrictEqual(expectedState[key]);
-      });
+    expect(readInterstate(['foo', 77, symbolKey])).toStrictEqual({
+      foo: 1,
+      77: 'lo',
+      [symbolKey]: { 0: null },
+    });
 
-      expect(readInterstate.acceptSelector((state) => ({ ...state }))).toStrictEqual(expectedState);
-    }
+    ({ readInterstate } = initInterstate<TestState>({
+      foo: 200,
+      77: undefined,
+      [symbolKey]: undefined,
+    }));
+
+    expect(readInterstate(['foo', 77, symbolKey])).toStrictEqual({
+      foo: 200,
+      77: undefined,
+      [symbolKey]: undefined,
+    });
   },
 ];
