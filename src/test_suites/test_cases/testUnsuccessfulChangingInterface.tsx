@@ -20,14 +20,14 @@ export const testUnsuccessfulChangingInterface: TestCase = [
       [symbolKey]: object;
     };
 
-    let { setInterstate, useInterstate } = initInterstate<TestState>({
+    const { useInterstate, setInterstate, resetInterstate } = initInterstate<TestState>({
       foo: 100,
       77: 'hi',
       [symbolKey]: { a: true },
     });
 
     const testComponentID = 'test_component';
-    let TestComponent = createListenerComponent({ useInterstate });
+    const TestComponent = createListenerComponent({ useInterstate });
     const triggersCounter = createTriggersCounter();
     let effectCounter = 0;
 
@@ -197,8 +197,7 @@ export const testUnsuccessfulChangingInterface: TestCase = [
     effectCounter = 0;
 
     rerender(<StrictMode />);
-    ({ setInterstate, useInterstate } = initInterstate<TestState>());
-    TestComponent = createListenerComponent({ useInterstate });
+    resetInterstate();
 
     expect([triggersCounter, 'foo']).triggersNumberToBe(0);
     expect([triggersCounter, 77]).triggersNumberToBe(0);
@@ -366,8 +365,7 @@ export const testUnsuccessfulChangingInterface: TestCase = [
     effectCounter = 0;
 
     rerender(<StrictMode />);
-    ({ setInterstate, useInterstate } = initInterstate<TestState>());
-    TestComponent = createListenerComponent({ useInterstate });
+    resetInterstate();
 
     expect([triggersCounter, 'foo']).triggersNumberToBe(0);
     expect([triggersCounter, 77]).triggersNumberToBe(0);
@@ -535,8 +533,7 @@ export const testUnsuccessfulChangingInterface: TestCase = [
     effectCounter = 0;
 
     rerender(<StrictMode />);
-    ({ setInterstate, useInterstate } = initInterstate<TestState>());
-    TestComponent = createListenerComponent({ useInterstate });
+    resetInterstate();
 
     expect([triggersCounter, 'foo']).triggersNumberToBe(0);
     expect([triggersCounter, 77]).triggersNumberToBe(0);
@@ -617,8 +614,7 @@ export const testUnsuccessfulChangingInterface: TestCase = [
     (console.error as any).mockRestore();
 
     rerender(<StrictMode />);
-    ({ setInterstate, useInterstate } = initInterstate<TestState>());
-    TestComponent = createListenerComponent({ useInterstate });
+    resetInterstate();
 
     expect([triggersCounter, 'foo']).triggersNumberToBe(0);
     expect([triggersCounter, 77]).triggersNumberToBe(0);
@@ -663,14 +659,7 @@ export const testUnsuccessfulChangingInterface: TestCase = [
     (console.error as any).mockRestore();
 
     rerender(<StrictMode />);
-
-    ({ setInterstate, useInterstate } = initInterstate<TestState>({
-      foo: 1,
-      77: 'x',
-      [symbolKey]: { a: null },
-    }));
-
-    TestComponent = createListenerComponent({ useInterstate });
+    resetInterstate({ foo: 1, 77: 'x', [symbolKey]: { a: null } });
 
     expect([triggersCounter, 'foo']).triggersNumberToBe(0);
     expect([triggersCounter, 77]).triggersNumberToBe(0);

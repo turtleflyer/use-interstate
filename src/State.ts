@@ -4,6 +4,8 @@ export interface State<M extends object> {
   readonly stateMap: StateMap<M>;
 
   readonly getAccessHandler: GetAccessHandler<M>;
+
+  readonly clearState: () => void;
 }
 
 export interface StateMap<M extends object> {

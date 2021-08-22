@@ -17,12 +17,12 @@ export const testScenariosWithSiblings: TestCase = [
       77: string;
     };
 
-    let { setInterstate, useInterstate } = initInterstate<TestState>();
+    const { useInterstate, setInterstate, resetInterstate } = initInterstate<TestState>();
 
     const testComponentID0 = 'test_component-0';
     const testComponentID1 = 'test_component-1';
     const testComponentID2 = 'test_component-2';
-    let TestComponent = createListenerComponent({ useInterstate });
+    const TestComponent = createListenerComponent({ useInterstate });
     const triggersCounter = createTriggersCounter();
     let effectCounter0 = 0;
     let effectCounter1 = 0;
@@ -71,8 +71,7 @@ export const testScenariosWithSiblings: TestCase = [
     effectCounter1 = 0;
 
     rerender(<StrictMode />);
-    ({ setInterstate, useInterstate } = initInterstate<TestState>());
-    TestComponent = createListenerComponent({ useInterstate });
+    resetInterstate();
 
     expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(0);
     expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(0);
@@ -118,8 +117,7 @@ export const testScenariosWithSiblings: TestCase = [
     effectCounter1 = 0;
 
     rerender(<StrictMode />);
-    ({ setInterstate, useInterstate } = initInterstate<TestState>());
-    TestComponent = createListenerComponent({ useInterstate });
+    resetInterstate();
 
     expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(0);
     expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(0);
@@ -165,8 +163,7 @@ export const testScenariosWithSiblings: TestCase = [
     effectCounter1 = 0;
 
     rerender(<StrictMode />);
-    ({ setInterstate, useInterstate } = initInterstate<TestState>());
-    TestComponent = createListenerComponent({ useInterstate });
+    resetInterstate();
 
     expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(0);
     expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(0);
@@ -213,8 +210,7 @@ export const testScenariosWithSiblings: TestCase = [
     effectCounter1 = 0;
 
     rerender(<StrictMode />);
-    ({ setInterstate, useInterstate } = initInterstate<TestState>());
-    TestComponent = createListenerComponent({ useInterstate });
+    resetInterstate();
 
     expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(0);
     expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(0);
@@ -273,8 +269,7 @@ export const testScenariosWithSiblings: TestCase = [
     effectCounter2 = 0;
 
     rerender(<StrictMode />);
-    ({ setInterstate, useInterstate } = initInterstate<TestState>({ 77: 'hi' }));
-    TestComponent = createListenerComponent({ useInterstate });
+    resetInterstate({ 77: 'hi' });
 
     expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(0);
     expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(0);
@@ -320,8 +315,7 @@ export const testScenariosWithSiblings: TestCase = [
     effectCounter1 = 0;
 
     rerender(<StrictMode />);
-    ({ setInterstate, useInterstate } = initInterstate<TestState>({ 77: 'lo' }));
-    TestComponent = createListenerComponent({ useInterstate });
+    resetInterstate({ 77: 'lo' });
 
     expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(0);
     expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(0);

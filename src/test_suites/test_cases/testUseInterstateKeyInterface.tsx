@@ -21,11 +21,11 @@ export const testUseInterstateKeyInterface: TestCase = [
       [symbolKey]: object;
     };
 
-    let { setInterstate, useInterstate } = initInterstate<TestState>();
+    const { useInterstate, setInterstate, resetInterstate } = initInterstate<TestState>();
 
     const triggersCounter = createTriggersCounter();
     const testComponentID = 'test_component';
-    let TestComponent = createListenerComponent({ useInterstate });
+    const TestComponent = createListenerComponent({ useInterstate });
     let effectCounter = 0;
 
     expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(0);
@@ -59,8 +59,7 @@ export const testUseInterstateKeyInterface: TestCase = [
     expect(effectCounter).numberToBeConsideringFlag(0);
 
     rerender(<StrictMode />);
-    ({ setInterstate, useInterstate } = initInterstate<TestState>());
-    TestComponent = createListenerComponent({ useInterstate });
+    resetInterstate();
 
     expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(0);
     expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(0);

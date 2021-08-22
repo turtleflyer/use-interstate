@@ -10,6 +10,7 @@ import type {
   InterstateMethods,
   InterstateSelector,
   ReadInterstate,
+  ResetInterstate,
   SetInterstate,
   SetInterstateParam,
   SetInterstateSchemaParam,
@@ -24,6 +25,7 @@ export const initInterstate = (<M extends object>(
   const {
     getValue,
     setValue,
+    resetValue,
     getStateUsingSelector,
     reactInitKey,
     reactRenderTask,
@@ -194,10 +196,13 @@ export const initInterstate = (<M extends object>(
   readInterstate.acceptSelector = (<R>(selector: InterstateSelector<M, R>): R =>
     getStateUsingSelector(selector, getValue)) as AcceptSelector<M>;
 
+  const resetInterstate = resetValue as ResetInterstate<M>;
+
   return {
     useInterstate,
     setInterstate,
     readInterstate,
+    resetInterstate,
   };
 }) as InitInterstate;
 

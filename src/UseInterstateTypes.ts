@@ -72,6 +72,8 @@ export interface InterstateMethods<M extends object = never> {
   readInterstate: ReadInterstate<M>;
 
   setInterstate: SetInterstate<M>;
+
+  resetInterstate: ResetInterstate<M>;
 }
 
 export type UseInterstate<M extends object = never> = ([M] extends [never]
@@ -312,8 +314,6 @@ export type AcceptSelector<M extends object = never> = ([M] extends [never]
             >
           : A
       ): never;
-
-      [_helpInfer]?: object;
     }
   : {
       <PreventExplicitGenericUse extends never, R>(selector: InterstateSelector<M, R>): R;
@@ -497,8 +497,6 @@ export type SetInterstate<M extends object = never> = ([M] extends [never]
               A
             >
       ): never;
-
-      [_helpInfer]?: object;
     }
   : {
       <PreventExplicitGenericUse extends never, K extends keyof M, SP>(
@@ -644,6 +642,74 @@ export type SetInterstateParam<T> =
 export type SetInterstateSchemaParam<M extends object, K extends keyof M = keyof M> =
   | Pick<M, K>
   | ((prevState: M) => Pick<M, K>);
+
+export type ResetInterstate<M extends object = never> = ([M] extends [never]
+  ? {
+      <PreventExplicitGenericUse extends never, S extends object>(
+        initStateValues: FilterOut<
+          S,
+          'must have keys' | 'must not be array' | 'must not be function'
+        > extends true
+          ? S
+          : never
+      ): void;
+
+      <G, DetectExplicitGenericUse = true>(
+        ...wrongArgs: DetectExplicitGenericUse extends true
+          ? [never] &
+              DetectExplicitGenericUse &
+              TypeError<'💣💥🙈 An explicit generic type is not allowed'>
+          : never
+      ): never;
+
+      <PreventExplicitGenericUse extends never, A>(
+        wrongArg: [A] extends [A]
+          ? TypeError<
+              '💣💥🙈 The argument must be a nonempty object; but the wrong type is provided:',
+              A
+            >
+          : A
+      ): never;
+    }
+  : {
+      <PreventExplicitGenericUse extends never, ISV extends object>(
+        initStateValues: FilterOut<
+          ISV,
+          'must have keys' | 'must not be array' | 'must not be function'
+        > extends true
+          ? ISV & { [P in keyof M]?: ReadonlyIfArray<M[P]> }
+          : never
+      ): void;
+
+      <G, DetectExplicitGenericUse = true>(
+        ...wrongArgs: DetectExplicitGenericUse extends true
+          ? [never] &
+              DetectExplicitGenericUse &
+              TypeError<'💣💥🙈 An explicit generic type is not allowed'>
+          : never
+      ): never;
+
+      <PreventExplicitGenericUse extends never, A>(
+        wrongArg: [A] extends [A]
+          ? TypeError<
+              '💣💥🙈 The argument must be a nonempty object representing the part of the state:',
+              M,
+              '; but the wrong type is provided:',
+              A
+            >
+          : A
+      ): never;
+
+      [_helpInfer]?: M;
+    }) & {
+  (): void;
+
+  <G extends object>(
+    arg1: any,
+    arg2: TypeError<'💣💥🙈 Only one argument is allowed'>,
+    ...restArg: any
+  ): never;
+};
 
 declare const DeclareTypeError: unique symbol;
 type DeclareTypeError = typeof DeclareTypeError;

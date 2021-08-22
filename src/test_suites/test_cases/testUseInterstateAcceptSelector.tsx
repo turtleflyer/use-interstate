@@ -21,7 +21,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
       [symbolKey]: object;
     };
 
-    let { setInterstate, useInterstate } = initInterstate<TestState>({
+    const { useInterstate, setInterstate, resetInterstate } = initInterstate<TestState>({
       foo: 100,
       77: 'hi',
       [symbolKey]: { a: true },
@@ -29,7 +29,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
 
     const triggersCounter = createTriggersCounter();
     const testComponentID = 'test_component';
-    let TestComponent = createListenerComponent({ useInterstate });
+    const TestComponent = createListenerComponent({ useInterstate });
     let effectCounter = 0;
 
     expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(0);
@@ -143,8 +143,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     effectCounter = 0;
 
     rerender(<StrictMode />);
-    ({ setInterstate, useInterstate } = initInterstate<TestState>({ foo: 1000 }));
-    TestComponent = createListenerComponent({ useInterstate });
+    resetInterstate({ foo: 1000 });
 
     const TestComponentWithSelector: FC = () => (
       <StrictMode>

@@ -3,7 +3,7 @@ import type { GetAccessHandler, State, StateEntry, StateMap, WayToAccessValue } 
 export const createState = <M extends object>(): State<M> => {
   const entriesMap = new Map<keyof M, StateEntry<M[keyof M]>>();
   let fnToAccessValue: WayToAccessValue<M>;
-  const accessHandler = {} as M;
+  let accessHandler = {} as M;
 
   const stateMap: StateMap<M> = {
     get: <K extends keyof M>(key: K): StateEntry<M[K]> => {
@@ -44,5 +44,10 @@ export const createState = <M extends object>(): State<M> => {
     return accessHandler;
   };
 
-  return { stateMap, getAccessHandler };
+  const clearState = (): void => {
+    entriesMap.clear();
+    accessHandler = {} as M;
+  };
+
+  return { stateMap, getAccessHandler, clearState };
 };

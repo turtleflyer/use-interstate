@@ -9,6 +9,7 @@ import { testInitInterstate } from './test_cases/testInitInterstate';
 import { testReadInterstateAcceptSelector } from './test_cases/testReadInterstateAcceptSelector';
 import { testReadInterstateKeyInterface } from './test_cases/testReadInterstateKeyInterface';
 import { testReadInterstateKeysInterface } from './test_cases/testReadInterstateKeysInterface';
+import { testResetInterstate } from './test_cases/testResetInterstate';
 import { testScenariosWithSiblings } from './test_cases/testScenariosWithSiblings';
 import { testSetInterstateCheckedByReadInterstate } from './test_cases/testSetInterstateCheckedByReadInterstate';
 import { testSetInterstateCheckedByUseInterstate } from './test_cases/testSetInterstateCheckedByUseInterstate';
@@ -61,6 +62,7 @@ export const testSuites = (packagePath: string): void => {
       testUnsuccessfulChangingInterface,
       testScenariosWithSiblings,
       testSetInterstateCheckedByUseInterstate,
+      testResetInterstate,
     ];
 
     /**

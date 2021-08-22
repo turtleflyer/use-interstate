@@ -10,13 +10,14 @@ import type {
   ReactInitKey,
   ReactKeyMethods,
   ReactTriggerMethods,
+  ResetValue,
   SetValue,
   Store,
 } from './Store';
 import type { InterstateSelector, UseInterstateInitParam } from './UseInterstateTypes';
 
 export function createStore<M extends object>(initStateValues?: Partial<M>): Store<M> {
-  const { stateMap, getAccessHandler } = createState<M>();
+  const { stateMap, getAccessHandler, clearState } = createState<M>();
 
   /**
    * `reactCleaningWatchList` is list of "abandoned" triggers. Trigger in React can get abandoned if
@@ -38,13 +39,7 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
   let [reactRenderTaskDone, reactEffectTaskDone] = [false, false];
   let reactRenderTasksPool: (() => void)[] = [];
   let reactEffectTasksPool: (() => void)[] = [];
-
-  initStateValues &&
-    getEntriesOfEnumerableKeys(initStateValues).forEach(
-      ([key, value]: [keyof M, M[keyof M] | undefined]): void => {
-        value === undefined || stateMap.set(key, { stateValue: { value } });
-      }
-    );
+  initState(initStateValues);
 
   const getValue: GetValue<M> = <K extends keyof M>(key: K): M[K] =>
     stateMap.get(key)?.stateValue?.value as M[K];
@@ -76,6 +71,14 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
         reactRenderTasksPool.push(() => (stateEntry.reactTriggersList.triggersFired = false));
       }
     }
+  };
+
+  const resetValue: ResetValue<M> = (resetStateValue?: Partial<M>): void => {
+    clearState();
+    initState(resetStateValue);
+    reactCleaningWatchList = {};
+    [reactRenderTaskDone, reactEffectTaskDone] = [false, false];
+    [reactRenderTasksPool, reactEffectTasksPool] = [[], []];
   };
 
   const reactRenderTask = (): void => {
@@ -147,8 +150,18 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
     getValue,
     getStateUsingSelector,
     setValue,
+    resetValue,
     reactInitKey,
     reactRenderTask,
     reactEffectTask,
   };
+
+  function initState(initV?: Partial<M>): void {
+    initV &&
+      getEntriesOfEnumerableKeys(initV).forEach(
+        ([key, value]: [keyof M, M[keyof M] | undefined]): void => {
+          value !== undefined && stateMap.set(key, { stateValue: { value } });
+        }
+      );
+  }
 }
