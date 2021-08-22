@@ -9,6 +9,7 @@ import type {
   InitInterstateDev,
   InterstateMethodsDev,
   ReadInterstateDev,
+  ResetInterstateDev,
   SetInterstateDev,
   UseInterstateDev,
 } from '../../../lib/DevTypes';
@@ -19,6 +20,7 @@ import type {
   InterstateMethods,
   InterstateSelector,
   ReadInterstate,
+  ResetInterstate,
   SetInterstate,
   SetInterstateParam,
   SetInterstateSchemaParam,
@@ -123,7 +125,7 @@ describe('Check types', () => {
       // @ts-expect-error
       initInterstate({ a: 'aa' }, null);
 
-      const { useInterstate, readInterstate, setInterstate } = initInterstate();
+      const { useInterstate, readInterstate, setInterstate, resetInterstate } = initInterstate();
 
       const ui01 = useInterstate('a');
       const ui02 = useInterstate(1);
@@ -545,6 +547,68 @@ describe('Check types', () => {
       // @ts-expect-error
       setInterstate('a', 'aa', 'aaa', 'aaaa');
 
+      resetInterstate();
+      resetInterstate({ 1: 11 });
+      resetInterstate({ 1: 11 as const });
+      resetInterstate({ 1: 11 } as const);
+      resetInterstate({ 1: undefined });
+      resetInterstate({ 1: undefined, a: 'aa', [SymbolKey]: true });
+      resetInterstate({ 1: undefined, a: 'aa' } as const);
+      resetInterstate({ 1: () => undefined, a: (): string => 'aa' });
+
+      // @ts-expect-error
+      resetInterstate<{ a: string }>({ a: 'aa' }, 'aaa');
+      // @ts-expect-error
+      resetInterstate<{ 1: string }>({ 1: 100 });
+      // @ts-expect-error
+      resetInterstate<{ 1: string; a: number }>({ 1: 100 });
+      // @ts-expect-error
+      resetInterstate<{ 1: number }>({ 1: 100, a: 'a' });
+      // @ts-expect-error
+      resetInterstate<{ 0: boolean }>([true]);
+      // @ts-expect-error
+      resetInterstate<{ 0: boolean }>({ 0: true });
+      // @ts-expect-error
+      resetInterstate<{ 0: boolean }>(() => ({ 0: true }));
+      // @ts-expect-error
+      resetInterstate<true>();
+      // @ts-expect-error
+      resetInterstate<null>();
+      // @ts-expect-error
+      resetInterstate<undefined>();
+      // @ts-expect-error
+      resetInterstate<() => number>();
+      // @ts-expect-error
+      resetInterstate<[number]>();
+      // @ts-expect-error
+      resetInterstate<{}>();
+      // @ts-expect-error
+      resetInterstate<{ a: string }>();
+      // @ts-expect-error
+      resetInterstate<() => { 1: number }>({ 1: 100 });
+
+      // @ts-expect-error
+      resetInterstate(1);
+      // @ts-expect-error
+      resetInterstate(true);
+      // @ts-expect-error
+      resetInterstate([true]);
+      // @ts-expect-error
+      resetInterstate({});
+      // @ts-expect-error
+      resetInterstate(() => true);
+      // @ts-expect-error
+      resetInterstate(null);
+      // @ts-expect-error
+      resetInterstate(undefined);
+
+      // @ts-expect-error
+      resetInterstate('a', 'aa');
+      // @ts-expect-error
+      resetInterstate('a', 'aa', 'aaa');
+      // @ts-expect-error
+      resetInterstate({ a: 'aa' }, null);
+
       interface State {
         0: boolean;
         a: string;
@@ -561,6 +625,7 @@ describe('Check types', () => {
         useInterstate: useInterstateDefined,
         readInterstate: readInterstateDefined,
         setInterstate: setInterstateDefined,
+        resetInterstate: resetInterstateDefined,
       } = initInterstate<State>();
 
       type TestCase07 = [
@@ -1158,6 +1223,85 @@ describe('Check types', () => {
       // @ts-expect-error
       setInterstateDefined('a', 'aa', 'aaa', 'aaaa');
 
+      resetInterstateDefined();
+
+      resetInterstateDefined({
+        a: 'aa',
+        [SymbolKey]: [true],
+        2: { two: 100 },
+        b: 'bb',
+        3: undefined,
+        c: 100,
+        d: { d: 'dd' },
+        e: () => 100,
+      });
+
+      resetInterstateDefined({
+        a: undefined,
+        [SymbolKey]: undefined,
+        2: undefined,
+      });
+
+      resetInterstateDefined({
+        a: 'aa',
+        [SymbolKey]: undefined,
+        2: undefined,
+      });
+
+      resetInterstateDefined({ a: 'aa' as const });
+      resetInterstateDefined({ a: 'aa' } as const);
+
+      // @ts-expect-error
+      resetInterstateDefined<{ a: string }>({ a: 'aa' }, 'aaa');
+      // @ts-expect-error
+      resetInterstateDefined<{ a: string }>({ a: 'aa' });
+      // @ts-expect-error
+      resetInterstateDefined<{ 1: string }>({ 1: 100 });
+      // @ts-expect-error
+      resetInterstateDefined<{ 0: boolean }>([true]);
+      // @ts-expect-error
+      resetInterstateDefined<{ 0: boolean }>({ 0: true });
+      // @ts-expect-error
+      resetInterstateDefined<{ 1: boolean }>(() => ({ 0: true }));
+      // @ts-expect-error
+      resetInterstateDefined<true>();
+      // @ts-expect-error
+      resetInterstateDefined<null>();
+      // @ts-expect-error
+      resetInterstateDefined<undefined>();
+      // @ts-expect-error
+      resetInterstateDefined<() => number>();
+      // @ts-expect-error
+      resetInterstateDefined<[number]>();
+      // @ts-expect-error
+      resetInterstateDefined<{}>();
+      // @ts-expect-error
+      resetInterstateDefined<{ a: string }>();
+      // @ts-expect-error
+      resetInterstateDefined<() => { 1: number }>({ 1: 100 });
+
+      // @ts-expect-error
+      resetInterstateDefined(1);
+      // @ts-expect-error
+      resetInterstateDefined(true);
+      // @ts-expect-error
+      resetInterstateDefined([true]);
+      // @ts-expect-error
+      resetInterstateDefined({});
+      // @ts-expect-error
+      resetInterstateDefined(() => true);
+      // @ts-expect-error
+      resetInterstateDefined(null);
+      // @ts-expect-error
+      resetInterstateDefined(undefined);
+
+      // @ts-expect-error
+      resetInterstateDefined('a', 'aa');
+      // @ts-expect-error
+      resetInterstateDefined('a', 'aa', 'aaa');
+      // @ts-expect-error
+      resetInterstateDefined({ a: 'aa' }, null);
+
       type TestCase12 = [
         IsTrue<IsEqual<UseInterstateInitParam<string>, string | (() => string)>>,
 
@@ -1405,6 +1549,27 @@ describe('Check types', () => {
         IsTrue<IsEqual<typeof sid02, SetInterstateDev<State>>>,
         IsTrue<IsEqual<typeof sid03, SetInterstateDev<object>>>,
         IsTrue<IsEqual<typeof sid04, SetInterstateDev<{ a: number }>>>
+      ];
+
+      const testResetInterstateDev = <M extends object>(a: ResetInterstateDev<M>) => a;
+
+      const testResIDExtends01: ResetInterstateDev<object> = {} as ResetInterstate<object>;
+      const testResIDExtends02: ResetInterstateDev<State> = {} as ResetInterstate<State>;
+      const testResIDExtends03: ResetInterstateDev<object> = {} as ResetInterstate<never>;
+      const testResIDExtends04: ResetInterstateDev<{ a: number }> = {} as ResetInterstate<{
+        a: number;
+      }>;
+
+      const ResID01 = testResetInterstateDev({} as ResetInterstate<object>);
+      const ResID02 = testResetInterstateDev({} as ResetInterstate<State>);
+      const ResID03 = testResetInterstateDev({} as ResetInterstate);
+      const ResID04 = testResetInterstateDev({} as ResetInterstate<{ a: number }>);
+
+      type TestCase23 = [
+        IsTrue<IsEqual<typeof ResID01, ResetInterstateDev<object>>>,
+        IsTrue<IsEqual<typeof ResID02, ResetInterstateDev<State>>>,
+        IsTrue<IsEqual<typeof ResID03, ResetInterstateDev<object>>>,
+        IsTrue<IsEqual<typeof ResID04, ResetInterstateDev<{ a: number }>>>
       ];
     };
   });
