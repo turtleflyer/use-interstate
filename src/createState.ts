@@ -1,7 +1,11 @@
 import type { GetAccessHandler, State, StateEntry, StateMap, WayToAccessValue } from './State';
+import type { InterstateKey } from './UseInterstateTypes';
+
+let _forDebugging_memCreatedMap: Map<InterstateKey, StateEntry<unknown>>;
 
 export const createState = <M extends object>(): State<M> => {
   const entriesMap = new Map<keyof M, StateEntry<M[keyof M]>>();
+  _forDebugging_memCreatedMap = entriesMap;
   let fnToAccessValue: WayToAccessValue<M>;
   let accessHandler = {} as M;
 
@@ -21,7 +25,7 @@ export const createState = <M extends object>(): State<M> => {
       key: K,
       entryProperties?: Omit<StateEntry<M[K]>, 'reactTriggersList'>
     ): StateEntry<M[K]> => {
-      const newEntry: StateEntry<M[K]> = { ...(entryProperties ?? {}), reactTriggersList: {} };
+      const newEntry: StateEntry<M[K]> = { ...entryProperties, reactTriggersList: {} };
       addKeyToState(key, newEntry);
 
       return newEntry;
@@ -51,3 +55,6 @@ export const createState = <M extends object>(): State<M> => {
 
   return { stateMap, getAccessHandler, clearState };
 };
+
+export const _forDebugging_getCreatedMap = (): Map<InterstateKey, StateEntry<unknown>> =>
+  _forDebugging_memCreatedMap;

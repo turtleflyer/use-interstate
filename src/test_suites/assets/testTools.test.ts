@@ -40,7 +40,7 @@ describe('Test correctness of test tools', () => {
   });
 
   test('triggersNumberToBe matchers work', () => {
-    const triggersCounter0: TriggersCounter = () => 1;
+    const triggersCounter0: TriggersCounter = (arg) => (arg === '_' ? 1 : NaN);
 
     flagManager.set({ SHOULD_TEST_IMPLEMENTATION: true });
 
@@ -58,7 +58,7 @@ describe('Test correctness of test tools', () => {
     expect([triggersCounter0, '_']).triggersNumberToBe(2);
     expect([triggersCounter0, '_']).triggersNumberToBeGreaterThanOrEqual(2);
 
-    const triggersCounter1: TriggersCounter = () => undefined;
+    const triggersCounter1: TriggersCounter = (arg) => (arg === '_' ? 0 : NaN);
 
     flagManager.set({ SHOULD_TEST_IMPLEMENTATION: true });
 

@@ -11,7 +11,7 @@ expect.extend({
       };
     }
 
-    const triggersNumber = triggersCounter(key) ?? 0;
+    const triggersNumber = triggersCounter(typeof key === 'number' ? `${key}` : key);
 
     if (triggersNumber === num) {
       return {
@@ -41,7 +41,7 @@ expect.extend({
       };
     }
 
-    const triggersNumber = triggersCounter(key) ?? 0;
+    const triggersNumber = triggersCounter(typeof key === 'number' ? `${key}` : key);
 
     if (triggersNumber >= num) {
       return {

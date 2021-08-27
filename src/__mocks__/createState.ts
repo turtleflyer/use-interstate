@@ -3,35 +3,41 @@ import { traverseLinkedList } from '../LinkedList';
 import type { StateEntry } from '../State';
 import type { InterstateKey } from '../UseInterstateTypes';
 
-let originalMap: Map<InterstateKey, StateEntry<unknown>>;
+const { createState, _forDebugging_getCreatedMap }: typeof CreateStateImport =
+  jest.requireActual('../createState.ts');
 
-global.Map = class MockedMap extends Map {
-  constructor() {
-    super();
-    originalMap = this;
-  }
+export type TriggersCounter = (key: InterstateKey) => number;
+
+type MockedMap = Map<InterstateKey, StateEntry<unknown>> & {
+  countTriggers: (key: InterstateKey) => number;
 };
-
-export type TriggersCounter = (key: InterstateKey) => number | undefined;
 
 export const createTriggersCounter = (): TriggersCounter => {
-  const memMap = originalMap;
+  const memMap = _forDebugging_getCreatedMap() as MockedMap;
+  if (memMap) {
+    memMap.countTriggers = function (key: InterstateKey): number {
+      const stateEntry = this.get(key);
+      let count = 0;
 
-  return (key: InterstateKey): number | undefined => {
-    const stateEntry = memMap.get(key);
+      if (stateEntry !== undefined) {
+        if (!('reactTriggersList' in stateEntry)) {
+          throw new Error('reactTriggersList not found in stateEntry');
+        }
 
-    if (stateEntry === undefined) {
-      return undefined;
-    }
+        traverseLinkedList(stateEntry.reactTriggersList, () => {
+          count++;
+        });
+      }
 
-    let count = 0;
+      return count;
+    };
 
-    traverseLinkedList(stateEntry.reactTriggersList, () => {
-      count++;
-    });
+    (global as any)._memMap = memMap;
 
-    return count;
-  };
+    return (key: InterstateKey): number => memMap.countTriggers(key);
+  }
+
+  return null as any;
 };
 
-export const { createState }: typeof CreateStateImport = jest.requireActual('../createState.ts');
+export { createState };

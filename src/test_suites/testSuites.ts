@@ -22,54 +22,43 @@ import { testUseInterstateSchemaObjInterface } from './test_cases/testUseInterst
 
 jest.mock('../createState.ts');
 
-export const testSuites = (packagePath: string): void => {
+export const testSuites = (
+  packagePath: string,
+  testSuiteSets: [name: string, flags: Partial<TestFlags>][]
+): void => {
   const parsedPackagePath = path.relative('..', packagePath);
 
-  describe.each([
-    ['test logic', {}],
-    ['test implementation details', { SHOULD_TEST_IMPLEMENTATION: true }],
-    ['test performance', { SHOULD_TEST_PERFORMANCE: true }],
-  ])('Test useInterstate correctness (%s)', (_name: string, flags: Partial<TestFlags>) => {
-    const testParameters = {} as TestParameters;
-    flagManager.reset();
-    flagManager.set(flags);
-    let cleanup: () => void;
+  describe.each(testSuiteSets)(
+    'Test useInterstate correctness (%s)',
+    (_name: string, flags: Partial<TestFlags>) => {
+      let testParameters: TestParameters;
+      let cleanup: () => void;
 
-    beforeEach(() => {
-      jest.isolateModules(() => {
-        testParameters.useInterstateImport = require(parsedPackagePath);
-        testParameters.triggersCounterImport = require('../createState');
-        testParameters.createComponentsImport = require('./assets/createComponents');
-        testParameters.testingLibraryReact = require('@testing-library/react');
-        ({ cleanup } = testParameters.testingLibraryReact);
+      beforeAll(() => {
+        flagManager.reset();
+        flagManager.set(flags);
       });
-    });
 
-    afterEach(() => cleanup());
+      beforeEach(() => {
+        jest.isolateModules(() => {
+          testParameters = {} as TestParameters;
+          testParameters.useInterstateImport = require(parsedPackagePath);
+          testParameters.triggersCounterImport = require('../createState');
+          testParameters.createComponentsImport = require('./assets/createComponents');
+          testParameters.testingLibraryReact = require('@testing-library/react');
+          ({ cleanup } = testParameters.testingLibraryReact);
+        });
+      });
 
-    const allTests = [
-      testCreateAndInitInterstate,
-      testInitInterstate,
-      testReadInterstateKeyInterface,
-      testReadInterstateKeysInterface,
-      testReadInterstateAcceptSelector,
-      testSetInterstateCheckedByReadInterstate,
-      testUseInterstateKeyInterface,
-      testUseInterstateKeysInterface,
-      testUseInterstateSchemaObjInterface,
-      testUseInterstateSchemaFnInterface,
-      testUseInterstateAcceptSelector,
-      testUnsuccessfulChangingInterface,
-      testScenariosWithSiblings,
-      testSetInterstateCheckedByUseInterstate,
-      testResetInterstate,
-    ];
+      afterEach(() => cleanup());
 
-    /**
-     * Tests are grouped by the flags that they have test cases related to.
-     */
-    const testsGroupedByFlags = {
-      SHOULD_TEST_IMPLEMENTATION: [
+      const allTests = [
+        testCreateAndInitInterstate,
+        testInitInterstate,
+        testReadInterstateKeyInterface,
+        testReadInterstateKeysInterface,
+        testReadInterstateAcceptSelector,
+        testSetInterstateCheckedByReadInterstate,
         testUseInterstateKeyInterface,
         testUseInterstateKeysInterface,
         testUseInterstateSchemaObjInterface,
@@ -78,39 +67,56 @@ export const testSuites = (packagePath: string): void => {
         testUnsuccessfulChangingInterface,
         testScenariosWithSiblings,
         testSetInterstateCheckedByUseInterstate,
-      ],
+        testResetInterstate,
+      ];
 
-      SHOULD_TEST_PERFORMANCE: [
-        testUseInterstateKeyInterface,
-        testUseInterstateKeysInterface,
-        testUseInterstateSchemaObjInterface,
-        testUseInterstateSchemaFnInterface,
-        testUseInterstateAcceptSelector,
-        testUnsuccessfulChangingInterface,
-        testScenariosWithSiblings,
-        testSetInterstateCheckedByUseInterstate,
-      ],
-    };
-
-    test.each(
       /**
-       * Filtering the tests by the flags they need to be set.
+       * Tests are grouped by the flags that they have test cases related to.
        */
-      allTests.filter((test) =>
+      const testsGroupedByFlags = {
+        SHOULD_TEST_IMPLEMENTATION: [
+          testUseInterstateKeyInterface,
+          testUseInterstateKeysInterface,
+          testUseInterstateSchemaObjInterface,
+          testUseInterstateSchemaFnInterface,
+          testUseInterstateAcceptSelector,
+          testUnsuccessfulChangingInterface,
+          testScenariosWithSiblings,
+          testSetInterstateCheckedByUseInterstate,
+        ],
+
+        SHOULD_TEST_PERFORMANCE: [
+          testUseInterstateKeyInterface,
+          testUseInterstateKeysInterface,
+          testUseInterstateSchemaObjInterface,
+          testUseInterstateSchemaFnInterface,
+          testUseInterstateAcceptSelector,
+          testUnsuccessfulChangingInterface,
+          testScenariosWithSiblings,
+          testSetInterstateCheckedByUseInterstate,
+        ],
+      };
+
+      test.each(
         /**
-         * Checking the flags if the test is in the list of that.
+         * Filtering the tests by the flags they need to be set.
          */
-        (Object.entries(flags) as [keyof TestFlags, boolean][]).every(
+        allTests.filter((test) =>
           /**
-           * If the `flag` is set and the test is in the list `testsGroupedByFlags[flag]`, it means
-           * that the test should be run.
+           * Checking the flags if the test is in the list of that.
            */
-          ([flag, v]) =>
-            v && testsGroupedByFlags[flag].some((testInFlagList) => testInFlagList === test)
+          (Object.entries(flags) as [keyof TestFlags, boolean][]).every(
+            /**
+             * If the `flag` is set and the test is in the list `testsGroupedByFlags[flag]`, it means
+             * that the test should be run.
+             */
+            ([flag, v]) =>
+              v && testsGroupedByFlags[flag].some((testInFlagList) => testInFlagList === test)
+          )
         )
-      )
-    )('%s', (_n: string, runTest: RunTestCase) => {
-      runTest(testParameters);
-    });
-  });
+      )('%s', (_n: string, runTest: RunTestCase) => {
+        runTest(testParameters);
+      });
+    }
+  );
 };
