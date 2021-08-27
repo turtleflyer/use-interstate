@@ -1,20 +1,20 @@
 import { createState } from './createState';
 import { getEntriesOfEnumerableKeys } from './getEntriesOfEnumerableKeys';
-import { isFunctionParameter } from './isFunctionParameter';
-import type { LinkedList, LinkedListEntry, LinkedListFilled } from './LinkedList';
+import type { LinkedList, LinkedListEntry, LinkedListNonempty } from './LinkedList';
 import { addLinkedListEntry, removeLinkedListEntry, traverseLinkedList } from './LinkedList';
-import type { StateEntry, Trigger, TriggersListEntry, WayToAccessValue } from './State';
+import type { StateEntry, TriggersListEntry, WayToAccessValue } from './State';
 import type {
   GetStateUsingSelector,
   GetValue,
-  ReactInitKey,
-  ReactKeyMethods,
-  ReactTriggerMethods,
+  GetValueFromState,
+  InitValuesForSubscribing,
+  ReactSubscribeState,
   ResetValue,
   SetValue,
   Store,
+  SubscribeStateReturn,
 } from './Store';
-import type { InterstateSelector, UseInterstateInitParam } from './UseInterstateTypes';
+import type { InterstateSelector } from './UseInterstateTypes';
 
 export function createStore<M extends object>(initStateValues?: Partial<M>): Store<M> {
   const { stateMap, getAccessHandler, clearState } = createState<M>();
@@ -42,7 +42,7 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
   initState(initStateValues);
 
   const getValue: GetValue<M> = <K extends keyof M>(key: K): M[K] =>
-    stateMap.get(key)?.stateValue?.value as M[K];
+    stateMap.get(key).stateValue?.value as M[K];
 
   const getStateUsingSelector: GetStateUsingSelector<M> = <R>(
     selector: InterstateSelector<M, R>,
@@ -103,47 +103,103 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
     }
   };
 
-  const reactInitKey: ReactInitKey<M> = <K extends keyof M>(
-    key: K,
-    initP?: UseInterstateInitParam<M[K]>
-  ): ReactKeyMethods => {
-    const stateEntry: StateEntry<M[K]> = stateMap.get(key);
+  const reactSubscribeState: ReactSubscribeState<M> = <K extends keyof M, R>(
+    notifyingTrigger: () => void,
+    getValueFromState: GetValueFromState<M, K, R>,
+    initValues?: InitValuesForSubscribing<M, K>
+  ): SubscribeStateReturn<R> => {
+    let calculatedValue: R;
+    let mustRecalculate = false;
+    let unsubscribeFromKeys: (() => void)[] = [];
 
-    if (initP !== undefined && !stateEntry.stateValue) {
-      stateEntry.stateValue = { value: isFunctionParameter(initP) ? initP() : initP };
+    if (initValues) {
+      const stateSlice = Object.fromEntries(
+        initValues.map(([key, value]) => {
+          const stateEntry = stateMap.get(key);
 
-      traverseLinkedList(stateEntry.reactTriggersList, ({ trigger }) => {
-        reactEffectTasksPool.push(() => {
-          trigger();
-        });
-      });
+          if (value !== undefined && !stateEntry.stateValue) {
+            stateEntry.stateValue = { value };
+
+            traverseLinkedList(stateEntry.reactTriggersList, ({ trigger }) => {
+              reactEffectTasksPool.push(() => {
+                trigger();
+              });
+            });
+          }
+
+          unsubscribeFromKeys.push(createUnsubscribingFunction(stateEntry));
+
+          return [key, stateEntry.stateValue?.value];
+        })
+      ) as Pick<M, K>;
+
+      calculatedValue = getValueFromState(stateSlice);
+    } else {
+      calculatedValue = getStateUsingSelector(
+        getValueFromState,
+        <KW extends keyof M>(key: KW): M[KW] => {
+          const stateEntry = stateMap.get(key);
+
+          unsubscribeFromKeys.push(createUnsubscribingFunction(stateEntry));
+
+          return stateEntry.stateValue?.value as M[KW];
+        }
+      );
     }
 
-    const addTrigger = (trigger: Trigger): ReactTriggerMethods => {
-      const triggerEntry = addLinkedListEntry(stateEntry.reactTriggersList, { trigger });
+    function createUnsubscribingFunction<KS extends keyof M>(
+      stateEntry: StateEntry<M[KS]>
+    ): () => void {
+      const trigger = () => {
+        mustRecalculate = true;
+        notifyingTrigger();
+      };
 
-      const removeTriggerFromKeyList = (): void => {
+      const triggerEntry = addLinkedListEntry(stateEntry.reactTriggersList, {
+        trigger,
+      });
+
+      return (): void => {
         removeLinkedListEntry(
-          stateEntry.reactTriggersList as LinkedListFilled<TriggersListEntry>,
+          stateEntry.reactTriggersList as LinkedListNonempty<TriggersListEntry>,
           triggerEntry
         );
       };
+    }
 
-      const watchListEntry = addLinkedListEntry(reactCleaningWatchList, {
-        removeTriggerFromKeyList,
+    const unsubscribe = (): void => {
+      unsubscribeFromKeys.forEach((unsubscribeFromKey) => {
+        unsubscribeFromKey();
       });
 
-      const removeTriggerFromWatchList = (): void => {
-        removeLinkedListEntry(
-          reactCleaningWatchList as LinkedListFilled<ReactCleaningWatchListEntry>,
-          watchListEntry
-        );
-      };
-
-      return { removeTriggerFromKeyList, removeTriggerFromWatchList };
+      unsubscribeFromKeys = [];
     };
 
-    return { addTrigger };
+    const removeTriggerFromKeyList = (): void => {
+      unsubscribe();
+    };
+
+    const watchListEntry = addLinkedListEntry(reactCleaningWatchList, {
+      removeTriggerFromKeyList,
+    });
+
+    const removeFromWatchList = (): void => {
+      removeLinkedListEntry(
+        reactCleaningWatchList as LinkedListNonempty<ReactCleaningWatchListEntry>,
+        watchListEntry
+      );
+    };
+
+    const retrieveValue = (): R => {
+      if (mustRecalculate) {
+        mustRecalculate = false;
+        calculatedValue = getStateUsingSelector(getValueFromState, getValue);
+      }
+
+      return calculatedValue;
+    };
+
+    return { retrieveValue, unsubscribe, removeFromWatchList };
   };
 
   return {
@@ -151,7 +207,7 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
     getStateUsingSelector,
     setValue,
     resetValue,
-    reactInitKey,
+    reactSubscribeState,
     reactRenderTask,
     reactEffectTask,
   };

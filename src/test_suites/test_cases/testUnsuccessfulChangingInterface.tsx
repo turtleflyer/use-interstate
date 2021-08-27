@@ -596,22 +596,33 @@ export const testUnsuccessfulChangingInterface: TestCase = [
     expect([triggersCounter, symbolKey]).triggersNumberToBe(0);
     expect(effectCounter).numberToBeConsideringFlag(0);
 
-    jest.spyOn(console, 'error').mockImplementation(() => undefined);
-    expect(() =>
-      rerender(
-        <StrictMode>
-          <TestComponent
-            {...{
-              testId: testComponentID,
-              keys: ['foo'],
-              effectFn: () => effectCounter++,
-            }}
-          />
-        </StrictMode>
-      )
-    ).toThrow();
-    // eslint-disable-next-line no-console
-    (console.error as any).mockRestore();
+    rerender(
+      <StrictMode>
+        <TestComponent
+          {...{
+            testId: testComponentID,
+            keys: ['foo'],
+            effectFn: () => effectCounter++,
+          }}
+        />
+      </StrictMode>
+    );
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe('14');
+    expect([triggersCounter, 'foo']).triggersNumberToBe(1);
+    expect([triggersCounter, 77]).triggersNumberToBe(0);
+    expect([triggersCounter, symbolKey]).triggersNumberToBe(0);
+    expect(effectCounter).numberToBeConsideringFlag(1);
+    effectCounter = 0;
+
+    act(() => setInterstate('foo', 200));
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe('200');
+    expect([triggersCounter, 'foo']).triggersNumberToBe(1);
+    expect([triggersCounter, 77]).triggersNumberToBe(0);
+    expect([triggersCounter, symbolKey]).triggersNumberToBe(0);
+    expect(effectCounter).numberToBeConsideringFlag(1);
+    effectCounter = 0;
 
     rerender(<StrictMode />);
     resetInterstate();
@@ -641,22 +652,26 @@ export const testUnsuccessfulChangingInterface: TestCase = [
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
-    jest.spyOn(console, 'error').mockImplementation(() => undefined);
-    expect(() =>
-      rerender(
-        <StrictMode>
-          <TestComponent
-            {...{
-              testId: testComponentID,
-              selector: ({ foo, 77: ss, [symbolKey]: sy }: TestState) => [foo, ss, sy],
-              effectFn: () => effectCounter++,
-            }}
-          />
-        </StrictMode>
-      )
-    ).toThrow();
-    // eslint-disable-next-line no-console
-    (console.error as any).mockRestore();
+    rerender(
+      <StrictMode>
+        <TestComponent
+          {...{
+            testId: testComponentID,
+            selector: ({ foo, 77: ss, [symbolKey]: sy }: TestState) => [foo, ss, sy],
+            effectFn: () => effectCounter++,
+          }}
+        />
+      </StrictMode>
+    );
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
+      '{"77":"undefined","foo":"undefined","symbol(0)":"undefined"}'
+    );
+    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(1);
+    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(effectCounter).numberToBeConsideringFlag(1);
+    effectCounter = 0;
 
     rerender(<StrictMode />);
     resetInterstate({ foo: 1, 77: 'x', [symbolKey]: { a: null } });
@@ -686,22 +701,26 @@ export const testUnsuccessfulChangingInterface: TestCase = [
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
-    jest.spyOn(console, 'error').mockImplementation(() => undefined);
-    expect(() =>
-      rerender(
-        <StrictMode>
-          <TestComponent
-            {...{
-              testId: testComponentID,
-              selector: ({ foo, 77: ss }: TestState) => [foo, ss],
-              effectFn: () => effectCounter++,
-            }}
-          />
-        </StrictMode>
-      )
-    ).toThrow();
-    // eslint-disable-next-line no-console
-    (console.error as any).mockRestore();
+    rerender(
+      <StrictMode>
+        <TestComponent
+          {...{
+            testId: testComponentID,
+            selector: ({ foo, 77: ss }: TestState) => [foo, ss],
+            effectFn: () => effectCounter++,
+          }}
+        />
+      </StrictMode>
+    );
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
+      '{"77":"x","foo":1,"symbol(0)":{"a":null}}'
+    );
+    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(1);
+    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(effectCounter).numberToBeConsideringFlag(1);
+    effectCounter = 0;
 
     rerender(<></>);
 

@@ -1,5 +1,5 @@
 import type { Trigger, WayToAccessValue } from './State';
-import type { InterstateSelector, UseInterstateInitParam } from './UseInterstateTypes';
+import type { InterstateSelector } from './UseInterstateTypes';
 
 export interface Store<M extends object> {
   readonly getValue: GetValue<M>;
@@ -10,7 +10,7 @@ export interface Store<M extends object> {
 
   readonly getStateUsingSelector: GetStateUsingSelector<M>;
 
-  readonly reactInitKey: ReactInitKey<M>;
+  readonly reactSubscribeState: ReactSubscribeState<M>;
 
   readonly reactEffectTask: () => void;
 
@@ -25,14 +25,29 @@ export type ResetValue<M extends object> = (initStateValues?: Partial<M>) => voi
 
 export type GetStateUsingSelector<M extends object> = <R>(
   selector: InterstateSelector<M, R>,
-
   wayToAccessValue: WayToAccessValue<M>
 ) => R;
 
-export type ReactInitKey<M extends object> = <K extends keyof M>(
+export type ReactSubscribeState<M extends object> = <K extends keyof M, R>(
+  notifyingTrigger: () => void,
+  getValueFromState: GetValueFromState<M, K, R>,
+  initValues?: InitValuesForSubscribing<M, K>
+) => SubscribeStateReturn<R>;
+
+export type GetValueFromState<M extends object, K extends keyof M, R> = (state: Pick<M, K>) => R;
+
+export type InitValuesForSubscribing<M extends object, K extends keyof M> = readonly (readonly [
   key: K,
-  initP?: UseInterstateInitParam<M[K]>
-) => ReactKeyMethods;
+  initValue?: M[K]
+])[];
+
+export interface SubscribeStateReturn<R> {
+  retrieveValue: () => R;
+
+  unsubscribe: () => void;
+
+  removeFromWatchList: () => void;
+}
 
 export interface ReactKeyMethods {
   readonly addTrigger: (trigger: Trigger) => ReactTriggerMethods;

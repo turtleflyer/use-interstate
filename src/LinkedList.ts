@@ -1,12 +1,12 @@
 export type LinkedList<E extends LinkedListEntry = LinkedListEntry> =
   | LinkedListEmpty
-  | LinkedListFilled<E>;
+  | LinkedListNonempty<E>;
 
 interface LinkedListEmpty {
   start?: null;
 }
 
-export interface LinkedListFilled<E extends LinkedListEntry> {
+export interface LinkedListNonempty<E extends LinkedListEntry> {
   start: E & { prev: undefined | null };
 }
 
@@ -44,12 +44,12 @@ export const addLinkedListEntry = <E extends LinkedListEntry<E>>(
   /* eslint-disable no-param-reassign */
   if (isLinkedListFilled(list)) {
     [createdEntry.next, (list.start as E).prev, list.start] = [
-      (list.start as E) as E & { prev: {} },
+      list.start as E as E & { prev: {} },
       createdEntry,
       createdEntry,
     ];
   } else {
-    ((list as LinkedList<E>) as LinkedListFilled<E>).start = createdEntry;
+    (list as LinkedList<E> as LinkedListNonempty<E>).start = createdEntry;
   }
   /* eslint-enable no-param-reassign */
 
@@ -58,14 +58,14 @@ export const addLinkedListEntry = <E extends LinkedListEntry<E>>(
 
 function isLinkedListFilled<E extends LinkedListEntry<E>>(
   list: LinkedList<E>
-): list is LinkedListFilled<E> {
-  return (list.start as unknown) as boolean;
+): list is LinkedListNonempty<E> {
+  return list.start as unknown as boolean;
 }
 
 const determineOppositeDirection = { prev: 'next', next: 'prev' } as const;
 
 export const removeLinkedListEntry = <E extends LinkedListEntry<E>>(
-  list: LinkedListFilled<E>,
+  list: LinkedListNonempty<E>,
   entry: E
 ): void => {
   if (entry.beenRemoved) {

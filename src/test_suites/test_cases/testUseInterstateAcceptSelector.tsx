@@ -205,13 +205,6 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect([triggersCounter, symbolKey]).triggersNumberToBe(0);
     expect(effectCounter).numberToBeConsideringFlag(0);
 
-    jest.spyOn(console, 'error').mockImplementation(() => undefined);
-    expect(() => rerender(<TestComponentWithSelector />)).toThrow(
-      'Rendered more hooks than during the previous render'
-    );
-    // eslint-disable-next-line no-console
-    (console.error as any).mockRestore();
-
     rerender(<></>);
 
     expect([triggersCounter, 'foo']).triggersNumberToBe(0);

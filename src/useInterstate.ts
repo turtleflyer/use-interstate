@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { createStore } from './createStore';
 import { getEntriesOfEnumerableKeys } from './getEntriesOfEnumerableKeys';
 import { isFunctionParameter } from './isFunctionParameter';
-import type { ReactKeyMethods, ReactTriggerMethods } from './Store';
+import { GetValueFromState, InitValuesForSubscribing } from './Store';
 import type {
   AcceptSelector,
   InitInterstate,
@@ -27,129 +27,169 @@ export const initInterstate = (<M extends object>(
     setValue,
     resetValue,
     getStateUsingSelector,
-    reactInitKey,
+    reactSubscribeState,
     reactRenderTask,
     reactEffectTask,
   } = createStore(initStateValues);
 
-  const useInterstatePlain = <K extends keyof M>(
-    key: K,
-    initParam?: UseInterstateInitParam<M[K]>
-  ): M[K] => {
-    const keyNormalized = normalizeKey(key);
+  type UseGetState<K extends keyof M, R> = (subscribingParams: SubscribingParams<K, R> | null) => R;
 
-    const [{ useBody }] = useState(() => {
-      let keyMethods: ReactKeyMethods | undefined;
-      let setterMethods: ReactTriggerMethods | undefined;
-      let memKey: keyof M;
+  type SubscribingParams<K extends keyof M, R> = {
+    getValueFromState: GetValueFromState<M, K, R>;
+    initValues?: InitValuesForSubscribing<M, K>;
+  };
+
+  const useDriveInterstate = <K extends keyof M, R>(): UseGetState<K, R> => {
+    reactRenderTask();
+    useEffect(reactEffectTask);
+
+    const [{ useGetState }] = useState(() => {
+      let retrieveValue: () => R;
+      let unsubscribe: () => void;
+      let removeFromWatchList: () => void;
 
       // eslint-disable-next-line no-shadow
-      const useBody = (curKey: K, curInitParam?: UseInterstateInitParam<M[K]>): void => {
+      const useGetState = (subscribingParams: SubscribingParams<K, R> | null): R => {
         /**
-         *
          * Emit setter using to trigger rendering of component signaling when value of `key` changed
          * in global state
          */
         const [, setState] = useState({});
 
-        /**
-         * For first call and any call when `key` changed it will place trigger in list of key entry
-         */
-        if (curKey !== memKey) {
-          keyMethods = reactInitKey(curKey, curInitParam);
-          setterMethods?.removeTriggerFromKeyList();
+        if (subscribingParams) {
+          unsubscribe?.();
+          const { getValueFromState, initValues } = subscribingParams;
 
-          setterMethods = keyMethods.addTrigger(() => {
-            setState({});
-          });
-
-          memKey = curKey;
+          ({ retrieveValue, unsubscribe, removeFromWatchList } = reactSubscribeState(
+            () => {
+              setState({});
+            },
+            getValueFromState,
+            initValues
+          ));
         }
 
-        /**
-         * `setterMethods` is only `undefined` for first run on rendering. On "effect" stage it
-         * always has value.
-         */
-        /* eslint-disable @typescript-eslint/no-non-null-assertion */
-        useEffect(() => setterMethods!.removeTriggerFromWatchList(), [curKey]);
-        useEffect(() => () => setterMethods!.removeTriggerFromKeyList(), []);
-        /* eslint-enable @typescript-eslint/no-non-null-assertion */
+        useEffect(removeFromWatchList, [removeFromWatchList]);
+
+        useEffect(
+          () => () => {
+            unsubscribe();
+          },
+          []
+        );
+
+        return retrieveValue();
       };
 
-      return { useBody };
+      return { useGetState };
     });
 
-    useBody(keyNormalized, initParam);
-
-    return getValue(keyNormalized);
+    return useGetState;
   };
 
   const useInterstate = (<K extends keyof M>(
     keyOrKeysOrInitParam: K | UseInterstateSchemaParam<M, K> | K[],
     initParam?: UseInterstateInitParam<M[K]>
   ): M[K] | Pick<M, K> => {
-    reactRenderTask();
-    useEffect(reactEffectTask);
+    const [{ useBody }] = useState(() => {
+      let memKey: keyof M | null = null;
+      let firstTimeRunSealed = false;
+      let subscribingParams: SubscribingParams<K, M[K] | Pick<M, K>> | null = null;
 
-    const [{ useGetState }] = useState(() => {
       // eslint-disable-next-line no-shadow
-      const useGetState = (key: {}, init?: UseInterstateInitParam<M[K]>): M[K] | Pick<M, K> => {
-        /**
-         *
-         * In the scope of the function the props of the component are being captured as they were
-         * on the first run. It is of how `useState` hook works (it runs the init function once on
-         * the creating of the react element). `useGetState` returns the state with the most updated
-         * values of keys or a single value for a key. `useGetState` takes parameters from the
-         * parent function (`useInterstate`). Because there are 4 possible parameter interfaces, the
-         * first parameter is any not nullish value (`{}`). At the same time passed parameters are
-         * interesting only for single key subscription when one can dynamically change the
-         * subscription to a new key. For multi-key interfaces changing parameters is prohibited.
-         */
-        const [buildStructure] = useState(
-          (): (readonly [key: K, initParam: () => M[K]])[] | null => {
-            switch (typeof keyOrKeysOrInitParam) {
-              case 'object':
-                return isArray(keyOrKeysOrInitParam)
-                  ? keyOrKeysOrInitParam.map((k) => [k, () => useInterstatePlain(k)])
-                  : getEntriesOfEnumerableKeys(keyOrKeysOrInitParam).map(([k, initV]) => [
-                      k,
-                      () => useInterstatePlain(k, () => initV),
-                    ]);
+      const useBody = (
+        keyOrKeysOrInitParamCurr: K | UseInterstateSchemaParam<M, K> | K[],
+        initParamCurr?: UseInterstateInitParam<M[K]>
+      ): M[K] | Pick<M, K> => {
+        switch (typeof keyOrKeysOrInitParamCurr) {
+          case 'object':
+            if (!firstTimeRunSealed) {
+              const initValues = isArray(keyOrKeysOrInitParamCurr)
+                ? keyOrKeysOrInitParamCurr.map((key) => [normalizeKey(key)] as const)
+                : getEntriesOfEnumerableKeys(keyOrKeysOrInitParamCurr);
 
-              case 'function':
-                return getEntriesOfEnumerableKeys(keyOrKeysOrInitParam()).map(([k, initV]) => [
-                  k,
-                  () => useInterstatePlain(k, () => initV),
-                ]);
+              subscribingParams = {
+                getValueFromState: (state) =>
+                  Object.fromEntries(initValues.map(([key]) => [key, state[key]])) as Pick<M, K>,
+                initValues,
+              };
 
-              default:
-                return null;
+              break;
             }
-          }
-        );
 
-        return buildStructure
-          ? (Object.fromEntries(buildStructure.map(([k, getV]) => [k, getV()])) as Pick<M, K>)
-          : /**
-             *
-             * `key` and `init` are arguments of `getState` and match props of component on first
-             * run
-             */
-            useInterstatePlain(key as K, init);
+            subscribingParams = null;
+
+            break;
+
+          case 'function':
+            if (!firstTimeRunSealed) {
+              const initValues = getEntriesOfEnumerableKeys(keyOrKeysOrInitParamCurr());
+
+              subscribingParams = {
+                getValueFromState: (state) =>
+                  Object.fromEntries(initValues.map(([key]) => [key, state[key]])) as Pick<M, K>,
+                initValues,
+              };
+
+              break;
+            }
+
+            subscribingParams = null;
+
+            break;
+
+          default: {
+            const normalizedKey = normalizeKey(keyOrKeysOrInitParamCurr);
+
+            if (!firstTimeRunSealed || (memKey !== null && normalizedKey !== memKey)) {
+              subscribingParams = {
+                getValueFromState: (state) => state[normalizedKey],
+                initValues: [
+                  [
+                    normalizedKey,
+                    isFunctionParameter(initParamCurr) ? initParamCurr() : initParamCurr,
+                  ],
+                ],
+              };
+
+              memKey = normalizedKey;
+
+              break;
+            }
+
+            subscribingParams = null;
+          }
+        }
+
+        firstTimeRunSealed = true;
+        const useGetState = useDriveInterstate<K, M[K] | Pick<M, K>>();
+
+        return useGetState(subscribingParams);
       };
 
-      return { useGetState };
+      return { useBody };
     });
 
-    return useGetState(keyOrKeysOrInitParam, initParam);
+    return useBody(keyOrKeysOrInitParam, initParam);
   }) as UseInterstate<M>;
 
   useInterstate.acceptSelector = (<R>(selector: InterstateSelector<M, R>): R => {
-    reactRenderTask();
-    useEffect(reactEffectTask);
-    const [memSelector] = useState(() => selector);
+    const [{ useBody }] = useState(() => {
+      let firstTimeRunSealed = false;
 
-    return getStateUsingSelector(memSelector, useInterstatePlain);
+      // eslint-disable-next-line no-shadow
+      const useBody = (selectorCurr: InterstateSelector<M, R>): R => {
+        const subscribingParams = firstTimeRunSealed ? null : { getValueFromState: selectorCurr };
+        firstTimeRunSealed = true;
+        const useGetState = useDriveInterstate<keyof M, R>();
+
+        return useGetState(subscribingParams);
+      };
+
+      return { useBody };
+    });
+
+    return useBody(selector);
   }) as AcceptSelector<M>;
 
   const setInterstate = (<K extends keyof M>(
