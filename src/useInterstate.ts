@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { createStore } from './createStore';
 import { getEntriesOfEnumerableKeys } from './getEntriesOfEnumerableKeys';
 import { isFunctionParameter } from './isFunctionParameter';
-import { GetValueFromState, InitValuesForSubscribing } from './Store';
+import { InitValuesForSubscribing, TakeStateAndCalculateValue } from './Store';
 import type {
   AcceptSelector,
   InitInterstate,
@@ -16,7 +16,7 @@ import type {
   SetInterstateSchemaParam,
   UseInterstate,
   UseInterstateInitParam,
-  UseInterstateSchemaParam,
+  UseInterstateSchemaParam
 } from './UseInterstateTypes';
 
 export const initInterstate = (<M extends object>(
@@ -35,7 +35,7 @@ export const initInterstate = (<M extends object>(
   type UseGetState<K extends keyof M, R> = (subscribingParams: SubscribingParams<K, R> | null) => R;
 
   type SubscribingParams<K extends keyof M, R> = {
-    getValueFromState: GetValueFromState<M, K, R>;
+    takeStateAndCalculateValue: TakeStateAndCalculateValue<M, K, R>;
     initValues?: InitValuesForSubscribing<M, K>;
   };
 
@@ -43,7 +43,7 @@ export const initInterstate = (<M extends object>(
     reactRenderTask();
     useEffect(reactEffectTask);
 
-    const [{ useGetState }] = useState(() => {
+    const [{ useGetState }] = useState((): { useGetState: UseGetState<K, R> } => {
       let retrieveValue: () => R;
       let unsubscribe: () => void;
       let removeFromWatchList: () => void;
@@ -58,13 +58,13 @@ export const initInterstate = (<M extends object>(
 
         if (subscribingParams) {
           unsubscribe?.();
-          const { getValueFromState, initValues } = subscribingParams;
+          const { takeStateAndCalculateValue, initValues } = subscribingParams;
 
           ({ retrieveValue, unsubscribe, removeFromWatchList } = reactSubscribeState(
             () => {
               setState({});
             },
-            getValueFromState,
+            takeStateAndCalculateValue,
             initValues
           ));
         }
@@ -109,7 +109,7 @@ export const initInterstate = (<M extends object>(
                 : getEntriesOfEnumerableKeys(keyOrKeysOrInitParamCurr);
 
               subscribingParams = {
-                getValueFromState: (state) =>
+                takeStateAndCalculateValue: (state) =>
                   Object.fromEntries(initValues.map(([key]) => [key, state[key]])) as Pick<M, K>,
                 initValues,
               };
@@ -126,7 +126,7 @@ export const initInterstate = (<M extends object>(
               const initValues = getEntriesOfEnumerableKeys(keyOrKeysOrInitParamCurr());
 
               subscribingParams = {
-                getValueFromState: (state) =>
+                takeStateAndCalculateValue: (state) =>
                   Object.fromEntries(initValues.map(([key]) => [key, state[key]])) as Pick<M, K>,
                 initValues,
               };
@@ -143,7 +143,7 @@ export const initInterstate = (<M extends object>(
 
             if (!firstTimeRunSealed || (memKey !== null && normalizedKey !== memKey)) {
               subscribingParams = {
-                getValueFromState: (state) => state[normalizedKey],
+                takeStateAndCalculateValue: (state) => state[normalizedKey],
                 initValues: [
                   [
                     normalizedKey,
@@ -179,7 +179,9 @@ export const initInterstate = (<M extends object>(
 
       // eslint-disable-next-line no-shadow
       const useBody = (selectorCurr: InterstateSelector<M, R>): R => {
-        const subscribingParams = firstTimeRunSealed ? null : { getValueFromState: selectorCurr };
+        const subscribingParams = firstTimeRunSealed
+          ? null
+          : { takeStateAndCalculateValue: selectorCurr };
         firstTimeRunSealed = true;
         const useGetState = useDriveInterstate<keyof M, R>();
 
@@ -205,7 +207,7 @@ export const initInterstate = (<M extends object>(
         break;
 
       case 'function':
-        getEntriesOfEnumerableKeys(getStateUsingSelector(keyOrSetterSchema, getValue)).forEach(
+        getEntriesOfEnumerableKeys(getStateUsingSelector(keyOrSetterSchema)).forEach(
           ([key, value]) => {
             setValue(key, value);
           }
@@ -234,7 +236,7 @@ export const initInterstate = (<M extends object>(
       : getValue(normalizeKey(keyOrKeys))) as ReadInterstate<M>;
 
   readInterstate.acceptSelector = (<R>(selector: InterstateSelector<M, R>): R =>
-    getStateUsingSelector(selector, getValue)) as AcceptSelector<M>;
+    getStateUsingSelector(selector)) as AcceptSelector<M>;
 
   const resetInterstate = resetValue as ResetInterstate<M>;
 
@@ -256,3 +258,4 @@ function normalizeKey<K extends InterstateKey>(key: K): K {
 
 export * from './DevTypes';
 export * from './UseInterstateTypes';
+

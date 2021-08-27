@@ -1,21 +1,21 @@
 import type { LinkedList, LinkedListEntry } from './LinkedList';
 
 export interface State<M extends object> {
-  readonly stateMap: StateMap<M>;
+  readonly getStateValue: GetStateValue<M>;
 
-  readonly getAccessHandler: GetAccessHandler<M>;
+  readonly setStateValue: SetStateValue<M>;
+
+  readonly getAccessMapHandler: GetAccessMapHandler<M>;
 
   readonly clearState: () => void;
 }
 
-export interface StateMap<M extends object> {
-  get: <K extends keyof M>(key: K) => StateEntry<M[K]>;
+export type GetStateValue<M extends object> = <K extends keyof M>(key: K) => StateEntry<M[K]>;
 
-  set: <K extends keyof M>(
-    key: K,
-    entryProperties?: Omit<StateEntry<M[K]>, 'reactTriggersList'>
-  ) => StateEntry<M[K]>;
-}
+export type SetStateValue<M extends object> = <K extends keyof M>(
+  key: K,
+  entryProperties?: Omit<StateEntry<M[K]>, 'reactTriggersList'>
+) => StateEntry<M[K]>;
 
 export type StateEntry<T> = {
   stateValue?: StateValue<T>;
@@ -33,6 +33,10 @@ export type TriggersListEntry = LinkedListEntry<TriggersListEntry> & {
 
 export type Trigger = () => void;
 
-export type GetAccessHandler<M extends object> = (wayToAccessValue: WayToAccessValue<M>) => M;
+export type GetAccessMapHandler<M extends object> = () => AccessMapHandlerAndGetKeysMethod<M>;
 
-export type WayToAccessValue<M extends object> = <K extends keyof M>(key: K) => M[K];
+export interface AccessMapHandlerAndGetKeysMethod<M extends object> {
+  readonly accessMapHandler: Readonly<M>;
+
+  readonly getKeys: () => readonly (keyof M)[];
+}

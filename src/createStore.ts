@@ -2,22 +2,22 @@ import { createState } from './createState';
 import { getEntriesOfEnumerableKeys } from './getEntriesOfEnumerableKeys';
 import type { LinkedList, LinkedListEntry, LinkedListNonempty } from './LinkedList';
 import { addLinkedListEntry, removeLinkedListEntry, traverseLinkedList } from './LinkedList';
-import type { StateEntry, TriggersListEntry, WayToAccessValue } from './State';
+import type { StateEntry, TriggersListEntry } from './State';
 import type {
   GetStateUsingSelector,
   GetValue,
-  GetValueFromState,
   InitValuesForSubscribing,
   ReactSubscribeState,
   ResetValue,
   SetValue,
   Store,
-  SubscribeStateReturn,
+  SubscribeStateMethods,
+  TakeStateAndCalculateValue,
 } from './Store';
 import type { InterstateSelector } from './UseInterstateTypes';
 
 export function createStore<M extends object>(initStateValues?: Partial<M>): Store<M> {
-  const { stateMap, getAccessHandler, clearState } = createState<M>();
+  const { getStateValue, setStateValue, getAccessMapHandler, clearState } = createState<M>();
 
   /**
    * `reactCleaningWatchList` is list of "abandoned" triggers. Trigger in React can get abandoned if
@@ -42,19 +42,18 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
   initState(initStateValues);
 
   const getValue: GetValue<M> = <K extends keyof M>(key: K): M[K] =>
-    stateMap.get(key).stateValue?.value as M[K];
+    getStateValue(key).stateValue?.value as M[K];
 
   const getStateUsingSelector: GetStateUsingSelector<M> = <R>(
-    selector: InterstateSelector<M, R>,
-    wayToAccessValue: WayToAccessValue<M>
+    selector: InterstateSelector<M, R>
   ): R => {
-    const handler = getAccessHandler(wayToAccessValue);
+    const { accessMapHandler } = getAccessMapHandler();
 
-    return selector(handler);
+    return selector(accessMapHandler);
   };
 
   const setValue: SetValue<M> = <K extends keyof M>(key: K, value: M[K]): void => {
-    const stateEntry: StateEntry<M[K]> = stateMap.get(key);
+    const stateEntry: StateEntry<M[K]> = getStateValue(key);
     const oldValue = stateEntry.stateValue;
     stateEntry.stateValue = { value };
 
@@ -105,9 +104,9 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
 
   const reactSubscribeState: ReactSubscribeState<M> = <K extends keyof M, R>(
     notifyingTrigger: () => void,
-    getValueFromState: GetValueFromState<M, K, R>,
+    getValueFromState: TakeStateAndCalculateValue<M, K, R>,
     initValues?: InitValuesForSubscribing<M, K>
-  ): SubscribeStateReturn<R> => {
+  ): SubscribeStateMethods<R> => {
     let calculatedValue: R;
     let mustRecalculate = false;
     let unsubscribeFromKeys: (() => void)[] = [];
@@ -115,7 +114,7 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
     if (initValues) {
       const stateSlice = Object.fromEntries(
         initValues.map(([key, value]) => {
-          const stateEntry = stateMap.get(key);
+          const stateEntry = getStateValue(key);
 
           if (value !== undefined && !stateEntry.stateValue) {
             stateEntry.stateValue = { value };
@@ -135,16 +134,13 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
 
       calculatedValue = getValueFromState(stateSlice);
     } else {
-      calculatedValue = getStateUsingSelector(
-        getValueFromState,
-        <KW extends keyof M>(key: KW): M[KW] => {
-          const stateEntry = stateMap.get(key);
+      const { accessMapHandler, getKeys } = getAccessMapHandler();
+      calculatedValue = getValueFromState(accessMapHandler);
 
-          unsubscribeFromKeys.push(createUnsubscribingFunction(stateEntry));
-
-          return stateEntry.stateValue?.value as M[KW];
-        }
-      );
+      getKeys().forEach((key) => {
+        const stateEntry = getStateValue(key);
+        unsubscribeFromKeys.push(createUnsubscribingFunction(stateEntry));
+      });
     }
 
     function createUnsubscribingFunction<KS extends keyof M>(
@@ -193,7 +189,8 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
     const retrieveValue = (): R => {
       if (mustRecalculate) {
         mustRecalculate = false;
-        calculatedValue = getStateUsingSelector(getValueFromState, getValue);
+        const { accessMapHandler } = getAccessMapHandler();
+        calculatedValue = getValueFromState(accessMapHandler);
       }
 
       return calculatedValue;
@@ -216,7 +213,7 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
     initV &&
       getEntriesOfEnumerableKeys(initV).forEach(
         ([key, value]: [keyof M, M[keyof M] | undefined]): void => {
-          value !== undefined && stateMap.set(key, { stateValue: { value } });
+          value !== undefined && setStateValue(key, { stateValue: { value } });
         }
       );
   }

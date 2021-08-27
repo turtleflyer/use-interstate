@@ -1,60 +1,75 @@
-import type { GetAccessHandler, State, StateEntry, StateMap, WayToAccessValue } from './State';
+import type { AccessMapHandlerAndGetKeysMethod, State, StateEntry } from './State';
 import type { InterstateKey } from './UseInterstateTypes';
 
-let _forDebugging_memCreatedMap: Map<InterstateKey, StateEntry<unknown>>;
+export type MemCreatedMap = { current: { [P in InterstateKey]?: StateEntry<unknown> } };
+
+const _forDebugging_memCreatedMap: MemCreatedMap = { current: {} };
 
 export const createState = <M extends object>(): State<M> => {
-  const entriesMap = new Map<keyof M, StateEntry<M[keyof M]>>();
-  _forDebugging_memCreatedMap = entriesMap;
-  let fnToAccessValue: WayToAccessValue<M>;
-  let accessHandler = {} as M;
+  type EntriesMap = { [P in keyof M]?: StateEntry<M[P]> };
 
-  const stateMap: StateMap<M> = {
-    get: <K extends keyof M>(key: K): StateEntry<M[K]> => {
-      if (entriesMap.has(key)) {
-        return entriesMap.get(key) as StateEntry<M[K]>;
-      }
+  let entriesMap: EntriesMap = {};
+  let accessMapHandler: EntriesMap = {};
+  let keysCollector: (key: keyof M) => void;
 
-      const newEntry: StateEntry<M[K]> = { reactTriggersList: {} };
-      addKeyToState(key, newEntry);
+  _forDebugging_memCreatedMap.current = entriesMap;
 
-      return newEntry;
-    },
+  const getStateValue = <K extends keyof M>(key: K): StateEntry<M[K]> => {
+    if (key in entriesMap) {
+      return entriesMap[key] as StateEntry<M[K]>;
+    }
 
-    set: <K extends keyof M>(
-      key: K,
-      entryProperties?: Omit<StateEntry<M[K]>, 'reactTriggersList'>
-    ): StateEntry<M[K]> => {
-      const newEntry: StateEntry<M[K]> = { ...entryProperties, reactTriggersList: {} };
-      addKeyToState(key, newEntry);
+    const newEntry: StateEntry<M[K]> = { reactTriggersList: {} };
+    addKeyToState(key, newEntry);
 
-      return newEntry;
-    },
+    return newEntry;
+  };
+
+  const setStateValue = <K extends keyof M>(
+    key: K,
+    entryProperties?: Omit<StateEntry<M[K]>, 'reactTriggersList'>
+  ): StateEntry<M[K]> => {
+    const newEntry: StateEntry<M[K]> = { ...entryProperties, reactTriggersList: {} };
+    addKeyToState(key, newEntry);
+
+    return newEntry;
   };
 
   function addKeyToState<K extends keyof M>(key: K, entry: StateEntry<M[K]>): void {
-    entriesMap.set(key, entry);
+    entriesMap[key] = entry;
 
-    Object.defineProperty(accessHandler, key, {
+    Object.defineProperty(accessMapHandler, key, {
       enumerable: true,
-      get: () => fnToAccessValue(key),
+      get: () => {
+        keysCollector(key);
+
+        return entry.stateValue?.value;
+      },
       configurable: false,
     });
   }
 
-  const getAccessHandler: GetAccessHandler<M> = (wayToAccessValue: WayToAccessValue<M>): M => {
-    fnToAccessValue = wayToAccessValue;
+  const getAccessMapHandler = (): AccessMapHandlerAndGetKeysMethod<M> => {
+    const capturedKeys: (keyof M)[] = [];
 
-    return accessHandler;
+    keysCollector = (key) => {
+      capturedKeys.push(key);
+    };
+
+    const getKeys = (): (keyof M)[] => {
+      return capturedKeys;
+    };
+
+    return { accessMapHandler: accessMapHandler as M, getKeys };
   };
 
   const clearState = (): void => {
-    entriesMap.clear();
-    accessHandler = {} as M;
+    entriesMap = {};
+    accessMapHandler = {};
+    _forDebugging_memCreatedMap.current = entriesMap;
   };
 
-  return { stateMap, getAccessHandler, clearState };
+  return { getStateValue, setStateValue, getAccessMapHandler, clearState };
 };
 
-export const _forDebugging_getCreatedMap = (): Map<InterstateKey, StateEntry<unknown>> =>
-  _forDebugging_memCreatedMap;
+export const _forDebugging_getCreatedMap = (): MemCreatedMap => _forDebugging_memCreatedMap;
