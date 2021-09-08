@@ -4,6 +4,7 @@ import './assets/expectTriggersNumber';
 import type { TestFlags } from './assets/testFlags';
 import { flagManager } from './assets/testFlags';
 import type { RunTestCase, TestParameters } from './assets/TestTypes';
+import { testChangingInterface } from './test_cases/testChangingInterface';
 import { testCreateAndInitInterstate } from './test_cases/testCreateAndInitInterstate';
 import { testInitInterstate } from './test_cases/testInitInterstate';
 import { testReadInterstateAcceptSelector } from './test_cases/testReadInterstateAcceptSelector';
@@ -13,7 +14,6 @@ import { testResetInterstate } from './test_cases/testResetInterstate';
 import { testScenariosWithSiblings } from './test_cases/testScenariosWithSiblings';
 import { testSetInterstateCheckedByReadInterstate } from './test_cases/testSetInterstateCheckedByReadInterstate';
 import { testSetInterstateCheckedByUseInterstate } from './test_cases/testSetInterstateCheckedByUseInterstate';
-import { testUnsuccessfulChangingInterface } from './test_cases/testUnsuccessfulChangingInterface';
 import { testUseInterstateAcceptSelector } from './test_cases/testUseInterstateAcceptSelector';
 import { testUseInterstateKeyInterface } from './test_cases/testUseInterstateKeyInterface';
 import { testUseInterstateKeysInterface } from './test_cases/testUseInterstateKeysInterface';
@@ -64,7 +64,7 @@ export const testSuites = (
         testUseInterstateSchemaObjInterface,
         testUseInterstateSchemaFnInterface,
         testUseInterstateAcceptSelector,
-        testUnsuccessfulChangingInterface,
+        testChangingInterface,
         testScenariosWithSiblings,
         testSetInterstateCheckedByUseInterstate,
         testResetInterstate,
@@ -80,7 +80,7 @@ export const testSuites = (
           testUseInterstateSchemaObjInterface,
           testUseInterstateSchemaFnInterface,
           testUseInterstateAcceptSelector,
-          testUnsuccessfulChangingInterface,
+          testChangingInterface,
           testScenariosWithSiblings,
           testSetInterstateCheckedByUseInterstate,
         ],
@@ -91,7 +91,7 @@ export const testSuites = (
           testUseInterstateSchemaObjInterface,
           testUseInterstateSchemaFnInterface,
           testUseInterstateAcceptSelector,
-          testUnsuccessfulChangingInterface,
+          testChangingInterface,
           testScenariosWithSiblings,
           testSetInterstateCheckedByUseInterstate,
         ],

@@ -133,6 +133,51 @@ export const testUseInterstateKeysInterface: TestCase = [
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
+    rerender(
+      <StrictMode>
+        <TestComponent
+          {...{
+            testId: testComponentID,
+            keys: ['foo'],
+            effectFn: () => effectCounter++,
+          }}
+        />
+      </StrictMode>
+    );
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"foo":15}');
+    expect([triggersCounter, 'foo']).triggersNumberToBe(1);
+    expect([triggersCounter, 77]).triggersNumberToBe(0);
+    expect([triggersCounter, symbolKey]).triggersNumberToBe(0);
+    expect(effectCounter).numberToBeConsideringFlag(1);
+    effectCounter = 0;
+
+    act(() => setInterstate({ foo: 111, 77: 'go' }));
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"foo":111}');
+    expect([triggersCounter, 'foo']).triggersNumberToBe(1);
+    expect([triggersCounter, 77]).triggersNumberToBe(0);
+    expect([triggersCounter, symbolKey]).triggersNumberToBe(0);
+    expect(effectCounter).numberToBeConsideringFlag(1);
+    effectCounter = 0;
+
+    act(() => setInterstate({ 77: 'nope' }));
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"foo":111}');
+    expect([triggersCounter, 'foo']).triggersNumberToBe(1);
+    expect([triggersCounter, 77]).triggersNumberToBe(0);
+    expect([triggersCounter, symbolKey]).triggersNumberToBe(0);
+    expect(effectCounter).numberToBeConsideringFlag(0);
+
+    act(() => setInterstate({ foo: -1 }));
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"foo":-1}');
+    expect([triggersCounter, 'foo']).triggersNumberToBe(1);
+    expect([triggersCounter, 77]).triggersNumberToBe(0);
+    expect([triggersCounter, symbolKey]).triggersNumberToBe(0);
+    expect(effectCounter).numberToBeConsideringFlag(1);
+    effectCounter = 0;
+
     rerender(<></>);
 
     expect([triggersCounter, 'foo']).triggersNumberToBe(0);

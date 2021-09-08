@@ -104,7 +104,7 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
 
   const reactSubscribeState: ReactSubscribeState<M> = <K extends keyof M, R>(
     notifyingTrigger: () => void,
-    getValueFromState: TakeStateAndCalculateValue<M, K, R>,
+    getValueFromState: TakeStateAndCalculateValue<M, R>,
     initValues?: InitValuesForSubscribing<M, K>
   ): SubscribeStateMethods<R> => {
     let calculatedValue: R;
@@ -130,7 +130,7 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
 
           return [key, stateEntry.stateValue?.value];
         })
-      ) as Pick<M, K>;
+      ) as M;
 
       calculatedValue = getValueFromState(stateSlice);
     } else {

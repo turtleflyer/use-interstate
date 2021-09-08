@@ -22,55 +22,54 @@ export interface InitInterstate {
     ...args: A
   ): InterstateMethods<S>;
 
-  <G, DetectExplicitGenericUse = true>(
-    ...args: DetectExplicitGenericUse extends true
+  <PreventExplicitGenericUse extends never, S extends object>(
+    initStateValues: FilterOut<
+      S,
+      'must have keys' | 'must not be array' | 'must not be function'
+    > extends true
+      ? S
+      : never
+  ): InterstateMethods<
+    {
+      -readonly [P in keyof S]: S[P] extends undefined ? unknown : S[P];
+    }
+  >;
+
+  <S extends object = never, DetectExplicitGenericUse = [S] extends [never] ? false : true>(
+    initStateValues: [
+      DetectExplicitGenericUse,
+      FilterOut<S, 'must have keys' | 'must not be array' | 'must not be function'>,
+      S
+    ] extends [true, true, infer SD]
+      ? Partial<SD>
+      : never
+  ): InterstateMethods<S>;
+
+  <G = never, DetectExplicitGenericUse = [G] extends [never] ? false : true>(
+    ...wrongArgs: DetectExplicitGenericUse extends true
       ? [never] &
           (FilterOut<
             G,
             'must be object' | 'must have keys' | 'must not be array' | 'must not be function'
           > extends true
-            ? TypeError<'💣💥🙈 Wrong argument not suitable to explicit generic:', G>
+            ? TypeError<'💣💥🙈 The argument is not suitable to explicit generic:', G>
             : TypeError<
-                '💣💥🙈 The explicit generic type must be a nonempty object; but the wrong type is provided:',
+                '💣💥🙈 The explicit generic type is expected to be a nonempty object; but the wrong type is provided:',
                 G
               >)
       : never
   ): never;
 
-  <S extends object, DetectExplicitGenericUse = true>(
-    initStateValues: FilterOut<
-      S,
-      'must have keys' | 'must not be array' | 'must not be function'
-    > extends true
-      ? DetectExplicitGenericUse extends true
-        ? Partial<S> &
-            (DetectExplicitGenericUse extends DetectExplicitGenericUse
-              ? unknown
-              : DetectExplicitGenericUse)
-        : S
-      : never
-  ): InterstateMethods<
-    DetectExplicitGenericUse extends true
-      ? S
-      : {
-          -readonly [P in keyof S]: S[P] extends undefined ? unknown : S[P];
-        }
-  >;
-
   <PreventExplicitGenericUse extends never, A>(
-    arg: A extends A
+    wrongArg: A extends A
       ? TypeError<
-          '💣💥🙈 The argument must be a nonempty object; but the wrong type is provided:',
+          '💣💥🙈 The argument is expected to be a nonempty object; but the wrong type is provided:',
           A
         >
       : A
   ): never;
 
-  <G extends object>(
-    arg1: any,
-    arg2: TypeError<'💣💥🙈 Only one argument is allowed'>,
-    ...restArg: any
-  ): never;
+  <G>(arg1: any, arg2: TypeError<'💣💥🙈 Only one argument is allowed'>, ...restArg: any): never;
 }
 
 export interface InterstateMethods<M extends object = never> {
@@ -85,35 +84,14 @@ export interface InterstateMethods<M extends object = never> {
 
 export declare type UseInterstate<M extends object = never> = ([M] extends [never]
   ? {
-      <T = unknown>(key: InterstateKey, init?: undefined): T;
+      <T = unknown>(key: InterstateKey, initParam?: undefined): T;
 
       <PreventExplicitGenericUse extends never, T>(
         key: InterstateKey,
-        init: FilterOut<T, 'must not be function'> extends true ? T : never
+        initParam: FilterOut<T, 'must not be function'> extends true ? T : never
       ): T;
 
       <PreventExplicitGenericUse extends never, T>(key: InterstateKey, init: () => T): T;
-
-      <G, DetectExplicitGenericUse = true>(
-        key: DetectExplicitGenericUse extends true
-          ? DetectExplicitGenericUse &
-              TypeError<'💣💥🙈 An explicit generic type is allowed only if the init argument is omitted or undefined'>
-          : never,
-        init: any
-      ): never;
-
-      <PreventExplicitGenericUse extends never, K, IP>(
-        possibleWrongKey: K extends InterstateKey
-          ? K
-          : TypeError<'💣💥🙈 The argument is not a valid key:', K>,
-        possibleWrongInitParam: FilterOut<IP, 'must be function'> extends true
-          ? IP &
-              TypeError<
-                '💣💥🙈 If the init argument is a function, it must not have parameters; but the wrong type is provided:',
-                IP
-              >
-          : never
-      ): never;
 
       <PreventExplicitGenericUse extends never, K extends InterstateKey>(
         keys: [K] extends [never] ? never : readonly K[]
@@ -134,46 +112,139 @@ export declare type UseInterstate<M extends object = never> = ([M] extends [neve
           'must have keys' | 'must not be array' | 'must not be function'
         > extends true
           ? S | (() => S)
-          : never
+          : never,
+        deps?: readonly any[]
       ): {
         -readonly [P in keyof S]: S[P];
       };
 
-      <G, DetectExplicitGenericUse = true>(
-        arg: DetectExplicitGenericUse extends true
-          ? DetectExplicitGenericUse &
-              TypeError<
-                '💣💥🙈 The explicit generic type defines the type of the state record if the argument is a valid key name; or it must be an nonempty object with the list of matching keys as an argument; but the wrong type is provided:',
-                G
-              >
-          : never
+      <G = never, DetectExplicitGenericUse = [G] extends [never] ? false : true>(
+        firstArg: DetectExplicitGenericUse extends true
+          ? TypeError<
+              '💣💥🙈 The explicit generic type defines the type of the state value if the argument is a valid key with no init value being provided; it also can be a nonempty object in the case of the argument being a list of the matching keys; but the wrong type is provided:',
+              G
+            >
+          : never,
+        secondArg?: any
       ): never;
 
       <PreventExplicitGenericUse extends never, A>(
         wrongArg: FilterOut<A, 'must be array'> extends true
           ? A &
               TypeError<
-                '💣💥🙈 If the argument is an array, it must be a list of valid keys; but the wrong type is provided:',
+                '💣💥🙈 If the argument is an array, it is expected to be a list of valid keys; but the wrong type is provided:',
                 A
               >
           : FilterOut<A, 'must be function'> extends true
-          ? TypeError<
-              '💣💥🙈 If the argument is a function, it must not have parameters and must return a nonempty object; but the wrong type is provided:',
-              A
-            >
+          ? ((arg: any, ...restA: any) => any) extends A
+            ? TypeError<
+                '💣💥🙈 If the argument is a function, it is expected to have no parameters; but the wrong type is provided:',
+                A
+              >
+            : TypeError<
+                '💣💥🙈 If the argument is a function, it is expected to return a nonempty object; but the wrong type is provided:',
+                A
+              >
           : FilterOut<A, 'must be object'> extends true
           ? TypeError<
-              '💣💥🙈 If the argument is an object, it must be nonempty; but the wrong type is provided:',
+              '💣💥🙈 If the argument is an object, it is expected to be nonempty; but the wrong type is provided:',
               A
             >
           : TypeError<
-              '💣💥🙈 The argument is expected to be either a valid key, a list of keys, a nonempty object, or a function returning a nonempty object; but the wrong type is provided:',
+              '💣💥🙈 The argument is expected to be either a valid key, list of keys, object, or function returning an object; but the wrong type is provided:',
               A
             >
       ): never;
+
+      <PreventExplicitGenericUse extends never, FA, SA>(
+        firstArg: FA extends readonly [InterstateKey, ...InterstateKey[]]
+          ? FA
+          : FA extends infer FAD
+          ? [
+              FAD,
+              FilterOut<
+                FAD,
+                'must be object' | 'must have keys' | 'must not be array' | 'must not be function'
+              >,
+              FAD extends () => infer FAR
+                ? FilterOut<
+                    FAR,
+                    | 'must be object'
+                    | 'must have keys'
+                    | 'must not be array'
+                    | 'must not be function'
+                  > extends true
+                  ? 'valid init parameter'
+                  : 'wrong parameter'
+                : 'not a case'
+            ] extends [InterstateKey, any, any] | [any, true, any] | [any, any, 'valid parameter']
+            ? FAD
+            : TypeError<
+                '💣💥🙈 The first argument is expected to be either a valid key, list of keys, nonempty object, or function with no parameters returning a nonempty object; but the wrong type is provided:',
+                FAD
+              >
+          : never,
+        secondArg: FA extends InterstateKey
+          ? FilterOut<SA, 'must be function'> extends true
+            ? SA &
+                TypeError<
+                  '💣💥🙈 If the second argument is a function, it is expected to have no parameters; but the wrong type is provided:',
+                  SA
+                >
+            : never
+          : FilterOut<FA, 'must be array'> extends true
+          ? TypeError<'💣💥🙈 No second argument is allowed'>
+          : TypeError<
+              '💣💥🙈 The second argument is optional and expected to be a list of deps; but the wrong type is provided:',
+              SA
+            >
+      ): never;
+
+      acceptSelector: {
+        <PreventExplicitGenericUse extends never, S extends object, R>(
+          selector: InterstateSelector<S, R>,
+          deps?: readonly any[]
+        ): R;
+
+        <PreventExplicitGenericUse extends never, A>(
+          wrongArg: ((arg1: any, arg2: any, ...restA: any) => any) extends A
+            ? A &
+                TypeError<
+                  '💣💥🙈 The argument is expected to be a valid selector function with one parameter (if any); but the wrong type is provided:',
+                  A
+                >
+            : TypeError<
+                '💣💥🙈 The argument is expected to be a valid selector function; but the wrong type is provided:',
+                A
+              >
+        ): never;
+
+        <PreventExplicitGenericUse extends never, FA, SA>(
+          firstArg: ((arg1: any, arg2: any, ...restA: any) => any) extends FA
+            ? TypeError<
+                '💣💥🙈 The first argument is expected to be a valid selector function with one parameter (if any); but the wrong type is provided:',
+                FA
+              >
+            : FA extends InterstateSelector<object, unknown>
+            ? FA
+            : TypeError<
+                '💣💥🙈 The first arguments is expected to be a valid selector function; but the wrong type is provided:',
+                FA
+              >,
+          secondArg: FA extends InterstateSelector<object, unknown>
+            ? TypeError<
+                '💣💥🙈 The second argument is optional and expected to be a list of deps; but the wrong type is provided:',
+                SA
+              >
+            : SA
+        ): never;
+      };
     }
   : {
-      <PreventExplicitGenericUse extends never, K extends keyof M>(key: K, init?: undefined): M[K];
+      <PreventExplicitGenericUse extends never, K extends keyof M>(
+        key: K,
+        initParam?: undefined
+      ): M[K];
 
       <
         PreventExplicitGenericUse extends never,
@@ -181,7 +252,7 @@ export declare type UseInterstate<M extends object = never> = ([M] extends [neve
         IP extends ReadonlyIfArray<M[K]>
       >(
         key: K,
-        init: FilterOut<IP, 'must not be function'> extends true ? IP : never
+        initParam: FilterOut<IP, 'must not be function'> extends true ? IP : never
       ): M[K];
 
       <
@@ -190,60 +261,8 @@ export declare type UseInterstate<M extends object = never> = ([M] extends [neve
         IP extends () => ReadonlyIfArray<M[K]>
       >(
         key: K,
-        init: IP
+        initParam: IP
       ): M[K];
-
-      <G, DetectExplicitGenericUse = true>(
-        initState: DetectExplicitGenericUse extends true
-          ? DetectExplicitGenericUse & TypeError<'💣💥🙈 An explicit generic type is not allowed'>
-          : never,
-        arg2?: any
-      ): never;
-
-      <PreventExplicitGenericUse extends never, K, IP>(
-        possibleWrongKey: K extends keyof M
-          ? K
-          : TypeError<
-              '💣💥🙈 The argument is not a valid key:',
-              K,
-              '; allowed keys are:',
-              keyof M & InterstateKey
-            >,
-        possibleWrongInitParam: FilterOut<IP, 'must be function'> extends true
-          ? ((arg: any, ...restA: any) => any) extends IP
-            ? IP &
-                TypeError<
-                  '💣💥🙈 If the init argument is a function, it must not have parameters; but the wrong type is provided:',
-                  IP
-                >
-            : TypeError<
-                '💣💥🙈 If the init argument is a function, it must be:',
-                () => M[K & keyof M],
-                ', returning the valid value for the key:',
-                K,
-                '; but the wrong type is provided:',
-                IP
-              >
-          : [Exclude<M[K & keyof M], (...x: any) => any>] extends [never]
-          ? TypeError<
-              '💣💥🙈 The init argument must be a function:',
-              () => M[K & keyof M],
-              ', returning the valid value for the key:',
-              K,
-              '; but the wrong type is provided:',
-              IP
-            >
-          : TypeError<
-              '💣💥🙈 The init argument must be the valid value if it is not a function:',
-              M[K & keyof M],
-              'or a function:',
-              () => M[K & keyof M],
-              'returning the valid value for the key:',
-              K,
-              '; but the wrong type is provided:',
-              IP
-            >
-      ): never;
 
       <PreventExplicitGenericUse extends never, K extends keyof M>(
         keys: [K] extends [never] ? never : readonly K[]
@@ -252,28 +271,42 @@ export declare type UseInterstate<M extends object = never> = ([M] extends [neve
       <PreventExplicitGenericUse extends never, K extends keyof M>(
         initState: [K] extends [never]
           ? never
-          : PickWithReadonlyArrays<M, K> | (() => PickWithReadonlyArrays<M, K>)
+          : PickWithReadonlyArrays<M, K> | (() => PickWithReadonlyArrays<M, K>),
+        deps?: readonly any[]
       ): Pick<M, K>;
+
+      <G = never, DetectExplicitGenericUse = [G] extends [never] ? false : true>(
+        firstParam: DetectExplicitGenericUse extends true
+          ? TypeError<'💣💥🙈 No explicit generic type is allowed'>
+          : never,
+        secondParam?: any
+      ): never;
 
       <PreventExplicitGenericUse extends never, A>(
         wrongArg: FilterOut<A, 'must be array'> extends true
           ? A &
               TypeError<
-                '💣💥🙈 If the argument is an array, it must be a list of valid keys:',
+                '💣💥🙈 If the argument is an array, it is expected to be a list of valid keys:',
                 (keyof M & InterstateKey)[],
                 '; but the wrong type is provided:',
                 A
               >
           : FilterOut<A, 'must be function'> extends true
+          ? ((arg: any, ...restA: any) => any) extends A
+            ? A &
+                TypeError<
+                  '💣💥🙈 If the argument is a function, it is expected to have no parameters; but the wrong type is provided:',
+                  A
+                >
+            : TypeError<
+                '💣💥🙈 If the argument is a function, it is expected to return an object representing the part of the state:',
+                M,
+                '; but the wrong type is provided:',
+                A
+              >
+          : FilterOut<A, 'must be object' | 'must not be array'> extends true
           ? TypeError<
-              '💣💥🙈 If the argument is a function, it must not have parameters and must return an object representing the part of the state:',
-              M,
-              '; but the wrong type is provided:',
-              A
-            >
-          : FilterOut<A, 'must be object'> extends true
-          ? TypeError<
-              '💣💥🙈 If the argument is an object, it must represent the part of the state:',
+              '💣💥🙈 If the argument is an object, it is expected to represent the part of the state:',
               M,
               '; but the wrong type is provided:',
               A
@@ -281,23 +314,126 @@ export declare type UseInterstate<M extends object = never> = ([M] extends [neve
           : TypeError<
               '💣💥🙈 The argument is expected to be either a valid key:',
               keyof M & InterstateKey,
-              ', a list of keys:',
-              (keyof M & InterstateKey)[],
-              ', a nonempty object, or a function returning a nonempty object representing the part of the state:',
+              ', a list of keys, object, or function returning an object representing the part of the state:',
               M,
               '; but the wrong type is provided:',
               A
             >
       ): never;
+
+      <PreventExplicitGenericUse extends never, FA, SA>(
+        firstArg: FA extends readonly [keyof M, ...(keyof M)[]]
+          ? FA
+          : FA extends infer FAD
+          ? [
+              FAD,
+              FilterOut<FAD, 'must have keys'>,
+              FAD extends (keyof FAD extends keyof M ? PickWithReadonlyArrays<M, keyof FAD> : never)
+                ? 'valid init parameter'
+                : 'not a case',
+              FAD extends () => infer FAR
+                ? FAR extends (
+                    keyof FAR extends keyof M ? PickWithReadonlyArrays<M, keyof FAR> : never
+                  )
+                  ? 'valid init parameter'
+                  : 'wrong parameter'
+                : 'not a case'
+            ] extends
+              | [keyof M, any, any, any]
+              | [any, true, 'valid init parameter', any]
+              | [any, any, any, 'valid init parameter']
+            ? FAD
+            : TypeError<
+                '💣💥🙈 The first argument is expected to be either a valid key:',
+                keyof M & InterstateKey,
+                ', a list of keys, object, or function returning an object representing the part of the state:',
+                M,
+                '; but the wrong type is provided:',
+                FA
+              >
+          : never,
+        secondArg: FA extends keyof M
+          ? [Exclude<M[FA], (...x: any) => any>] extends [never]
+            ? SA &
+                TypeError<
+                  '💣💥🙈 The allowed type of the second argument is:',
+                  () => M[FA],
+                  '; but the wrong type is provided:',
+                  SA
+                >
+            : TypeError<
+                '💣💥🙈 The allowed type of the second argument is:',
+                M[FA] | (() => M[FA]),
+                '; but the wrong type is provided:',
+                SA
+              >
+          : FilterOut<FA, 'must be array'> extends true
+          ? TypeError<'💣💥🙈 No second argument is allowed'>
+          : TypeError<
+              '💣💥🙈 The second argument is optional and expected to be a list of deps; but the wrong type is provided:',
+              SA
+            >
+      ): never;
+
+      acceptSelector: {
+        <PreventExplicitGenericUse extends never, R>(
+          selector: InterstateSelector<M, R>,
+          deps?: readonly any[]
+        ): R;
+
+        <PreventExplicitGenericUse extends never, A>(
+          wrongArg: A extends A
+            ? TypeError<
+                '💣💥🙈 The argument is expected to be a valid selector function for the state:',
+                M,
+                '; but the wrong type is provided:',
+                A
+              >
+            : A
+        ): never;
+
+        <PreventExplicitGenericUse extends never, FA, SA>(
+          firstArg: FA extends InterstateSelector<M, unknown>
+            ? FA
+            : TypeError<
+                '💣💥🙈 The first argument is expected to be a valid selector function for the state:',
+                M,
+                '; but the wrong type is provided:',
+                FA
+              >,
+          secondArg: FA extends InterstateSelector<M, unknown>
+            ? TypeError<
+                '💣💥🙈 The second argument is optional and expected to be a list of deps; but the wrong type is provided:',
+                SA
+              >
+            : SA
+        ): never;
+      };
+
+      [_helpInfer]?: M;
     }) & {
-  <G extends keyof M>(
+  <G>(
     arg1: any,
     arg2: any,
     arg3: TypeError<'💣💥🙈 The max number of arguments is 2'>,
     ...restArg: any
   ): never;
 
-  acceptSelector: AcceptSelector<M>;
+  acceptSelector: {
+    <G = never, DetectExplicitGenericUse = [G] extends [never] ? false : true>(
+      firstArg: DetectExplicitGenericUse extends true
+        ? TypeError<'💣💥🙈 No explicit generic type is allowed'>
+        : never,
+      secondArg?: any
+    ): never;
+
+    <G>(
+      arg1: any,
+      arg2: any,
+      arg3: TypeError<'💣💥🙈 The max number of arguments is 2'>,
+      ...restArg: any
+    ): never;
+  };
 };
 
 export declare type UseInterstateInitParam<T> =
@@ -307,46 +443,6 @@ export declare type UseInterstateInitParam<T> =
 export declare type UseInterstateSchemaParam<M extends object, K extends keyof M = keyof M> =
   | Pick<M, K>
   | (() => Pick<M, K>);
-
-export declare type AcceptSelector<M extends object = never> = ([M] extends [never]
-  ? {
-      <PreventExplicitGenericUse extends never, S extends object, R>(
-        selector: InterstateSelector<S, R>
-      ): R;
-
-      <PreventExplicitGenericUse extends never, A>(
-        wrongArg: A extends A
-          ? TypeError<
-              '💣💥🙈 The argument must be a valid selector function; but the wrong type is provided:',
-              A
-            >
-          : A
-      ): never;
-    }
-  : {
-      <PreventExplicitGenericUse extends never, R>(selector: InterstateSelector<M, R>): R;
-
-      <PreventExplicitGenericUse extends never, A>(
-        wrongArg: A extends A
-          ? TypeError<
-              '💣💥🙈 The argument must be a valid selector function for the state:',
-              M,
-              '; but the wrong type is provided:',
-              A
-            >
-          : A
-      ): never;
-
-      [_helpInfer]?: M;
-    }) & {
-  <G, DetectExplicitGenericUse = true>(
-    selector: DetectExplicitGenericUse extends true
-      ? DetectExplicitGenericUse & TypeError<'💣💥🙈 An explicit generic type is not allowed'>
-      : never
-  ): never;
-
-  <G>(arg1: any, arg2: TypeError<'💣💥🙈 Only one argument is allowed'>, ...restArg: any): never;
-};
 
 export declare type InterstateSelector<M extends object, R = unknown> = (readState: M) => R;
 
@@ -367,13 +463,12 @@ export declare type ReadInterstate<M extends object = never> = ([M] extends [nev
           : never
       ): S;
 
-      <G, DetectExplicitGenericUse = true>(
+      <G = never, DetectExplicitGenericUse = [G] extends [never] ? false : true>(
         arg: DetectExplicitGenericUse extends true
-          ? DetectExplicitGenericUse &
-              TypeError<
-                '💣💥🙈 The explicit generic type defines the type of the state record if the argument is a valid key name; or it must be an nonempty object with the list of matching keys as an argument; but the wrong type is provided:',
-                G
-              >
+          ? TypeError<
+              '💣💥🙈 The explicit generic type defines the type of the state value if the argument is a valid key; it also can be a nonempty object in the case of the argument being a list of the matching keys; but the wrong type is provided:',
+              G
+            >
           : never
       ): never;
 
@@ -381,14 +476,33 @@ export declare type ReadInterstate<M extends object = never> = ([M] extends [nev
         wrongArg: FilterOut<A, 'must be array'> extends true
           ? A &
               TypeError<
-                '💣💥🙈 If the argument is an array, it must be a list of valid keys; but the wrong type is provided:',
+                '💣💥🙈 If the argument is an array, it is expected to be a list of valid keys; but the wrong type is provided:',
                 A
               >
           : TypeError<
-              '💣💥🙈 The argument is expected to be either a valid key or a list of keys; but the wrong type is provided:',
+              '💣💥🙈 The argument is expected to be either a valid key or list of keys; but the wrong type is provided:',
               A
             >
       ): never;
+
+      acceptSelector: {
+        <PreventExplicitGenericUse extends never, S extends object, R>(
+          selector: InterstateSelector<S, R>
+        ): R;
+
+        <PreventExplicitGenericUse extends never, A>(
+          wrongArg: ((arg1: any, arg2: any, ...restA: any) => any) extends A
+            ? A &
+                TypeError<
+                  '💣💥🙈 The argument is expected to be a valid selector function with one parameter (if any); but the wrong type is provided:',
+                  A
+                >
+            : TypeError<
+                '💣💥🙈 The argument is expected to be a valid selector function; but the wrong type is provided:',
+                A
+              >
+        ): never;
+      };
     }
   : {
       <PreventExplicitGenericUse extends never, K extends keyof M>(key: K): M[K];
@@ -397,9 +511,9 @@ export declare type ReadInterstate<M extends object = never> = ([M] extends [nev
         keys: [K] extends [never] ? never : readonly K[]
       ): Pick<M, K>;
 
-      <G, DetectExplicitGenericUse = true>(
+      <G = never, DetectExplicitGenericUse = [G] extends [never] ? false : true>(
         initState: DetectExplicitGenericUse extends true
-          ? DetectExplicitGenericUse & TypeError<'💣💥🙈 An explicit generic type is not allowed'>
+          ? TypeError<'💣💥🙈 No explicit generic type is allowed'>
           : never
       ): never;
 
@@ -407,7 +521,7 @@ export declare type ReadInterstate<M extends object = never> = ([M] extends [nev
         wrongArg: FilterOut<A, 'must be array'> extends true
           ? A &
               TypeError<
-                '💣💥🙈 If the argument is an array, it must be a list of valid keys:',
+                '💣💥🙈 If the argument is an array, it is expected to be a list of valid keys:',
                 (keyof M & InterstateKey)[],
                 '; but the wrong type is provided:',
                 A
@@ -415,20 +529,39 @@ export declare type ReadInterstate<M extends object = never> = ([M] extends [nev
           : TypeError<
               '💣💥🙈 The argument is expected to be either a valid key:',
               keyof M & InterstateKey,
-              ', a list of keys:',
-              (keyof M & InterstateKey)[],
-              '; but the wrong type is provided:',
+              ', or a list of keys; but the wrong type is provided:',
               A
             >
       ): never;
-    }) & {
-  <G>(
-    arg1: any,
-    arg2: TypeError<'💣💥🙈 The max number of arguments is 1'>,
-    ...restArg: any
-  ): never;
 
-  acceptSelector: AcceptSelector<M>;
+      acceptSelector: {
+        <PreventExplicitGenericUse extends never, R>(selector: InterstateSelector<M, R>): R;
+
+        <PreventExplicitGenericUse extends never, A>(
+          wrongArg: A extends A
+            ? TypeError<
+                '💣💥🙈 The argument is expected to be a valid selector function for the state:',
+                M,
+                '; but the wrong type is provided:',
+                A
+              >
+            : A
+        ): never;
+      };
+
+      [_helpInfer]?: M;
+    }) & {
+  <G>(arg1: any, arg2: TypeError<'💣💥🙈 Only one argument is allowed'>, ...restArg: any): never;
+
+  acceptSelector: {
+    <G = never, DetectExplicitGenericUse = [G] extends [never] ? false : true>(
+      selector: DetectExplicitGenericUse extends true
+        ? TypeError<'💣💥🙈 No explicit generic type is allowed'>
+        : never
+    ): never;
+
+    <G>(arg1: any, arg2: TypeError<'💣💥🙈 Only one argument is allowed'>, ...restArg: any): never;
+  };
 };
 
 export declare type SetInterstate<M extends object = never> = ([M] extends [never]
@@ -442,26 +575,6 @@ export declare type SetInterstate<M extends object = never> = ([M] extends [neve
         key: InterstateKey,
         setter: (prevValue: T) => T
       ): void;
-
-      <G, DetectExplicitGenericUse = true>(
-        setter: DetectExplicitGenericUse extends true
-          ? DetectExplicitGenericUse & TypeError<'💣💥🙈 An explicit generic type is not allowed'>
-          : never,
-        arg2?: any
-      ): never;
-
-      <PreventExplicitGenericUse extends never, K, SP>(
-        possibleWrongKey: K extends InterstateKey
-          ? K
-          : TypeError<'💣💥🙈 The argument is not a valid key:', K>,
-        possibleWrongSetter: FilterOut<SP, 'must be function'> extends true
-          ? SP &
-              TypeError<
-                '💣💥🙈 If the setter argument is a function, it must have one parameter (if any) of the same type as the returned value; but the wrong type is provided:',
-                SP
-              >
-          : never
-      ): never;
 
       <PreventExplicitGenericUse extends never, S extends object>(
         setter: FilterOut<
@@ -488,149 +601,135 @@ export declare type SetInterstate<M extends object = never> = ([M] extends [neve
           : never
       ): void;
 
+      <G = never, DetectExplicitGenericUse = [G] extends [never] ? false : true>(
+        firstArg: DetectExplicitGenericUse extends true
+          ? TypeError<'💣💥🙈 No explicit generic type is allowed'>
+          : never,
+        secondArg?: any
+      ): never;
+
       <PreventExplicitGenericUse extends never, A>(
         wrongArg: FilterOut<A, 'must be function'> extends true
           ? A &
               TypeError<
-                '💣💥🙈 If the argument is a function, it must have one parameter (if any) and must return an object not conflicted with type of the parameter; but the wrong type is provided:',
+                '💣💥🙈 If the argument is a function, it is expected to have one parameter (if any) and return a nonempty object not conflicting with the type of the parameter; but the wrong type is provided:',
                 A
               >
-          : FilterOut<A, 'must be object'> extends true
+          : FilterOut<A, 'must be object' | 'must not be array'> extends true
           ? TypeError<
-              '💣💥🙈 If the argument is an object, it must be nonempty; but the wrong type is provided:',
+              '💣💥🙈 If the argument is an object, it is expected to be nonempty; but the wrong type is provided:',
               A
             >
           : TypeError<
-              '💣💥🙈 The argument is expected to be either an object or valid setter function; but the wrong type is provided:',
+              '💣💥🙈 The argument is expected to be either a nonempty object or valid setter function; but the wrong type is provided:',
               A
             >
+      ): never;
+
+      <PreventExplicitGenericUse extends never, FA, SA>(
+        firstArg: FA extends InterstateKey
+          ? FA
+          : TypeError<'💣💥🙈 The argument is not a valid key:', FA>,
+        secondArg: FilterOut<SA, 'must be function'> extends true
+          ? SA &
+              TypeError<
+                '💣💥🙈 If the second argument is a function, it is expected to have one parameter (if any) of the same type as the returned value; but the wrong type is provided:',
+                SA
+              >
+          : never
       ): never;
     }
   : {
       <PreventExplicitGenericUse extends never, K extends keyof M, SP>(
         key: K,
-        setter: FilterOut<SP, 'must not be function'> extends true
-          ? SP extends ReadonlyIfArray<M[K]>
-            ? SP
-            : never
+        setter: [FilterOut<SP, 'must not be function'>, SP] extends [true, ReadonlyIfArray<M[K]>]
+          ? SP
           : never
       ): void;
 
-      <
-        PreventExplicitGenericUse extends never,
-        K extends keyof M,
-        SP extends (prevValue: M[K]) => ReadonlyIfArray<M[K]>
-      >(
+      <PreventExplicitGenericUse extends never, K extends keyof M>(
         key: K,
-        setter: SP
+        setter: (prevValue: M[K]) => ReadonlyIfArray<M[K]>
       ): void;
-
-      <G, DetectExplicitGenericUse = true>(
-        setter: DetectExplicitGenericUse extends true
-          ? DetectExplicitGenericUse & TypeError<'💣💥🙈 An explicit generic type is not allowed'>
-          : never,
-        arg2?: any
-      ): never;
-
-      <PreventExplicitGenericUse extends never, K, SP>(
-        possibleWrongKey: K extends keyof M
-          ? K
-          : TypeError<
-              '💣💥🙈 The argument is not a valid key:',
-              K,
-              '; allowed keys are:',
-              keyof M & InterstateKey
-            >,
-        possibleWrongInitParam: FilterOut<SP, 'must be function'> extends true
-          ? ((arg1: any, arg2: any, ...restA: any) => any) extends SP
-            ? SP &
-                TypeError<
-                  '💣💥🙈 If the setter is a function, it must have one parameter (if any) of type:',
-                  M[K & keyof M],
-                  '; but the wrong type is provided:',
-                  SP
-                >
-            : TypeError<
-                '💣💥🙈 If the setter is a function, it must be:',
-                ((prevValue: M[K & keyof M]) => M[K & keyof M]) | (() => M[K & keyof M]),
-                ', returning the valid value for the key:',
-                K,
-                '; but the wrong type is provided:',
-                SP
-              >
-          : [Exclude<M[K & keyof M], (...x: any) => any>] extends [never]
-          ? TypeError<
-              '💣💥🙈 The setter must be a function:',
-              ((prevValue: M[K & keyof M]) => M[K & keyof M]) | (() => M[K & keyof M]),
-              ', returning the valid value for the key:',
-              K,
-              '; but the wrong type is provided:',
-              SP
-            >
-          : TypeError<
-              '💣💥🙈 The setter must be the valid value if it is not a function:',
-              M[K & keyof M],
-              'or a function:',
-              ((prevValue: M[K & keyof M]) => M[K & keyof M]) | (() => M[K & keyof M]),
-              'returning the valid value for the key:',
-              K,
-              '; but the wrong type is provided:',
-              SP
-            >
-      ): never;
 
       <PreventExplicitGenericUse extends never, K extends keyof M>(
         setter: [K] extends [never] ? never : PickWithReadonlyArrays<M, K>
       ): void;
 
-      <
-        PreventExplicitGenericUse extends never,
-        K extends keyof M,
-        SP extends (prevState: M) => any
-      >(
-        setter: [K] extends [never] ? never : SP & ((prevState: M) => PickWithReadonlyArrays<M, K>)
+      <PreventExplicitGenericUse extends never, K extends keyof M>(
+        setter: [K] extends [never] ? never : (prevState: M) => PickWithReadonlyArrays<M, K>
       ): void;
+
+      <G = never, DetectExplicitGenericUse = [G] extends [never] ? false : true>(
+        firstArg: DetectExplicitGenericUse extends true
+          ? TypeError<'💣💥🙈 No explicit generic type is allowed'>
+          : never,
+        secondArg?: any
+      ): never;
 
       <PreventExplicitGenericUse extends never, A>(
         wrongArg: A extends keyof M
-          ? [Exclude<M[A & keyof M], (...x: any) => any>] extends [never]
+          ? [Exclude<M[A], (...x: any) => any>] extends [never]
             ? A &
                 TypeError<
                   '💣💥🙈 The second argument for the key:',
                   A,
-                  'is expected; it must be:',
-                  ((prevValue: M[A & keyof M]) => M[A & keyof M]) | (() => M[A & keyof M])
+                  'is expected:',
+                  ((prevValue: M[A]) => M[A]) | (() => M[A])
                 >
             : TypeError<
                 '💣💥🙈 The second argument for the key:',
                 A,
-                'is expected; it must be:',
-                | M[A & keyof M]
-                | ((prevValue: M[A & keyof M]) => M[A & keyof M])
-                | (() => M[A & keyof M])
+                'is expected:',
+                M[A] | ((prevValue: M[A]) => M[A]) | (() => M[A])
               >
           : FilterOut<A, 'must be function'> extends true
           ? TypeError<
-              '💣💥🙈 If the argument is a function, it must have one parameter (if any) for the state:',
+              '💣💥🙈 If the argument is a function, it is expected to take the state:',
               M,
-              'and return an object representing the part of the state:',
-              M,
-              '; but the wrong type is provided:',
+              'as an argument and return an object representing the part of the state; but the wrong type is provided:',
               A
             >
           : FilterOut<A, 'must be object' | 'must not be array'> extends true
           ? TypeError<
-              '💣💥🙈 If the argument is an object, it must represent the part of the state:',
+              '💣💥🙈 If the argument is an object, it is expected to represent the part of the state:',
               M,
               '; but the wrong type is provided:',
               A
             >
           : TypeError<
-              '💣💥🙈 The argument is expected to be either a nonempty object, or a function returning a nonempty object representing the part of the state:',
+              '💣💥🙈 The argument is expected to be either an object, or function returning an object representing the part of the state:',
               M,
               '; but the wrong type is provided:',
               A
             >
+      ): never;
+
+      <PreventExplicitGenericUse extends never, FA, SA>(
+        firstArg: FA extends keyof M
+          ? FA
+          : TypeError<
+              '💣💥🙈 The argument is not a valid key:',
+              FA,
+              '; allowed keys are:',
+              keyof M & InterstateKey
+            >,
+        secondArg: FA extends keyof M
+          ? [Exclude<M[FA], (...x: any) => any>] extends [never]
+            ? SA &
+                TypeError<
+                  '💣💥🙈 The allowed type of the second argument is:',
+                  ((prevValue: M[FA]) => M[FA]) | (() => M[FA]),
+                  '; but the wrong type is provided:',
+                  SA
+                >
+            : TypeError<
+                '💣💥🙈 The allowed type of the second argument is:',
+                M[FA] | ((prevValue: M[FA]) => M[FA]) | (() => M[FA]),
+                '; but the wrong type is provided:',
+                SA
+              >
+          : never
       ): never;
 
       [_helpInfer]?: M;
@@ -662,18 +761,10 @@ export declare type ResetInterstate<M extends object = never> = ([M] extends [ne
           : never
       ): void;
 
-      <G, DetectExplicitGenericUse = true>(
-        ...wrongArgs: DetectExplicitGenericUse extends true
-          ? [never] &
-              DetectExplicitGenericUse &
-              TypeError<'💣💥🙈 An explicit generic type is not allowed'>
-          : never
-      ): never;
-
       <PreventExplicitGenericUse extends never, A>(
-        wrongArg: [A] extends [A]
+        wrongArg: A extends A
           ? TypeError<
-              '💣💥🙈 The argument must be a nonempty object; but the wrong type is provided:',
+              '💣💥🙈 The argument is expected to be a nonempty object; but the wrong type is provided:',
               A
             >
           : A
@@ -692,18 +783,10 @@ export declare type ResetInterstate<M extends object = never> = ([M] extends [ne
           : never
       ): void;
 
-      <G, DetectExplicitGenericUse = true>(
-        ...wrongArgs: DetectExplicitGenericUse extends true
-          ? [never] &
-              DetectExplicitGenericUse &
-              TypeError<'💣💥🙈 An explicit generic type is not allowed'>
-          : never
-      ): never;
-
       <PreventExplicitGenericUse extends never, A>(
         wrongArg: [A] extends [A]
           ? TypeError<
-              '💣💥🙈 The argument must be a nonempty object representing the part of the state:',
+              '💣💥🙈 The argument is expected to be an object representing the part of the state:',
               M,
               '; but the wrong type is provided:',
               A
@@ -715,11 +798,13 @@ export declare type ResetInterstate<M extends object = never> = ([M] extends [ne
     }) & {
   (): void;
 
-  <G extends object>(
-    arg1: any,
-    arg2: TypeError<'💣💥🙈 Only one argument is allowed'>,
-    ...restArg: any
+  <G = never, DetectExplicitGenericUse = [G] extends [never] ? false : true>(
+    ...wrongArgs: DetectExplicitGenericUse extends true
+      ? [never] & TypeError<'💣💥🙈 No explicit generic type is allowed'>
+      : never
   ): never;
+
+  <G>(arg1: any, arg2: TypeError<'💣💥🙈 Only one argument is allowed'>, ...restArg: any): never;
 };
 
 declare const DeclareTypeError: unique symbol;

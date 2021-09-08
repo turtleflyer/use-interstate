@@ -27,13 +27,11 @@ export type GetStateUsingSelector<M extends object> = <R>(selector: InterstateSe
 
 export type ReactSubscribeState<M extends object> = <K extends keyof M, R>(
   notifyingTrigger: () => void,
-  takeStateAndCalculateValue: TakeStateAndCalculateValue<M, K, R>,
+  takeStateAndCalculateValue: TakeStateAndCalculateValue<M, R>,
   initValues?: InitValuesForSubscribing<M, K>
 ) => SubscribeStateMethods<R>;
 
-export type TakeStateAndCalculateValue<M extends object, K extends keyof M, R> = (
-  state: Pick<M, K>
-) => R;
+export type TakeStateAndCalculateValue<M extends object, R> = (state: M) => R;
 
 export type InitValuesForSubscribing<M extends object, K extends keyof M> = readonly (readonly [
   key: K,

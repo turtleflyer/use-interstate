@@ -181,6 +181,169 @@ export const testUseInterstateSchemaObjInterface: TestCase = [
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
+    rerender(
+      <StrictMode>
+        <TestComponent
+          {...{
+            testId: testComponentID,
+            initSchema: { foo: 0 },
+            deps: [],
+            effectFn: () => effectCounter++,
+          }}
+        />
+      </StrictMode>
+    );
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"foo":1}');
+    expect([triggersCounter, 'foo']).triggersNumberToBe(1);
+    expect([triggersCounter, 77]).triggersNumberToBe(0);
+    expect([triggersCounter, symbolKey]).triggersNumberToBe(0);
+    expect(effectCounter).numberToBeConsideringFlag(1);
+    effectCounter = 0;
+
+    act(() => setInterstate({ foo: 111, 77: 'go' }));
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"foo":111}');
+    expect([triggersCounter, 'foo']).triggersNumberToBe(1);
+    expect([triggersCounter, 77]).triggersNumberToBe(0);
+    expect([triggersCounter, symbolKey]).triggersNumberToBe(0);
+    expect(effectCounter).numberToBeConsideringFlag(1);
+    effectCounter = 0;
+
+    act(() => setInterstate({ 77: 'nope' }));
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"foo":111}');
+    expect([triggersCounter, 'foo']).triggersNumberToBe(1);
+    expect([triggersCounter, 77]).triggersNumberToBe(0);
+    expect([triggersCounter, symbolKey]).triggersNumberToBe(0);
+    expect(effectCounter).numberToBeConsideringFlag(0);
+
+    act(() => setInterstate({ foo: -1 }));
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"foo":-1}');
+    expect([triggersCounter, 'foo']).triggersNumberToBe(1);
+    expect([triggersCounter, 77]).triggersNumberToBe(0);
+    expect([triggersCounter, symbolKey]).triggersNumberToBe(0);
+    expect(effectCounter).numberToBeConsideringFlag(1);
+    effectCounter = 0;
+
+    rerender(
+      <StrictMode>
+        <TestComponent
+          {...{
+            testId: testComponentID,
+            initSchema: { 77: '' },
+            deps: [],
+            effectFn: () => effectCounter++,
+          }}
+        />
+      </StrictMode>
+    );
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"foo":-1}');
+    expect([triggersCounter, 'foo']).triggersNumberToBe(1);
+    expect([triggersCounter, 77]).triggersNumberToBe(0);
+    expect([triggersCounter, symbolKey]).triggersNumberToBe(0);
+    expect(effectCounter).numberToBeConsideringFlag(1);
+    effectCounter = 0;
+
+    act(() => setInterstate({ 77: 'run' }));
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"foo":-1}');
+    expect([triggersCounter, 'foo']).triggersNumberToBe(1);
+    expect([triggersCounter, 77]).triggersNumberToBe(0);
+    expect([triggersCounter, symbolKey]).triggersNumberToBe(0);
+    expect(effectCounter).numberToBeConsideringFlag(0);
+
+    act(() => setInterstate({ foo: 200, 77: 'go' }));
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"foo":200}');
+    expect([triggersCounter, 'foo']).triggersNumberToBe(1);
+    expect([triggersCounter, 77]).triggersNumberToBe(0);
+    expect([triggersCounter, symbolKey]).triggersNumberToBe(0);
+    expect(effectCounter).numberToBeConsideringFlag(1);
+    effectCounter = 0;
+
+    rerender(
+      <StrictMode>
+        <TestComponent
+          {...{
+            testId: testComponentID,
+            initSchema: { foo: 0, 77: '' },
+            deps: [1],
+            effectFn: () => effectCounter++,
+          }}
+        />
+      </StrictMode>
+    );
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"77":"go","foo":200}');
+    expect([triggersCounter, 'foo']).triggersNumberToBe(1);
+    expect([triggersCounter, 77]).triggersNumberToBe(1);
+    expect([triggersCounter, symbolKey]).triggersNumberToBe(0);
+    expect(effectCounter).numberToBeConsideringFlag(1);
+    effectCounter = 0;
+
+    rerender(
+      <StrictMode>
+        <TestComponent
+          {...{
+            testId: testComponentID,
+            initSchema: { foo: 0 },
+            deps: [1, 2],
+            effectFn: () => effectCounter++,
+          }}
+        />
+      </StrictMode>
+    );
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"foo":200}');
+    expect([triggersCounter, 'foo']).triggersNumberToBe(1);
+    expect([triggersCounter, 77]).triggersNumberToBe(0);
+    expect([triggersCounter, symbolKey]).triggersNumberToBe(0);
+    expect(effectCounter).numberToBeConsideringFlag(1);
+    effectCounter = 0;
+
+    rerender(
+      <StrictMode>
+        <TestComponent
+          {...{
+            testId: testComponentID,
+            initSchema: { 77: '' },
+            deps: [1, 2],
+            effectFn: () => effectCounter++,
+          }}
+        />
+      </StrictMode>
+    );
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"foo":200}');
+    expect([triggersCounter, 'foo']).triggersNumberToBe(1);
+    expect([triggersCounter, 77]).triggersNumberToBe(0);
+    expect([triggersCounter, symbolKey]).triggersNumberToBe(0);
+    expect(effectCounter).numberToBeConsideringFlag(1);
+    effectCounter = 0;
+
+    rerender(
+      <StrictMode>
+        <TestComponent
+          {...{
+            testId: testComponentID,
+            initSchema: { [symbolKey]: {} },
+            deps: [1, 3],
+            effectFn: () => effectCounter++,
+          }}
+        />
+      </StrictMode>
+    );
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"symbol(0)":{"d":"here"}}');
+    expect([triggersCounter, 'foo']).triggersNumberToBe(0);
+    expect([triggersCounter, 77]).triggersNumberToBe(0);
+    expect([triggersCounter, symbolKey]).triggersNumberToBe(1);
+    expect(effectCounter).numberToBeConsideringFlag(1);
+    effectCounter = 0;
+
     rerender(<></>);
 
     expect([triggersCounter, 'foo']).triggersNumberToBe(0);

@@ -24,6 +24,8 @@ interface StateKeyProps<M extends object = any, K extends keyof M = any> {
 interface SchemaProps<M extends object = any, K extends keyof M = any> {
   initSchema: UseInterstateSchemaParam<M, K>;
 
+  deps?: any[];
+
   interpretResult?: (s: Pick<M, K>) => string;
 }
 
@@ -35,6 +37,8 @@ interface KeysProps<M extends object = any, K extends keyof M = any> {
 
 interface SelectorProps<M extends object = any, R = any> {
   selector: InterstateSelector<M, R>;
+
+  deps?: any[];
 
   interpretResult?: (v: R) => string;
 }
@@ -135,13 +139,13 @@ export const createListenerComponent = <M extends object>({
 
     const stringifiedState = props.initSchema
       ? (interpretResult as NonNullable<typeof props.interpretResult>)(
-          useInterstate(props.initSchema)
+          useInterstate(props.initSchema, props.deps)
         )
       : props.keys
       ? (interpretResult as NonNullable<typeof props.interpretResult>)(useInterstate(props.keys))
       : props.selector
       ? (interpretResult as NonNullable<typeof props.interpretResult>)(
-          useInterstate.acceptSelector(props.selector)
+          useInterstate.acceptSelector(props.selector, props.deps)
         )
       : (interpretResult as NonNullable<typeof props.interpretResult>)(
           useInterstate(props.stateKey, props.initParam)
