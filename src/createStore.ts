@@ -147,8 +147,10 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
       stateEntry: StateEntry<M[KS]>
     ): () => void {
       const trigger = () => {
-        mustRecalculate = true;
-        notifyingTrigger();
+        if (!mustRecalculate) {
+          mustRecalculate = true;
+          notifyingTrigger();
+        }
       };
 
       const triggerEntry = addLinkedListEntry(stateEntry.reactTriggersList, {
