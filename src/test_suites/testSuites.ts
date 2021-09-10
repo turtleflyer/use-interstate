@@ -4,6 +4,7 @@ import './assets/expectTriggersNumber';
 import type { TestFlags } from './assets/testFlags';
 import { flagManager } from './assets/testFlags';
 import type { RunTestCase, TestParameters } from './assets/TestTypes';
+import { testAsyncSetInterstate } from './test_cases/testAsyncSetInterstate';
 import { testChangingInterface } from './test_cases/testChangingInterface';
 import { testCreateAndInitInterstate } from './test_cases/testCreateAndInitInterstate';
 import { testInitInterstate } from './test_cases/testInitInterstate';
@@ -68,6 +69,7 @@ export const testSuites = (
         testScenariosWithSiblings,
         testSetInterstateCheckedByUseInterstate,
         testResetInterstate,
+        testAsyncSetInterstate,
       ];
 
       /**
@@ -83,6 +85,7 @@ export const testSuites = (
           testChangingInterface,
           testScenariosWithSiblings,
           testSetInterstateCheckedByUseInterstate,
+          testAsyncSetInterstate,
         ],
 
         SHOULD_TEST_PERFORMANCE: [
@@ -94,6 +97,7 @@ export const testSuites = (
           testChangingInterface,
           testScenariosWithSiblings,
           testSetInterstateCheckedByUseInterstate,
+          testAsyncSetInterstate,
         ],
       };
 
@@ -114,8 +118,8 @@ export const testSuites = (
               v && testsGroupedByFlags[flag].some((testInFlagList) => testInFlagList === test)
           )
         )
-      )('%s', (_n: string, runTest: RunTestCase) => {
-        runTest(testParameters);
+      )('%s', async (_n: string, runTest: RunTestCase) => {
+        await runTest(testParameters);
       });
     }
   );

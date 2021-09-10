@@ -5,7 +5,7 @@ import type * as createComponentsImport from '../assets/createComponents';
 
 export type TestCase = readonly [name: string, test: RunTestCase];
 
-export type RunTestCase = (testParameters: TestParameters) => void;
+export type RunTestCase = (testParameters: TestParameters) => Promise<void> | void;
 
 export interface TestParameters {
   useInterstateImport: UseInterstateImport;

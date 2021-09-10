@@ -58,17 +58,19 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
     stateEntry.stateValue = { value };
 
     if (
+      stateEntry.reactTriggersList.start &&
       !stateEntry.reactTriggersList.triggersFired &&
       !(oldValue && Object.is(oldValue.value, value))
     ) {
+      stateEntry.reactTriggersList.triggersFired = true;
+
+      reactRenderTasksPool.push(() => {
+        stateEntry.reactTriggersList.triggersFired = false;
+      });
+
       traverseLinkedList(stateEntry.reactTriggersList, ({ trigger }) => {
         trigger();
       });
-
-      if (stateEntry.reactTriggersList.start) {
-        stateEntry.reactTriggersList.triggersFired = true;
-        reactRenderTasksPool.push(() => (stateEntry.reactTriggersList.triggersFired = false));
-      }
     }
   };
 
