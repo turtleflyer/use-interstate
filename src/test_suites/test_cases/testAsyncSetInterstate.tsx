@@ -16,8 +16,6 @@ export const testAsyncSetInterstate: TestCase = [
 
     type TestState = {
       foo: number;
-      77: string;
-      [symbolKey]: object;
     };
 
     const { useInterstate, setInterstate } = initInterstate<TestState>();
@@ -28,8 +26,6 @@ export const testAsyncSetInterstate: TestCase = [
     let effectCounter = 0;
 
     expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(0);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(0);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(0);
 
     const { getByTestId, rerender } = render(
       <StrictMode>
@@ -65,7 +61,5 @@ export const testAsyncSetInterstate: TestCase = [
     rerender(<></>);
 
     expect([triggersCounter, 'foo']).triggersNumberToBe(0);
-    expect([triggersCounter, 77]).triggersNumberToBe(0);
-    expect([triggersCounter, symbolKey]).triggersNumberToBe(0);
   },
 ];
