@@ -29,11 +29,9 @@ export interface InitInterstate {
     > extends true
       ? S
       : never
-  ): InterstateMethods<
-    {
-      -readonly [P in keyof S]: S[P] extends undefined ? unknown : S[P];
-    }
-  >;
+  ): InterstateMethods<{
+    -readonly [P in keyof S]: S[P] extends undefined ? unknown : S[P];
+  }>;
 
   <S extends object = never, DetectExplicitGenericUse = [S] extends [never] ? false : true>(
     initStateValues: [
@@ -776,10 +774,9 @@ export declare type ResetInterstate<M extends object = never> = ([M] extends [ne
           ISV,
           'must have keys' | 'must not be array' | 'must not be function'
         > extends true
-          ? ISV &
-              {
-                [P in keyof M]?: ReadonlyIfArray<M[P]>;
-              }
+          ? ISV & {
+              [P in keyof M]?: ReadonlyIfArray<M[P]>;
+            }
           : never
       ): void;
 
