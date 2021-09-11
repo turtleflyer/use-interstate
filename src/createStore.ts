@@ -18,6 +18,7 @@ import type { InterstateSelector } from './UseInterstateTypes';
 
 export function createStore<M extends object>(initStateValues?: Partial<M>): Store<M> {
   const { getStateValue, setStateValue, getAccessMapHandler, clearState } = createState<M>();
+  initState(initStateValues);
 
   /**
    * `reactCleaningWatchList` is list of "abandoned" triggers. Trigger in React can get abandoned if
@@ -39,7 +40,7 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
   let [reactRenderTaskDone, reactEffectTaskDone] = [false, false];
   let reactRenderTasksPool: (() => void)[] = [];
   let reactEffectTasksPool: (() => void)[] = [];
-  initState(initStateValues);
+  let triggersBatchPool: (() => void)[] = [];
 
   const getValue: GetValue<M> = <K extends keyof M>(key: K): M[K] =>
     getStateValue(key).stateValue?.value as M[K];
@@ -52,7 +53,11 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
     return selector(accessMapHandler);
   };
 
-  const setValue: SetValue<M> = <K extends keyof M>(key: K, value: M[K]): void => {
+  const setValue: SetValue<M> = <K extends keyof M>(
+    key: K,
+    value: M[K],
+    lastInSeries: boolean
+  ): void => {
     const stateEntry: StateEntry<M[K]> = getStateValue(key);
     const oldValue = stateEntry.stateValue;
     stateEntry.stateValue = { value };
@@ -69,8 +74,13 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
       });
 
       traverseLinkedList(stateEntry.reactTriggersList, ({ trigger }) => {
-        trigger();
+        trigger.addToTriggersBatchList();
       });
+
+      if (lastInSeries) {
+        triggersBatchPool.forEach((batchTask) => batchTask());
+        triggersBatchPool = [];
+      }
     }
   };
 
@@ -111,6 +121,7 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
   ): SubscribeStateMethods<R> => {
     let calculatedValue: R;
     let mustRecalculate = false;
+    let addedToTriggersBatchList = false;
     let unsubscribeFromKeys: (() => void)[] = [];
 
     if (initValues) {
@@ -123,7 +134,7 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
 
             traverseLinkedList(stateEntry.reactTriggersList, ({ trigger }) => {
               reactEffectTasksPool.push(() => {
-                trigger();
+                trigger.fire();
               });
             });
           }
@@ -148,15 +159,25 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
     function createUnsubscribingFunction<KS extends keyof M>(
       stateEntry: StateEntry<M[KS]>
     ): () => void {
-      const trigger = () => {
+      const fire = () => {
         if (!mustRecalculate) {
           mustRecalculate = true;
           notifyingTrigger();
         }
       };
 
+      const addToTriggersBatchList = () => {
+        if (!addedToTriggersBatchList) {
+          addedToTriggersBatchList = true;
+
+          triggersBatchPool.push(fire, () => {
+            addedToTriggersBatchList = false;
+          });
+        }
+      };
+
       const triggerEntry = addLinkedListEntry(stateEntry.reactTriggersList, {
-        trigger,
+        trigger: { fire, addToTriggersBatchList },
       });
 
       return (): void => {

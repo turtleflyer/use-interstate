@@ -5,6 +5,7 @@ import type { TestFlags } from './assets/testFlags';
 import { flagManager } from './assets/testFlags';
 import type { RunTestCase, TestParameters } from './assets/TestTypes';
 import { testAsyncSetInterstate } from './test_cases/testAsyncSetInterstate';
+import { testAsyncSetInterstateOnlyOneUpdate } from './test_cases/testAsyncSetInterstateOnlyOneUpdate';
 import { testChangingInterface } from './test_cases/testChangingInterface';
 import { testCreateAndInitInterstate } from './test_cases/testCreateAndInitInterstate';
 import { testInitInterstate } from './test_cases/testInitInterstate';
@@ -70,6 +71,7 @@ export const testSuites = (
         testSetInterstateCheckedByUseInterstate,
         testResetInterstate,
         testAsyncSetInterstate,
+        testAsyncSetInterstateOnlyOneUpdate,
       ];
 
       /**
@@ -86,6 +88,7 @@ export const testSuites = (
           testScenariosWithSiblings,
           testSetInterstateCheckedByUseInterstate,
           testAsyncSetInterstate,
+          testAsyncSetInterstateOnlyOneUpdate,
         ],
 
         SHOULD_TEST_PERFORMANCE: [
@@ -98,6 +101,7 @@ export const testSuites = (
           testScenariosWithSiblings,
           testSetInterstateCheckedByUseInterstate,
           testAsyncSetInterstate,
+          testAsyncSetInterstateOnlyOneUpdate,
         ],
       };
 

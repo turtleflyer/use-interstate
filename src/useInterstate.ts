@@ -79,16 +79,18 @@ export const initInterstate = (<M extends object>(
   ): void => {
     switch (typeof keyOrSetterSchema) {
       case 'object':
-        getEntriesOfEnumerableKeys(keyOrSetterSchema).forEach(([key, setterP]): void => {
-          setValueNormalizingParam(key, () => setterP);
-        });
+        getEntriesOfEnumerableKeys(keyOrSetterSchema).forEach(
+          ([key, setterP], index, allKeys): void => {
+            setValueNormalizingParam(key, () => setterP, index === allKeys.length - 1);
+          }
+        );
 
         break;
 
       case 'function':
         getEntriesOfEnumerableKeys(getStateUsingSelector(keyOrSetterSchema)).forEach(
-          ([key, value]) => {
-            setValue(key, value);
+          ([key, value], index, allKeys) => {
+            setValue(key, value, index === allKeys.length - 1);
           }
         );
 
@@ -96,13 +98,17 @@ export const initInterstate = (<M extends object>(
 
       default:
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        setValueNormalizingParam(normalizeKey(keyOrSetterSchema), setterParam!);
+        setValueNormalizingParam(normalizeKey(keyOrSetterSchema), setterParam!, true);
 
         break;
     }
 
-    function setValueNormalizingParam(key: K, setterP: SetInterstateParam<M[K]>): void {
-      setValue(key, isFunctionParameter(setterP) ? setterP(getValue(key)) : setterP);
+    function setValueNormalizingParam(
+      key: K,
+      setterP: SetInterstateParam<M[K]>,
+      lastInSeries: boolean
+    ): void {
+      setValue(key, isFunctionParameter(setterP) ? setterP(getValue(key)) : setterP, lastInSeries);
     }
   };
 

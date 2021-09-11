@@ -19,7 +19,11 @@ export interface Store<M extends object> {
 
 export type GetValue<M extends object> = <K extends keyof M>(key: K) => M[K];
 
-export type SetValue<M extends object> = <K extends keyof M>(key: K, value: M[K]) => void;
+export type SetValue<M extends object> = <K extends keyof M>(
+  key: K,
+  value: M[K],
+  lastInSeries: boolean
+) => void;
 
 export type ResetValue<M extends object> = (initStateValues?: Partial<M>) => void;
 

@@ -31,7 +31,11 @@ export type TriggersListEntry = LinkedListEntry<TriggersListEntry> & {
   readonly trigger: Trigger;
 };
 
-export type Trigger = () => void;
+export interface Trigger {
+  fire: () => void;
+
+  addToTriggersBatchList: () => void;
+}
 
 export type GetAccessMapHandler<M extends object> = () => AccessMapHandlerAndGetKeysMethod<M>;
 
