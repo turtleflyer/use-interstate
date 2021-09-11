@@ -3,7 +3,7 @@ import type { InterstateKey } from './UseInterstateTypes';
 
 export type MemCreatedMap = { current: { [P in InterstateKey]?: StateEntry<unknown> } };
 
-const _forDebugging_memCreatedMap: MemCreatedMap = { current: {} };
+const _toAccessWhileTesting_memCreatedMap: MemCreatedMap = { current: {} };
 
 export const createState = <M extends object>(): State<M> => {
   type EntriesMap = { [P in keyof M]?: StateEntry<M[P]> };
@@ -12,7 +12,7 @@ export const createState = <M extends object>(): State<M> => {
   let accessMapHandler: EntriesMap = {};
   let keysCollector: (key: keyof M) => void;
 
-  _forDebugging_memCreatedMap.current = entriesMap;
+  _toAccessWhileTesting_memCreatedMap.current = entriesMap;
 
   const getStateValue = <K extends keyof M>(key: K): StateEntry<M[K]> => {
     if (key in entriesMap) {
@@ -66,10 +66,11 @@ export const createState = <M extends object>(): State<M> => {
   const clearState = (): void => {
     entriesMap = {};
     accessMapHandler = {};
-    _forDebugging_memCreatedMap.current = entriesMap;
+    _toAccessWhileTesting_memCreatedMap.current = entriesMap;
   };
 
   return { getStateValue, setStateValue, getAccessMapHandler, clearState };
 };
 
-export const _forDebugging_getCreatedMap = (): MemCreatedMap => _forDebugging_memCreatedMap;
+export const _toAccessWhileTesting_getCreatedMap = (): MemCreatedMap =>
+  _toAccessWhileTesting_memCreatedMap;

@@ -3,7 +3,7 @@ import type { MemCreatedMap } from '../createState';
 import { traverseLinkedList } from '../LinkedList';
 import type { InterstateKey } from '../UseInterstateTypes';
 
-const { createState, _forDebugging_getCreatedMap }: typeof CreateStateImport =
+const { createState, _toAccessWhileTesting_getCreatedMap }: typeof CreateStateImport =
   jest.requireActual('../createState.ts');
 
 type MockedMap = MemCreatedMap & { _countTriggers: TriggersCounter };
@@ -11,7 +11,7 @@ type MockedMap = MemCreatedMap & { _countTriggers: TriggersCounter };
 export type TriggersCounter = (key: InterstateKey) => number;
 
 export const createTriggersCounter = (): TriggersCounter => {
-  const memMap = _forDebugging_getCreatedMap() as MockedMap;
+  const memMap = _toAccessWhileTesting_getCreatedMap() as MockedMap;
 
   if (memMap) {
     memMap._countTriggers = function (key: InterstateKey): number {
