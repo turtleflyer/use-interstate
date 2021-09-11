@@ -33,9 +33,11 @@ export const initInterstate = (<M extends object>(
     reactEffectTask,
   } = createStore(initStateValues);
 
-  type UseGetState<K extends keyof M, R> = (subscribingParams: SubscribingParams<K, R> | null) => R;
+  type UseRetrieveState<K extends keyof M, R> = (
+    subscribingParams: SubscribingParam<K, R> | null
+  ) => R;
 
-  interface SubscribingParams<K extends keyof M, R> {
+  interface SubscribingParam<K extends keyof M, R> {
     takeStateAndCalculateValue: TakeStateAndCalculateValue<M, R>;
 
     initValues?: InitValuesForSubscribing<M, K>;
@@ -46,7 +48,7 @@ export const initInterstate = (<M extends object>(
     | [keys: readonly K[]]
     | [initState: UseInterstateSchemaParam<M, K>, deps?: readonly any[]];
 
-  type UseInterstateUnifiedInterface<K extends keyof M, R = unknown> =
+  type UnifiedInterfaceForUseInterstate<K extends keyof M, R = unknown> =
     | { interfaceType: 'single key'; key: K; initParam?: UseInterstateInitParam<M[K]> }
     | { interfaceType: 'keys list'; keys: readonly K[] }
     | {
@@ -61,7 +63,7 @@ export const initInterstate = (<M extends object>(
     ...args: Args
   ): M[K] | Pick<M, K> =>
     useInterstateTakingUnifiedInterface(
-      unifyUseInterstateInterface(...args) as UseInterstateUnifiedInterface<K, any> & {
+      unifyUseInterstateInterface(...args) as UnifiedInterfaceForUseInterstate<K, any> & {
         interfaceType: 'single key' | 'keys list' | 'object interface' | 'function interface';
       }
     )) as UseInterstateDev<M>;
@@ -125,39 +127,42 @@ export const initInterstate = (<M extends object>(
   };
 
   function useInterstateTakingUnifiedInterface<K extends keyof M>(
-    param: UseInterstateUnifiedInterface<K> & { interfaceType: 'single key' }
+    param: UnifiedInterfaceForUseInterstate<K> & { interfaceType: 'single key' }
   ): M[K];
 
   function useInterstateTakingUnifiedInterface<K extends keyof M>(
-    param: UseInterstateUnifiedInterface<K> & {
+    param: UnifiedInterfaceForUseInterstate<K> & {
       interfaceType: 'keys list' | 'object interface' | 'function interface';
     }
   ): Pick<M, K>;
 
   function useInterstateTakingUnifiedInterface<R>(
-    param: UseInterstateUnifiedInterface<any, R> & { interfaceType: 'selector' }
+    param: UnifiedInterfaceForUseInterstate<any, R> & { interfaceType: 'selector' }
   ): R;
 
   function useInterstateTakingUnifiedInterface<K extends keyof M, R>(
-    param: UseInterstateUnifiedInterface<K, R>
+    param: UnifiedInterfaceForUseInterstate<K, R>
   ): M[K] | Pick<M, K> | R;
 
   function useInterstateTakingUnifiedInterface<K extends keyof M, R>(
-    param: UseInterstateUnifiedInterface<K, R>
+    param: UnifiedInterfaceForUseInterstate<K, R>
   ): M[K] | Pick<M, K> | R {
+    reactRenderTask();
+    useEffect(reactEffectTask);
+
+    type ReturnType = M[K] | Pick<M, K> | R;
+
     type DetermineNeedToResubscribe = (
-      paramToCheck: UseInterstateUnifiedInterface<K, R>
+      paramToCheck: UnifiedInterfaceForUseInterstate<K, R>
     ) => boolean;
 
     const [{ useInRender }] = useState(() => {
+      const useRetrieveState = createUseRetrieveState();
       let determineNeedToResubscribe: DetermineNeedToResubscribe = () => true;
 
       // eslint-disable-next-line no-shadow
-      const useInRender = (
-        paramInRender: UseInterstateUnifiedInterface<K, R>
-      ): M[K] | Pick<M, K> | R => {
-        const useGetState = useDriveInterstate<K, M[K] | Pick<M, K> | R>();
-        let useGetStateParam: SubscribingParams<K, M[K] | Pick<M, K> | R> | null = null;
+      const useInRender = (paramInRender: UnifiedInterfaceForUseInterstate<K, R>): ReturnType => {
+        let paramForUseRetrieveState: SubscribingParam<K, ReturnType> | null = null;
 
         if (determineNeedToResubscribe(paramInRender)) {
           switch (paramInRender.interfaceType) {
@@ -169,7 +174,7 @@ export const initInterstate = (<M extends object>(
                 paramToCheck.interfaceType !== 'single key' ||
                 paramToCheck.key !== paramInRender.key;
 
-              useGetStateParam = {
+              paramForUseRetrieveState = {
                 takeStateAndCalculateValue: (state) => state[normalizedKey],
 
                 initValues: [
@@ -187,9 +192,9 @@ export const initInterstate = (<M extends object>(
 
               const initValues = paramInRender.keys.map((key) => [normalizeKey(key)] as const);
 
-              useGetStateParam = {
+              paramForUseRetrieveState = {
                 takeStateAndCalculateValue:
-                  getTakeStateAndCalculateValueForObjectAndFuncAndList(initValues),
+                  createTakeStateAndCalculateValueForObjectAndFuncAndList(initValues),
 
                 initValues,
               };
@@ -198,16 +203,16 @@ export const initInterstate = (<M extends object>(
             }
 
             case 'object interface': {
-              determineNeedToResubscribe = getDetermineNeedToResubscribeForDepsInvolved(
+              determineNeedToResubscribe = createDetermineNeedToResubscribeWithDepsInvolved(
                 paramInRender.deps,
                 ['object interface', 'function interface']
               );
 
               const initValues = getEntriesOfEnumerableKeys(paramInRender.initState);
 
-              useGetStateParam = {
+              paramForUseRetrieveState = {
                 takeStateAndCalculateValue:
-                  getTakeStateAndCalculateValueForObjectAndFuncAndList(initValues),
+                  createTakeStateAndCalculateValueForObjectAndFuncAndList(initValues),
 
                 initValues,
               };
@@ -216,16 +221,16 @@ export const initInterstate = (<M extends object>(
             }
 
             case 'function interface': {
-              determineNeedToResubscribe = getDetermineNeedToResubscribeForDepsInvolved(
+              determineNeedToResubscribe = createDetermineNeedToResubscribeWithDepsInvolved(
                 paramInRender.deps,
                 ['object interface', 'function interface']
               );
 
               const initValues = getEntriesOfEnumerableKeys(paramInRender.initState());
 
-              useGetStateParam = {
+              paramForUseRetrieveState = {
                 takeStateAndCalculateValue:
-                  getTakeStateAndCalculateValueForObjectAndFuncAndList(initValues),
+                  createTakeStateAndCalculateValueForObjectAndFuncAndList(initValues),
 
                 initValues,
               };
@@ -234,12 +239,12 @@ export const initInterstate = (<M extends object>(
             }
 
             case 'selector':
-              determineNeedToResubscribe = getDetermineNeedToResubscribeForDepsInvolved(
+              determineNeedToResubscribe = createDetermineNeedToResubscribeWithDepsInvolved(
                 paramInRender.deps,
                 ['selector']
               );
 
-              useGetStateParam = { takeStateAndCalculateValue: paramInRender.selector };
+              paramForUseRetrieveState = { takeStateAndCalculateValue: paramInRender.selector };
 
               break;
 
@@ -248,7 +253,7 @@ export const initInterstate = (<M extends object>(
           }
         }
 
-        return useGetState(useGetStateParam);
+        return useRetrieveState(paramForUseRetrieveState);
       };
 
       return { useInRender };
@@ -256,44 +261,15 @@ export const initInterstate = (<M extends object>(
 
     return useInRender(param);
 
-    function getDetermineNeedToResubscribeForDepsInvolved(
-      depsToCheckWith: readonly any[] | undefined,
-      allowedInterfaceTypes: readonly ('object interface' | 'function interface' | 'selector')[]
-    ): DetermineNeedToResubscribe {
-      return depsToCheckWith
-        ? (paramToCheck) => {
-            if (allowedInterfaceTypes.some((it) => it === paramToCheck.interfaceType)) {
-              const { deps } = paramToCheck as UseInterstateUnifiedInterface<K, R> & {
-                interfaceType: 'object interface' | 'function interface' | 'selector';
-              };
-
-              return !deps || checkDepsChanged(deps, depsToCheckWith);
-            }
-
-            return true;
-          }
-        : () => true;
-    }
-
-    function getTakeStateAndCalculateValueForObjectAndFuncAndList(
-      initValues: InitValuesForSubscribing<M, K>
-    ): TakeStateAndCalculateValue<M, Pick<M, K>> {
-      return (state) =>
-        Object.fromEntries(initValues.map(([key]) => [key, state[key]])) as Pick<M, K>;
-    }
-  }
-
-  function useDriveInterstate<K extends keyof M, R>(): UseGetState<K, R> {
-    reactRenderTask();
-    useEffect(reactEffectTask);
-
-    const [{ useGetState }] = useState((): { useGetState: UseGetState<K, R> } => {
-      let retrieveValue: () => R;
+    function createUseRetrieveState(): UseRetrieveState<K, ReturnType> {
+      let retrieveValue: () => ReturnType;
       let unsubscribe: () => void;
       let removeFromWatchList: () => void;
 
       // eslint-disable-next-line no-shadow
-      const useGetState = (subscribingParams: SubscribingParams<K, R> | null): R => {
+      const useRetrieveState = (
+        subscribingParams: SubscribingParam<K, ReturnType> | null
+      ): ReturnType => {
         /**
          * Emit setter using to trigger rendering of component signaling when value of `key` changed
          * in global state
@@ -325,15 +301,39 @@ export const initInterstate = (<M extends object>(
         return retrieveValue();
       };
 
-      return { useGetState };
-    });
+      return useRetrieveState;
+    }
 
-    return useGetState;
+    function createTakeStateAndCalculateValueForObjectAndFuncAndList(
+      initValues: InitValuesForSubscribing<M, K>
+    ): TakeStateAndCalculateValue<M, Pick<M, K>> {
+      return (state) =>
+        Object.fromEntries(initValues.map(([key]) => [key, state[key]])) as Pick<M, K>;
+    }
+
+    function createDetermineNeedToResubscribeWithDepsInvolved(
+      depsToCheckWith: readonly any[] | undefined,
+      allowedInterfaceTypes: readonly ('object interface' | 'function interface' | 'selector')[]
+    ): DetermineNeedToResubscribe {
+      return depsToCheckWith
+        ? (paramToCheck) => {
+            if (allowedInterfaceTypes.some((it) => it === paramToCheck.interfaceType)) {
+              const { deps } = paramToCheck as UnifiedInterfaceForUseInterstate<K, R> & {
+                interfaceType: 'object interface' | 'function interface' | 'selector';
+              };
+
+              return !deps || checkDepsChanged(deps, depsToCheckWith);
+            }
+
+            return true;
+          }
+        : () => true;
+    }
   }
 
   function unifyUseInterstateInterface<K extends keyof M>(
     ...[firstArg, secondArg]: UseInterstateArgs<K>
-  ): UseInterstateUnifiedInterface<K> {
+  ): UnifiedInterfaceForUseInterstate<K> {
     switch (typeof firstArg) {
       case 'object':
         return isArray(firstArg)
