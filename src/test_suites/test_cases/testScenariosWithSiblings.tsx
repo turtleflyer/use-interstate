@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import React, { StrictMode } from 'react';
 import type { TestCase, TestParameters } from '../assets/TestTypes';
 
 export const testScenariosWithSiblings: TestCase = [
@@ -9,7 +8,12 @@ export const testScenariosWithSiblings: TestCase = [
   ({
     useInterstateImport: { initInterstate },
     triggersCounterImport: { createTriggersCounter },
-    createComponentsImport: { createListenerComponent },
+
+    createComponentsImport: {
+      createListenerComponent,
+      reactImport: { StrictMode },
+    },
+
     testingLibraryReact: { act, render },
   }: TestParameters): void => {
     type TestState = {

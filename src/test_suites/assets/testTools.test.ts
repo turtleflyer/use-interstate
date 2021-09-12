@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { TriggersCounter } from '../../__mocks__/createState';
-import { defInterpretResult } from './createComponents';
+import { stringifyState } from './createComponents';
 import './expectNumberToBeConsideringFlag';
 import './expectTriggersNumber';
 import { flagManager } from './testFlags';
@@ -78,26 +78,26 @@ describe('Test correctness of test tools', () => {
   });
 
   test('defInterpretResult works', () => {
-    expect(defInterpretResult(undefined)).toBe('undefined');
-    expect(defInterpretResult(null)).toBe('null');
-    expect(defInterpretResult('foo')).toBe('foo');
-    expect(defInterpretResult(1)).toBe('1');
-    expect(defInterpretResult(true)).toBe('true');
-    expect(defInterpretResult(Symbol())).toBe('symbol(0)');
+    expect(stringifyState(undefined)).toBe('undefined');
+    expect(stringifyState(null)).toBe('null');
+    expect(stringifyState('foo')).toBe('foo');
+    expect(stringifyState(1)).toBe('1');
+    expect(stringifyState(true)).toBe('true');
+    expect(stringifyState(Symbol())).toBe('symbol(0)');
 
     const obj0 = {};
-    expect(defInterpretResult(obj0)).toBe('{}');
+    expect(stringifyState(obj0)).toBe('{}');
 
     const obj1 = { a: true };
-    expect(defInterpretResult(obj1)).toBe('{"a":true}');
+    expect(stringifyState(obj1)).toBe('{"a":true}');
 
     const obj2 = { foo: undefined };
-    expect(defInterpretResult(obj2)).toBe('{"foo":"undefined"}');
+    expect(stringifyState(obj2)).toBe('{"foo":"undefined"}');
 
     const obj3 = { [Symbol()]: 'hi', [Symbol()]: Symbol() };
-    expect(defInterpretResult(obj3)).toBe('{"symbol(0)":"hi","symbol(1)":"symbol(2)"}');
+    expect(stringifyState(obj3)).toBe('{"symbol(0)":"hi","symbol(1)":"symbol(2)"}');
 
-    expect(defInterpretResult({ 0: obj0, bar: obj1, z: obj2, [Symbol()]: obj3 })).toBe(
+    expect(stringifyState({ 0: obj0, bar: obj1, z: obj2, [Symbol()]: obj3 })).toBe(
       '{"0":{},"bar":{"a":true},"z":{"foo":"undefined"},"symbol(0)":{"symbol(1)":"hi","symbol(2)":"symbol(3)"}}'
     );
   });

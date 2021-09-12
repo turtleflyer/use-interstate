@@ -39,5 +39,6 @@ module.exports = {
     '@typescript-eslint/no-use-before-define': ['error', { functions: false }],
     'no-param-reassign': ['error', { props: true }],
     'no-shadow': 'error',
+    'react/react-in-jsx-scope': 'off',
   },
 };

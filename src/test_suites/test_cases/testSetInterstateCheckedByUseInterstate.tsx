@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import React, { StrictMode } from 'react';
 import type { TestCase, TestParameters } from '../assets/TestTypes';
 
 export const testSetInterstateCheckedByUseInterstate: TestCase = [
@@ -9,7 +8,12 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
   ({
     useInterstateImport: { initInterstate },
     triggersCounterImport: { createTriggersCounter },
-    createComponentsImport: { createListenerComponent },
+
+    createComponentsImport: {
+      createListenerComponent,
+      reactImport: { StrictMode },
+    },
+
     testingLibraryReact: { act, render },
   }: TestParameters): void => {
     const symbolKey = Symbol('symbol_key');

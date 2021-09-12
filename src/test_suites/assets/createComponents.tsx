@@ -1,5 +1,6 @@
 import type { PropsWithChildren, ReactElement } from 'react';
-import React, { useEffect } from 'react';
+import * as reactImport from 'react';
+import { useEffect } from 'react';
 import type { UseInterstateDev } from '../../DevTypes';
 import type {
   InterstateSelector,
@@ -46,8 +47,7 @@ interface SelectorProps<M extends object = any, R = any> {
 type PropsWithRemainingUndefined<
   C extends StateKeyProps | SchemaProps | KeysProps | SelectorProps
 > = C &
-  TestProps &
-  {
+  TestProps & {
     [P in keyof (StateKeyProps & SchemaProps & KeysProps & SelectorProps) as P extends keyof C
       ? never
       : P]?: undefined;
@@ -55,7 +55,7 @@ type PropsWithRemainingUndefined<
 
 let symbolsCounter = 0;
 
-export const defInterpretResult = (v: unknown): string => {
+export const stringifyState = (v: unknown): string => {
   symbolsCounter = 0;
   const processedV = separateAndProcessTypes(v);
 
@@ -135,7 +135,7 @@ export const createListenerComponent = <M extends object>({
       props.effectFn?.();
     });
 
-    const interpretResult = props.interpretResult ?? defInterpretResult;
+    const interpretResult = props.interpretResult ?? stringifyState;
 
     const stringifiedState = props.initSchema
       ? (interpretResult as NonNullable<typeof props.interpretResult>)(
@@ -158,3 +158,5 @@ export const createListenerComponent = <M extends object>({
       </div>
     );
   };
+
+export { reactImport };
