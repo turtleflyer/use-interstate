@@ -38,7 +38,6 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
 
   let reactCleaningWatchList: ReactCleaningWatchList = {};
   let [reactRenderTaskDone, reactEffectTaskDone] = [false, false];
-  let reactRenderTasksPool: (() => void)[] = [];
   let reactEffectTasksPool: (() => void)[] = [];
   let triggersBatchPool: (() => void)[] = [];
 
@@ -69,18 +68,18 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
     ) {
       stateEntry.reactTriggersList.triggersFired = true;
 
-      reactRenderTasksPool.push(() => {
+      triggersBatchPool.push(() => {
         stateEntry.reactTriggersList.triggersFired = false;
       });
 
       traverseLinkedList(stateEntry.reactTriggersList, ({ trigger }) => {
-        trigger.addToTriggersBatchList();
+        trigger.addToTriggersBatchPool();
       });
+    }
 
-      if (lastInSeries) {
-        triggersBatchPool.forEach((batchTask) => batchTask());
-        triggersBatchPool = [];
-      }
+    if (lastInSeries) {
+      triggersBatchPool.forEach((batchTask) => batchTask());
+      triggersBatchPool = [];
     }
   };
 
@@ -89,7 +88,7 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
     initState(resetStateValue);
     reactCleaningWatchList = {};
     [reactRenderTaskDone, reactEffectTaskDone] = [false, false];
-    [reactRenderTasksPool, reactEffectTasksPool] = [[], []];
+    reactEffectTasksPool = [];
   };
 
   const reactRenderTask = (): void => {
@@ -100,8 +99,6 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
         removeTriggerFromKeyList();
       });
 
-      reactRenderTasksPool.forEach((task) => task());
-      reactRenderTasksPool = [];
       reactCleaningWatchList = {};
     }
   };
@@ -121,7 +118,7 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
   ): SubscribeStateMethods<R> => {
     let calculatedValue: R;
     let mustRecalculate = false;
-    let addedToTriggersBatchList = false;
+    let addedToTriggersBatchPool = false;
     let unsubscribeFromKeys: (() => void)[] = [];
 
     if (initValues) {
@@ -166,18 +163,18 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
         }
       };
 
-      const addToTriggersBatchList = () => {
-        if (!addedToTriggersBatchList) {
-          addedToTriggersBatchList = true;
+      const addToTriggersBatchPool = () => {
+        if (!addedToTriggersBatchPool) {
+          addedToTriggersBatchPool = true;
 
           triggersBatchPool.push(fire, () => {
-            addedToTriggersBatchList = false;
+            addedToTriggersBatchPool = false;
           });
         }
       };
 
       const triggerEntry = addLinkedListEntry(stateEntry.reactTriggersList, {
-        trigger: { fire, addToTriggersBatchList },
+        trigger: { fire, addToTriggersBatchPool },
       });
 
       return (): void => {
