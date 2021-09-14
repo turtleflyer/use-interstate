@@ -1,12 +1,13 @@
 import { createState } from './createState';
 import { getEntriesOfEnumerableKeys } from './getEntriesOfEnumerableKeys';
+import { isFunctionParameter } from './isFunctionParameter';
 import type { LinkedList, LinkedListEntry, LinkedListNonempty } from './LinkedList';
 import { addLinkedListEntry, removeLinkedListEntry, traverseLinkedList } from './LinkedList';
 import type { StateEntry, TriggersListEntry } from './State';
 import type {
   GetStateUsingSelector,
   GetValue,
-  InitValuesForSubscribing,
+  InitRecordsForSubscribing,
   ReactSubscribeState,
   ResetValue,
   SetValue,
@@ -14,7 +15,7 @@ import type {
   SubscribeStateMethods,
   TakeStateAndCalculateValue,
 } from './Store';
-import type { InterstateSelector } from './UseInterstateTypes';
+import type { InterstateSelector, UseInterstateInitParam } from './UseInterstateTypes';
 
 export function createStore<M extends object>(initStateValues?: Partial<M>): Store<M> {
   const { getStateValue, setStateValue, getAccessMapHandler, clearState } = createState<M>();
@@ -114,20 +115,26 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
   const reactSubscribeState: ReactSubscribeState<M> = <K extends keyof M, R>(
     notifyingTrigger: () => void,
     getValueFromState: TakeStateAndCalculateValue<M, R>,
-    initValues?: InitValuesForSubscribing<M, K>
+    initRecords?: InitRecordsForSubscribing<M, K>
   ): SubscribeStateMethods<R> => {
     let calculatedValue: R;
     let mustRecalculate = false;
     let addedToTriggersBatchPool = false;
     let unsubscribeFromKeys: (() => void)[] = [];
 
-    if (initValues) {
+    if (initRecords) {
       const stateSlice = Object.fromEntries(
-        initValues.map(([key, value]) => {
+        initRecords.map(([key, initValue, needToCalculateValue]) => {
           const stateEntry = getStateValue(key);
 
-          if (value !== undefined && !stateEntry.stateValue) {
-            stateEntry.stateValue = { value };
+          if (initValue !== undefined && !stateEntry.stateValue) {
+            stateEntry.stateValue = {
+              value: needToCalculateValue
+                ? isFunctionParameter(initValue as UseInterstateInitParam<M[K]>)
+                  ? (initValue as () => M[K])()
+                  : (initValue as M[K])
+                : (initValue as M[K]),
+            };
 
             traverseLinkedList(stateEntry.reactTriggersList, ({ trigger }) => {
               reactEffectTasksPool.push(() => {

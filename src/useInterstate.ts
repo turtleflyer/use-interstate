@@ -9,7 +9,7 @@ import type {
 } from './DevTypes';
 import { getEntriesOfEnumerableKeys } from './getEntriesOfEnumerableKeys';
 import { isFunctionParameter } from './isFunctionParameter';
-import { InitValuesForSubscribing, TakeStateAndCalculateValue } from './Store';
+import { InitRecordsForSubscribing, TakeStateAndCalculateValue } from './Store';
 import type {
   InitInterstate,
   InterstateKey,
@@ -40,7 +40,7 @@ export const initInterstate = (<M extends object>(
   interface SubscribingParam<K extends keyof M, R> {
     takeStateAndCalculateValue: TakeStateAndCalculateValue<M, R>;
 
-    initValues?: InitValuesForSubscribing<M, K>;
+    initRecords?: InitRecordsForSubscribing<M, K>;
   }
 
   type UseInterstateArgs<K extends keyof M> =
@@ -80,8 +80,8 @@ export const initInterstate = (<M extends object>(
     switch (typeof keyOrSetterSchema) {
       case 'object':
         getEntriesOfEnumerableKeys(keyOrSetterSchema).forEach(
-          ([key, setterP], index, allKeys): void => {
-            setValueNormalizingParam(key, () => setterP, index === allKeys.length - 1);
+          ([key, setterV], index, allKeys): void => {
+            setValue(key, setterV, index === allKeys.length - 1);
           }
         );
 
@@ -96,19 +96,20 @@ export const initInterstate = (<M extends object>(
 
         break;
 
-      default:
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        setValueNormalizingParam(normalizeKey(keyOrSetterSchema), setterParam!, true);
+      default: {
+        const normalizedKey = normalizeKey(keyOrSetterSchema);
+        const setterParamMustBeDefined = setterParam as SetInterstateParam<M[K]>;
+
+        setValue(
+          normalizedKey,
+          isFunctionParameter(setterParamMustBeDefined)
+            ? setterParamMustBeDefined(getValue(normalizedKey))
+            : setterParamMustBeDefined,
+          true
+        );
 
         break;
-    }
-
-    function setValueNormalizingParam(
-      key: K,
-      setterP: SetInterstateParam<M[K]>,
-      lastInSeries: boolean
-    ): void {
-      setValue(key, isFunctionParameter(setterP) ? setterP(getValue(key)) : setterP, lastInSeries);
+      }
     }
   };
 
@@ -183,8 +184,8 @@ export const initInterstate = (<M extends object>(
               paramForUseRetrieveState = {
                 takeStateAndCalculateValue: (state) => state[normalizedKey],
 
-                initValues: [
-                  [normalizedKey, isFunctionParameter(initParam) ? initParam() : initParam],
+                initRecords: [
+                  initParam === undefined ? [normalizedKey] : [normalizedKey, initParam, true],
                 ],
               };
 
@@ -196,13 +197,13 @@ export const initInterstate = (<M extends object>(
                 paramToCheck.interfaceType !== 'keys list' ||
                 checkDepsChanged(paramToCheck.keys, paramInRender.keys);
 
-              const initValues = paramInRender.keys.map((key) => [normalizeKey(key)] as const);
+              const initRecords = paramInRender.keys.map((key) => [normalizeKey(key)] as const);
 
               paramForUseRetrieveState = {
                 takeStateAndCalculateValue:
-                  createTakeStateAndCalculateValueForObjectAndFuncAndList(initValues),
+                  createTakeStateAndCalculateValueForObjectAndFuncAndList(initRecords),
 
-                initValues,
+                initRecords,
               };
 
               break;
@@ -214,13 +215,13 @@ export const initInterstate = (<M extends object>(
                 ['object interface', 'function interface']
               );
 
-              const initValues = getEntriesOfEnumerableKeys(paramInRender.initState);
+              const initRecords = getEntriesOfEnumerableKeys(paramInRender.initState);
 
               paramForUseRetrieveState = {
                 takeStateAndCalculateValue:
-                  createTakeStateAndCalculateValueForObjectAndFuncAndList(initValues),
+                  createTakeStateAndCalculateValueForObjectAndFuncAndList(initRecords),
 
-                initValues,
+                initRecords,
               };
 
               break;
@@ -232,13 +233,13 @@ export const initInterstate = (<M extends object>(
                 ['object interface', 'function interface']
               );
 
-              const initValues = getEntriesOfEnumerableKeys(paramInRender.initState());
+              const initRecords = getEntriesOfEnumerableKeys(paramInRender.initState());
 
               paramForUseRetrieveState = {
                 takeStateAndCalculateValue:
-                  createTakeStateAndCalculateValueForObjectAndFuncAndList(initValues),
+                  createTakeStateAndCalculateValueForObjectAndFuncAndList(initRecords),
 
-                initValues,
+                initRecords,
               };
 
               break;
@@ -284,14 +285,16 @@ export const initInterstate = (<M extends object>(
 
         if (subscribingParams) {
           unsubscribe?.();
-          const { takeStateAndCalculateValue, initValues } = subscribingParams;
+          const { takeStateAndCalculateValue, initRecords } = subscribingParams;
 
           ({ retrieveValue, unsubscribe, removeFromWatchList } = reactSubscribeState(
             () => {
               setState({});
             },
+
             takeStateAndCalculateValue,
-            initValues
+
+            initRecords
           ));
         }
 
@@ -301,6 +304,7 @@ export const initInterstate = (<M extends object>(
           () => () => {
             unsubscribe();
           },
+
           []
         );
 
@@ -311,10 +315,10 @@ export const initInterstate = (<M extends object>(
     }
 
     function createTakeStateAndCalculateValueForObjectAndFuncAndList(
-      initValues: InitValuesForSubscribing<M, K>
+      initRecords: InitRecordsForSubscribing<M, K>
     ): TakeStateAndCalculateValue<M, Pick<M, K>> {
       return (state) =>
-        Object.fromEntries(initValues.map(([key]) => [key, state[key]])) as Pick<M, K>;
+        Object.fromEntries(initRecords.map(([key]) => [key, state[key]])) as Pick<M, K>;
     }
 
     function createDetermineNeedToResubscribeWithDepsInvolved(

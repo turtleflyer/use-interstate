@@ -1,5 +1,5 @@
 import type { Trigger } from './State';
-import type { InterstateSelector } from './UseInterstateTypes';
+import type { InterstateSelector, UseInterstateInitParam } from './UseInterstateTypes';
 
 export interface Store<M extends object> {
   readonly getValue: GetValue<M>;
@@ -32,15 +32,19 @@ export type GetStateUsingSelector<M extends object> = <R>(selector: InterstateSe
 export type ReactSubscribeState<M extends object> = <K extends keyof M, R>(
   notifyingTrigger: () => void,
   takeStateAndCalculateValue: TakeStateAndCalculateValue<M, R>,
-  initValues?: InitValuesForSubscribing<M, K>
+  initValues?: InitRecordsForSubscribing<M, K>
 ) => SubscribeStateMethods<R>;
 
 export type TakeStateAndCalculateValue<M extends object, R> = (state: M) => R;
 
-export type InitValuesForSubscribing<M extends object, K extends keyof M> = readonly (readonly [
-  key: K,
-  initValue?: M[K]
-])[];
+export type InitRecordsForSubscribing<M extends object, K extends keyof M> = readonly InitRecord<
+  M,
+  K
+>[];
+
+export type InitRecord<M extends object, K extends keyof M> =
+  | readonly [key: K, initValue?: M[K], needToCalculateValue?: false]
+  | readonly [key: K, initValue: UseInterstateInitParam<M[K]>, needToCalculateValue: true];
 
 export interface SubscribeStateMethods<R> {
   retrieveValue: () => R;
