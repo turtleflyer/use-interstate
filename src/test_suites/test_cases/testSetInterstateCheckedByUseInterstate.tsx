@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
+import type { TestCounter } from '../assets/expectCounterToIncreaseBy';
 import type { TestCase, TestParameters } from '../assets/TestTypes';
 
 export const testSetInterstateCheckedByUseInterstate: TestCase = [
@@ -27,7 +28,7 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
 
     const testComponentID = 'test_component';
     const TestComponent = createListenerComponent({ useInterstate });
-    let effectCounter = 0;
+    const effectCounter: TestCounter = { count: 0 };
 
     expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
     expect(77).triggersNumberToBeGreaterThanOrEqual(0);
@@ -39,7 +40,7 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
           {...{
             testId: testComponentID,
             keys: ['foo', 77, symbolKey],
-            effectFn: () => effectCounter++,
+            effectFn: () => effectCounter.count++,
           }}
         />
       </StrictMode>
@@ -51,8 +52,7 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
     expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
     expect(77).triggersNumberToBeGreaterThanOrEqual(1);
     expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate('foo', 100));
 
@@ -62,8 +62,7 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
     expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
     expect(77).triggersNumberToBeGreaterThanOrEqual(1);
     expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate('foo', (p: number) => p + 1));
 
@@ -73,8 +72,7 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
     expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
     expect(77).triggersNumberToBeGreaterThanOrEqual(1);
     expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate({ foo: 200, 77: 'hi', [symbolKey]: { a: true } }));
 
@@ -84,8 +82,7 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
     expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
     expect(77).triggersNumberToBeGreaterThanOrEqual(1);
     expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() =>
       setInterstate((prevState) => {
@@ -108,8 +105,7 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
     expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
     expect(77).triggersNumberToBeGreaterThanOrEqual(1);
     expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate({ foo: 2, 77: 'no' }));
 
@@ -119,8 +115,7 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
     expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
     expect(77).triggersNumberToBeGreaterThanOrEqual(1);
     expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() =>
       setInterstate((state: { foo: number; 77: string }) => ({
@@ -136,8 +131,7 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
     expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
     expect(77).triggersNumberToBeGreaterThanOrEqual(1);
     expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate('foo', 10));
 
@@ -147,7 +141,7 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
     expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
     expect(77).triggersNumberToBeGreaterThanOrEqual(1);
     expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(effectCounter).numberToBeConsideringFlag(0);
+    expect(effectCounter).counterToIncreaseBy(0);
 
     act(() => setInterstate({ foo: 10, [symbolKey]: { all: false } }));
 
@@ -157,8 +151,7 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
     expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
     expect(77).triggersNumberToBeGreaterThanOrEqual(1);
     expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate({ foo: 10, 77: 'no or yes / 2' }));
 
@@ -168,7 +161,7 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
     expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
     expect(77).triggersNumberToBeGreaterThanOrEqual(1);
     expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(effectCounter).numberToBeConsideringFlag(0);
+    expect(effectCounter).counterToIncreaseBy(0);
 
     act(() =>
       setInterstate(({ foo: prevFooV, [symbolKey]: prevSymbV }) => ({
@@ -183,7 +176,7 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
     expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
     expect(77).triggersNumberToBeGreaterThanOrEqual(1);
     expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(effectCounter).numberToBeConsideringFlag(0);
+    expect(effectCounter).counterToIncreaseBy(0);
 
     act(() => setInterstate((state) => ({ ...state })));
 
@@ -193,6 +186,6 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
     expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
     expect(77).triggersNumberToBeGreaterThanOrEqual(1);
     expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(effectCounter).numberToBeConsideringFlag(0);
+    expect(effectCounter).counterToIncreaseBy(0);
   },
 ];

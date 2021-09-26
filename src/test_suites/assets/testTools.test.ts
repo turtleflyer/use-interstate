@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { stringifyState } from './createComponents';
-import './expectNumberToBeConsideringFlag';
+import './expectCounterToIncreaseBy';
+import type { TestCounter } from './expectCounterToIncreaseBy';
 import { _testingAsset_defineTriggersCounter } from './expectTriggersNumber';
 import { flagManager } from './testFlags';
 
@@ -30,16 +31,44 @@ describe('Test correctness of test tools', () => {
     expect(flagManager.read('SHOULD_TEST_PERFORMANCE')).toBeFalsy();
   });
 
-  test('numberToBeConsideringFlag matcher works', () => {
+  test('counterToIncreaseBy matcher works', () => {
+    const testCounter1: TestCounter = { count: 0 };
     flagManager.set({ SHOULD_TEST_PERFORMANCE: true });
 
-    expect(1).numberToBeConsideringFlag(1);
-    expect(2).not.numberToBeConsideringFlag(1);
+    expect(testCounter1).counterToIncreaseBy(0);
+    expect(testCounter1).not.counterToIncreaseBy(2);
 
+    testCounter1.count = 6;
+
+    expect(testCounter1).counterToIncreaseBy(6);
+    expect(testCounter1).not.counterToIncreaseBy(2);
+
+    testCounter1.count = 7;
+
+    expect(testCounter1).counterToIncreaseBy(1);
+    expect(testCounter1).not.counterToIncreaseBy(2);
+
+    const testCounter2: TestCounter = { count: 0 };
     flagManager.set({ SHOULD_TEST_PERFORMANCE: false });
 
-    expect(1).numberToBeConsideringFlag(1);
-    expect(2).numberToBeConsideringFlag(1);
+    expect(testCounter2).counterToIncreaseBy(0);
+    expect(testCounter2).not.counterToIncreaseBy(2);
+    expect(testCounter2).not.counterToIncreaseBy(0);
+    expect(testCounter2).counterToIncreaseBy(2);
+
+    testCounter2.count = 6;
+
+    expect(testCounter2).counterToIncreaseBy(6);
+    expect(testCounter2).not.counterToIncreaseBy(2);
+    expect(testCounter2).not.counterToIncreaseBy(6);
+    expect(testCounter2).counterToIncreaseBy(2);
+
+    testCounter2.count = 7;
+
+    expect(testCounter2).counterToIncreaseBy(1);
+    expect(testCounter2).not.counterToIncreaseBy(2);
+    expect(testCounter2).not.counterToIncreaseBy(1);
+    expect(testCounter2).counterToIncreaseBy(2);
   });
 
   test('triggersNumberToBe matchers work', () => {

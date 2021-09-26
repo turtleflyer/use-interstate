@@ -1,5 +1,5 @@
 import path from 'path';
-import './assets/expectNumberToBeConsideringFlag';
+import './assets/expectCounterToIncreaseBy';
 import { _testingAsset_defineTriggersCounter } from './assets/expectTriggersNumber';
 import type { TestFlags } from './assets/testFlags';
 import { flagManager } from './assets/testFlags';

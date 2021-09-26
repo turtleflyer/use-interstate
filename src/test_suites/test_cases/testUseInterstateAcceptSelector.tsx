@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import type { TestCounter } from '../assets/expectCounterToIncreaseBy';
 import type { TestCase, TestParameters } from '../assets/TestTypes';
 
 export const testUseInterstateAcceptSelector: TestCase = [
@@ -31,7 +32,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
 
     const testComponentID = 'test_component';
     const TestComponent = createListenerComponent({ useInterstate });
-    let effectCounter = 0;
+    const effectCounter: TestCounter = { count: 0 };
 
     expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
     expect(77).triggersNumberToBeGreaterThanOrEqual(0);
@@ -47,7 +48,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
               77: ss,
               [symbolKey]: sy,
             }),
-            effectFn: () => effectCounter++,
+            effectFn: () => effectCounter.count++,
           }}
         />
       </StrictMode>
@@ -59,8 +60,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
     expect(77).triggersNumberToBeGreaterThanOrEqual(1);
     expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate('foo', 200));
 
@@ -70,8 +70,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate('foo', 200));
 
@@ -81,7 +80,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
-    expect(effectCounter).numberToBeConsideringFlag(0);
+    expect(effectCounter).counterToIncreaseBy(0);
 
     act(() => setInterstate(77, 'lo'));
 
@@ -91,8 +90,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate(symbolKey, { b: false }));
 
@@ -102,8 +100,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() =>
       setInterstate(({ foo: prevFooV }) => ({
@@ -119,8 +116,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate({ 77: 'no' }));
 
@@ -130,7 +126,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
-    expect(effectCounter).numberToBeConsideringFlag(0);
+    expect(effectCounter).counterToIncreaseBy(0);
 
     act(() => setInterstate({ foo: 15, 77: 'no', [symbolKey]: { 1: true } }));
 
@@ -140,8 +136,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     rerender(<StrictMode />);
     resetInterstate({ foo: 1000 });
@@ -155,7 +150,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
           {...{
             testId: testComponentID,
             selector: ({ foo, 77: ss }: TestState) => `${foo}-${ss}`,
-            effectFn: () => effectCounter++,
+            effectFn: () => effectCounter.count++,
           }}
         />
       </StrictMode>
@@ -165,8 +160,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate('foo', 1));
 
@@ -174,8 +168,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     rerender(
       <StrictMode>
@@ -183,7 +176,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
           {...{
             testId: testComponentID,
             selector: ({ foo, 77: ss }: TestState) => `${foo}-${ss}`,
-            effectFn: () => effectCounter++,
+            effectFn: () => effectCounter.count++,
           }}
         />
       </StrictMode>
@@ -193,8 +186,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate(77, 'run'));
 
@@ -202,7 +194,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
-    expect(effectCounter).numberToBeConsideringFlag(0);
+    expect(effectCounter).counterToIncreaseBy(0);
 
     rerender(
       <StrictMode>
@@ -210,7 +202,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
           {...{
             testId: testComponentID,
             selector: ({ foo, 77: ss }: TestState) => `${foo}-${ss}`,
-            effectFn: () => effectCounter++,
+            effectFn: () => effectCounter.count++,
           }}
         />
       </StrictMode>
@@ -220,8 +212,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(0);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate('foo', -1));
 
@@ -229,8 +220,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(0);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate(77, 'aa'));
 
@@ -238,8 +228,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(0);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     rerender(
       <StrictMode>
@@ -248,7 +237,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
             testId: testComponentID,
             selector: ({ foo }: TestState) => foo,
             deps: [],
-            effectFn: () => effectCounter++,
+            effectFn: () => effectCounter.count++,
           }}
         />
       </StrictMode>
@@ -258,8 +247,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate({ foo: 111, 77: 'go' }));
 
@@ -267,8 +255,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate({ 77: 'nope' }));
 
@@ -276,7 +263,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
-    expect(effectCounter).numberToBeConsideringFlag(0);
+    expect(effectCounter).counterToIncreaseBy(0);
 
     act(() => setInterstate({ foo: 1000 }));
 
@@ -284,8 +271,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     rerender(
       <StrictMode>
@@ -294,7 +280,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
             testId: testComponentID,
             selector: ({ 77: ss }: TestState) => ss,
             deps: [],
-            effectFn: () => effectCounter++,
+            effectFn: () => effectCounter.count++,
           }}
         />
       </StrictMode>
@@ -304,8 +290,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate({ 77: 'run' }));
 
@@ -313,7 +298,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
-    expect(effectCounter).numberToBeConsideringFlag(0);
+    expect(effectCounter).counterToIncreaseBy(0);
 
     act(() => setInterstate({ foo: 200, 77: 'go' }));
 
@@ -321,8 +306,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     rerender(
       <StrictMode>
@@ -331,7 +315,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
             testId: testComponentID,
             selector: ({ foo, 77: ss }: TestState) => `${foo}-${ss}`,
             deps: [1],
-            effectFn: () => effectCounter++,
+            effectFn: () => effectCounter.count++,
           }}
         />
       </StrictMode>
@@ -341,8 +325,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(0);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     rerender(
       <StrictMode>
@@ -351,7 +334,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
             testId: testComponentID,
             selector: ({ foo }: TestState) => foo,
             deps: [1, 2],
-            effectFn: () => effectCounter++,
+            effectFn: () => effectCounter.count++,
           }}
         />
       </StrictMode>
@@ -361,8 +344,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     rerender(
       <StrictMode>
@@ -371,7 +353,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
             testId: testComponentID,
             selector: ({ 77: ss }: TestState) => ss,
             deps: [1, 2],
-            effectFn: () => effectCounter++,
+            effectFn: () => effectCounter.count++,
           }}
         />
       </StrictMode>
@@ -381,8 +363,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate({ [symbolKey]: { a: 'aa' } }));
 
@@ -390,7 +371,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
-    expect(effectCounter).numberToBeConsideringFlag(0);
+    expect(effectCounter).counterToIncreaseBy(0);
 
     rerender(
       <StrictMode>
@@ -399,7 +380,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
             testId: testComponentID,
             selector: ({ [symbolKey]: sk }: TestState) => sk,
             deps: [1, 3],
-            effectFn: () => effectCounter++,
+            effectFn: () => effectCounter.count++,
           }}
         />
       </StrictMode>
@@ -409,8 +390,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect('foo').triggersNumberToBe(0);
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     rerender(<></>);
 

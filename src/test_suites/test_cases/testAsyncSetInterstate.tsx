@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import type { TestCounter } from '../assets/expectCounterToIncreaseBy';
 import type { TestCase, TestParameters } from '../assets/TestTypes';
 
 export const testAsyncSetInterstate: TestCase = [
@@ -23,22 +24,21 @@ export const testAsyncSetInterstate: TestCase = [
 
     const testComponentID = 'test_component';
     const TestComponent = createListenerComponent({ useInterstate });
-    let effectCounter = 0;
+    const effectCounter: TestCounter = { count: 0 };
 
     expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
 
     const { getByTestId, rerender } = render(
       <StrictMode>
         <TestComponent
-          {...{ testId: testComponentID, stateKey: 'foo', effectFn: () => effectCounter++ }}
+          {...{ testId: testComponentID, stateKey: 'foo', effectFn: () => effectCounter.count++ }}
         />
       </StrictMode>
     );
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('undefined');
     expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     Promise.resolve().then(() => {
       setInterstate('foo', 100);
@@ -46,8 +46,7 @@ export const testAsyncSetInterstate: TestCase = [
 
     await waitFor(() => expect(getByTestId(testComponentID).firstChild!.textContent).toBe('100'));
     expect('foo').triggersNumberToBe(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     Promise.resolve().then(() => {
       setInterstate('foo', -1);
@@ -55,8 +54,7 @@ export const testAsyncSetInterstate: TestCase = [
 
     await waitFor(() => expect(getByTestId(testComponentID).firstChild!.textContent).toBe('-1'));
     expect('foo').triggersNumberToBe(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     rerender(<></>);
 

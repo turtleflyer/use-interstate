@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import type { TestCounter } from '../assets/expectCounterToIncreaseBy';
 import type { TestCase, TestParameters } from '../assets/TestTypes';
 
 export const testUseInterstateKeyInterface: TestCase = [
@@ -27,7 +28,7 @@ export const testUseInterstateKeyInterface: TestCase = [
 
     const testComponentID = 'test_component';
     const TestComponent = createListenerComponent({ useInterstate });
-    let effectCounter = 0;
+    const effectCounter: TestCounter = { count: 0 };
 
     expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
     expect(77).triggersNumberToBeGreaterThanOrEqual(0);
@@ -36,28 +37,26 @@ export const testUseInterstateKeyInterface: TestCase = [
     const { getByTestId, rerender } = render(
       <StrictMode>
         <TestComponent
-          {...{ testId: testComponentID, stateKey: 'foo', effectFn: () => effectCounter++ }}
+          {...{ testId: testComponentID, stateKey: 'foo', effectFn: () => effectCounter.count++ }}
         />
       </StrictMode>
     );
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('undefined');
     expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate('foo', 0));
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('0');
     expect('foo').triggersNumberToBe(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate('foo', 0));
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('0');
     expect('foo').triggersNumberToBe(1);
-    expect(effectCounter).numberToBeConsideringFlag(0);
+    expect(effectCounter).counterToIncreaseBy(0);
 
     rerender(<StrictMode />);
     resetInterstate();
@@ -73,7 +72,7 @@ export const testUseInterstateKeyInterface: TestCase = [
             testId: testComponentID,
             stateKey: 'foo',
             initParam: 100,
-            effectFn: () => effectCounter++,
+            effectFn: () => effectCounter.count++,
           }}
         />
       </StrictMode>
@@ -81,20 +80,18 @@ export const testUseInterstateKeyInterface: TestCase = [
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('100');
     expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate('foo', (p: number) => p * 3));
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('300');
     expect('foo').triggersNumberToBe(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     rerender(
       <StrictMode>
         <TestComponent
-          {...{ testId: testComponentID, stateKey: 77, effectFn: () => effectCounter++ }}
+          {...{ testId: testComponentID, stateKey: 77, effectFn: () => effectCounter.count++ }}
         />
       </StrictMode>
     );
@@ -102,20 +99,17 @@ export const testUseInterstateKeyInterface: TestCase = [
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('undefined');
     expect('foo').triggersNumberToBe(0);
     expect(77).triggersNumberToBe(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate(77, 'hi'));
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('hi');
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate(77, 'lo'));
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('lo');
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     rerender(
       <StrictMode>
@@ -124,7 +118,7 @@ export const testUseInterstateKeyInterface: TestCase = [
             testId: testComponentID,
             stateKey: symbolKey,
             initParam: { a: true },
-            effectFn: () => effectCounter++,
+            effectFn: () => effectCounter.count++,
           }}
         />
       </StrictMode>
@@ -134,19 +128,17 @@ export const testUseInterstateKeyInterface: TestCase = [
     expect('foo').triggersNumberToBe(0);
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate(symbolKey, { b: false }));
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"b":false}');
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate('foo', 300));
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"b":false}');
-    expect(effectCounter).numberToBeConsideringFlag(0);
+    expect(effectCounter).counterToIncreaseBy(0);
 
     rerender(<></>);
 

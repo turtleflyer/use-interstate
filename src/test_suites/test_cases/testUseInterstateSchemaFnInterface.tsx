@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import type { TestCounter } from '../assets/expectCounterToIncreaseBy';
 import type { TestCase, TestParameters } from '../assets/TestTypes';
 
 export const testUseInterstateSchemaFnInterface: TestCase = [
@@ -27,7 +28,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
 
     const testComponentID = 'test_component';
     const TestComponent = createListenerComponent({ useInterstate });
-    let effectCounter = 0;
+    const effectCounter: TestCounter = { count: 0 };
 
     expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
     expect(77).triggersNumberToBeGreaterThanOrEqual(0);
@@ -39,7 +40,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
           {...{
             testId: testComponentID,
             initSchema: () => ({ foo: 100, 77: 'hi', [symbolKey]: { a: true } }),
-            effectFn: () => effectCounter++,
+            effectFn: () => effectCounter.count++,
           }}
         />
       </StrictMode>
@@ -51,8 +52,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
     expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
     expect(77).triggersNumberToBeGreaterThanOrEqual(1);
     expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate('foo', 200));
 
@@ -62,8 +62,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate('foo', 200));
 
@@ -73,7 +72,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
-    expect(effectCounter).numberToBeConsideringFlag(0);
+    expect(effectCounter).counterToIncreaseBy(0);
 
     act(() => setInterstate(77, 'lo'));
 
@@ -83,8 +82,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate(symbolKey, { b: false }));
 
@@ -94,8 +92,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() =>
       setInterstate(({ foo: prevFooV }) => ({
@@ -111,8 +108,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate({ 77: 'no' }));
 
@@ -122,7 +118,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
-    expect(effectCounter).numberToBeConsideringFlag(0);
+    expect(effectCounter).counterToIncreaseBy(0);
 
     act(() => setInterstate({ foo: 15, 77: 'no', [symbolKey]: { 1: true } }));
 
@@ -132,8 +128,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     rerender(
       <StrictMode>
@@ -142,7 +137,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
             testId: testComponentID,
             initSchema: () => ({ foo: 0 }),
             deps: [],
-            effectFn: () => effectCounter++,
+            effectFn: () => effectCounter.count++,
           }}
         />
       </StrictMode>
@@ -152,8 +147,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate({ foo: 111, 77: 'go' }));
 
@@ -161,8 +155,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate({ 77: 'nope' }));
 
@@ -170,7 +163,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
-    expect(effectCounter).numberToBeConsideringFlag(0);
+    expect(effectCounter).counterToIncreaseBy(0);
 
     act(() => setInterstate({ foo: -1 }));
 
@@ -178,8 +171,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     rerender(
       <StrictMode>
@@ -188,7 +180,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
             testId: testComponentID,
             initSchema: () => ({ 77: '' }),
             deps: [],
-            effectFn: () => effectCounter++,
+            effectFn: () => effectCounter.count++,
           }}
         />
       </StrictMode>
@@ -198,8 +190,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     act(() => setInterstate({ 77: 'run' }));
 
@@ -207,7 +198,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
-    expect(effectCounter).numberToBeConsideringFlag(0);
+    expect(effectCounter).counterToIncreaseBy(0);
 
     act(() => setInterstate({ foo: 200, 77: 'go' }));
 
@@ -215,8 +206,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     rerender(
       <StrictMode>
@@ -225,7 +215,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
             testId: testComponentID,
             initSchema: () => ({ foo: 0, 77: '' }),
             deps: [1],
-            effectFn: () => effectCounter++,
+            effectFn: () => effectCounter.count++,
           }}
         />
       </StrictMode>
@@ -235,8 +225,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(0);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     rerender(
       <StrictMode>
@@ -245,7 +234,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
             testId: testComponentID,
             initSchema: () => ({ foo: 0 }),
             deps: [1, 2],
-            effectFn: () => effectCounter++,
+            effectFn: () => effectCounter.count++,
           }}
         />
       </StrictMode>
@@ -255,8 +244,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     rerender(
       <StrictMode>
@@ -265,7 +253,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
             testId: testComponentID,
             initSchema: () => ({ 77: '' }),
             deps: [1, 2],
-            effectFn: () => effectCounter++,
+            effectFn: () => effectCounter.count++,
           }}
         />
       </StrictMode>
@@ -275,8 +263,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     rerender(
       <StrictMode>
@@ -285,7 +272,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
             testId: testComponentID,
             initSchema: () => ({ [symbolKey]: {} }),
             deps: [1, 3],
-            effectFn: () => effectCounter++,
+            effectFn: () => effectCounter.count++,
           }}
         />
       </StrictMode>
@@ -295,8 +282,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
     expect('foo').triggersNumberToBe(0);
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(1);
-    expect(effectCounter).numberToBeConsideringFlag(1);
-    effectCounter = 0;
+    expect(effectCounter).counterToIncreaseBy(1);
 
     rerender(<></>);
 
