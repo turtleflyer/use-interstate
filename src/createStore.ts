@@ -151,10 +151,10 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
 
       calculatedValue = getValueFromState(stateSlice);
     } else {
-      const { accessMapHandler, getKeys } = getAccessMapHandler();
+      const { accessMapHandler, getKeysBeingAccessed } = getAccessMapHandler();
       calculatedValue = getValueFromState(accessMapHandler);
 
-      getKeys().forEach((key) => {
+      getKeysBeingAccessed().forEach((key) => {
         const stateEntry = getStateValue(key);
         unsubscribeFromKeys.push(createUnsubscribingFunction(stateEntry));
       });

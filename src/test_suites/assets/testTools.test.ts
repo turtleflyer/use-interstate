@@ -1,14 +1,21 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { TriggersCounter } from '../../__mocks__/createState';
 import { stringifyState } from './createComponents';
 import './expectNumberToBeConsideringFlag';
-import './expectTriggersNumber';
+import { _testingAsset_defineTriggersCounter } from './expectTriggersNumber';
 import { flagManager } from './testFlags';
+
+jest.mock('../../createState.ts');
+
+beforeEach(() => {
+  flagManager.reset();
+});
+
+afterAll(() => {
+  flagManager.reset();
+});
 
 describe('Test correctness of test tools', () => {
   test('flag manager works', () => {
-    flagManager.reset();
-
     expect(flagManager.read('SHOULD_TEST_IMPLEMENTATION')).toBeFalsy();
     expect(flagManager.read('SHOULD_TEST_PERFORMANCE')).toBeFalsy();
 
@@ -21,8 +28,6 @@ describe('Test correctness of test tools', () => {
 
     expect(flagManager.read('SHOULD_TEST_IMPLEMENTATION')).toBeFalsy();
     expect(flagManager.read('SHOULD_TEST_PERFORMANCE')).toBeFalsy();
-
-    flagManager.reset();
   });
 
   test('numberToBeConsideringFlag matcher works', () => {
@@ -35,46 +40,50 @@ describe('Test correctness of test tools', () => {
 
     expect(1).numberToBeConsideringFlag(1);
     expect(2).numberToBeConsideringFlag(1);
-
-    flagManager.reset();
   });
 
   test('triggersNumberToBe matchers work', () => {
-    const triggersCounter0: TriggersCounter = (arg) => (arg === '_' ? 1 : NaN);
-
+    _testingAsset_defineTriggersCounter((arg) => (arg === '_' ? 1 : NaN));
     flagManager.set({ SHOULD_TEST_IMPLEMENTATION: true });
 
-    expect([triggersCounter0, '_']).triggersNumberToBe(1);
-    expect([triggersCounter0, '_']).triggersNumberToBeGreaterThanOrEqual(0);
-    expect([triggersCounter0, '_']).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter0, '_']).not.triggersNumberToBe(2);
-    expect([triggersCounter0, '_']).not.triggersNumberToBeGreaterThanOrEqual(2);
+    expect('_').triggersNumberToBe(1);
+    expect('_').triggersNumberToBeGreaterThanOrEqual(0);
+    expect('_').triggersNumberToBeGreaterThanOrEqual(1);
+    expect('_').not.triggersNumberToBe(2);
+    expect('_').not.triggersNumberToBeGreaterThanOrEqual(2);
 
     flagManager.set({ SHOULD_TEST_IMPLEMENTATION: false });
 
-    expect([triggersCounter0, '_']).triggersNumberToBe(1);
-    expect([triggersCounter0, '_']).triggersNumberToBeGreaterThanOrEqual(0);
-    expect([triggersCounter0, '_']).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter0, '_']).triggersNumberToBe(2);
-    expect([triggersCounter0, '_']).triggersNumberToBeGreaterThanOrEqual(2);
+    expect('_').triggersNumberToBe(1);
+    expect('_').triggersNumberToBeGreaterThanOrEqual(0);
+    expect('_').triggersNumberToBeGreaterThanOrEqual(1);
+    expect('_').triggersNumberToBe(2);
+    expect('_').triggersNumberToBeGreaterThanOrEqual(2);
+    expect('_').not.triggersNumberToBe(1);
+    expect('_').not.triggersNumberToBeGreaterThanOrEqual(0);
+    expect('_').not.triggersNumberToBeGreaterThanOrEqual(1);
+    expect('_').not.triggersNumberToBe(2);
+    expect('_').not.triggersNumberToBeGreaterThanOrEqual(2);
 
-    const triggersCounter1: TriggersCounter = (arg) => (arg === '_' ? 0 : NaN);
+    _testingAsset_defineTriggersCounter((arg) => (arg === '_' ? 0 : NaN));
 
     flagManager.set({ SHOULD_TEST_IMPLEMENTATION: true });
 
-    expect([triggersCounter1, '_']).triggersNumberToBe(0);
-    expect([triggersCounter1, '_']).triggersNumberToBeGreaterThanOrEqual(0);
-    expect([triggersCounter1, '_']).not.triggersNumberToBe(1);
-    expect([triggersCounter1, '_']).not.triggersNumberToBeGreaterThanOrEqual(1);
+    expect('_').triggersNumberToBe(0);
+    expect('_').triggersNumberToBeGreaterThanOrEqual(0);
+    expect('_').not.triggersNumberToBe(1);
+    expect('_').not.triggersNumberToBeGreaterThanOrEqual(1);
 
     flagManager.set({ SHOULD_TEST_IMPLEMENTATION: false });
 
-    expect([triggersCounter1, '_']).triggersNumberToBe(0);
-    expect([triggersCounter1, '_']).triggersNumberToBeGreaterThanOrEqual(0);
-    expect([triggersCounter1, '_']).triggersNumberToBe(1);
-    expect([triggersCounter1, '_']).triggersNumberToBeGreaterThanOrEqual(1);
-
-    flagManager.reset();
+    expect('_').triggersNumberToBe(0);
+    expect('_').triggersNumberToBeGreaterThanOrEqual(0);
+    expect('_').triggersNumberToBe(1);
+    expect('_').triggersNumberToBeGreaterThanOrEqual(1);
+    expect('_').not.triggersNumberToBe(0);
+    expect('_').not.triggersNumberToBeGreaterThanOrEqual(0);
+    expect('_').not.triggersNumberToBe(1);
+    expect('_').not.triggersNumberToBeGreaterThanOrEqual(1);
   });
 
   test('defInterpretResult works', () => {

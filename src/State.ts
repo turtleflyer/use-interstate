@@ -42,5 +42,5 @@ export type GetAccessMapHandler<M extends object> = () => AccessMapHandlerAndGet
 export interface AccessMapHandlerAndGetKeysMethod<M extends object> {
   readonly accessMapHandler: Readonly<M>;
 
-  readonly getKeys: () => readonly (keyof M)[];
+  readonly getKeysBeingAccessed: () => readonly (keyof M)[];
 }

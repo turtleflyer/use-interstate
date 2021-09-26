@@ -7,7 +7,6 @@ export const testChangingInterface: TestCase = [
 
   ({
     useInterstateImport: { initInterstate },
-    triggersCounterImport: { createTriggersCounter },
 
     createComponentsImport: {
       createListenerComponent,
@@ -32,12 +31,11 @@ export const testChangingInterface: TestCase = [
 
     const testComponentID = 'test_component';
     const TestComponent = createListenerComponent({ useInterstate });
-    const triggersCounter = createTriggersCounter();
     let effectCounter = 0;
 
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(0);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(0);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(0);
 
     const { getByTestId, rerender } = render(
       <StrictMode>
@@ -52,18 +50,18 @@ export const testChangingInterface: TestCase = [
     );
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('100');
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(0);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(0);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
     act(() => setInterstate('foo', 200));
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('200');
-    expect([triggersCounter, 'foo']).triggersNumberToBe(1);
-    expect([triggersCounter, 77]).triggersNumberToBe(0);
-    expect([triggersCounter, symbolKey]).triggersNumberToBe(0);
+    expect('foo').triggersNumberToBe(1);
+    expect(77).triggersNumberToBe(0);
+    expect(symbolKey).triggersNumberToBe(0);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
@@ -82,9 +80,9 @@ export const testChangingInterface: TestCase = [
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
       '{"77":"hi","symbol(0)":{"a":true}}'
     );
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(0);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
@@ -102,9 +100,9 @@ export const testChangingInterface: TestCase = [
     );
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"77":"hi","foo":200}');
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(0);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
@@ -122,9 +120,9 @@ export const testChangingInterface: TestCase = [
     );
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"77":"hi","foo":200}');
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(0);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
@@ -141,9 +139,9 @@ export const testChangingInterface: TestCase = [
     );
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"symbol(0)":{"a":true}}');
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(0);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(0);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
@@ -160,9 +158,9 @@ export const testChangingInterface: TestCase = [
     );
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"77":"hi"}');
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(0);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(0);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
@@ -179,9 +177,9 @@ export const testChangingInterface: TestCase = [
     );
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('200');
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(0);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(0);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
@@ -199,9 +197,9 @@ export const testChangingInterface: TestCase = [
     );
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('hi');
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(0);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(0);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
@@ -219,9 +217,9 @@ export const testChangingInterface: TestCase = [
     );
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"77":"hi","foo":200}');
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(0);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
@@ -239,16 +237,16 @@ export const testChangingInterface: TestCase = [
     );
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"a":true}');
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(0);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(0);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
     rerender(<></>);
 
-    expect([triggersCounter, 'foo']).triggersNumberToBe(0);
-    expect([triggersCounter, 77]).triggersNumberToBe(0);
-    expect([triggersCounter, symbolKey]).triggersNumberToBe(0);
+    expect('foo').triggersNumberToBe(0);
+    expect(77).triggersNumberToBe(0);
+    expect(symbolKey).triggersNumberToBe(0);
   },
 ];

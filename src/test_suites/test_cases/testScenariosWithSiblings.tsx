@@ -7,7 +7,6 @@ export const testScenariosWithSiblings: TestCase = [
 
   ({
     useInterstateImport: { initInterstate },
-    triggersCounterImport: { createTriggersCounter },
 
     createComponentsImport: {
       createListenerComponent,
@@ -27,13 +26,12 @@ export const testScenariosWithSiblings: TestCase = [
     const testComponentID1 = 'test_component-1';
     const testComponentID2 = 'test_component-2';
     const TestComponent = createListenerComponent({ useInterstate });
-    const triggersCounter = createTriggersCounter();
     let effectCounter0 = 0;
     let effectCounter1 = 0;
     let effectCounter2 = 0;
 
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(0);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
 
     const { getByTestId, rerender } = render(
       <StrictMode>
@@ -56,8 +54,8 @@ export const testScenariosWithSiblings: TestCase = [
 
     expect(getByTestId(testComponentID0).firstChild!.textContent).toBe('undefined');
     expect(getByTestId(testComponentID1).firstChild!.textContent).toBe('undefined');
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(2);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(2);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
     expect(effectCounter0).numberToBeConsideringFlag(1);
     effectCounter0 = 0;
     expect(effectCounter1).numberToBeConsideringFlag(1);
@@ -67,8 +65,8 @@ export const testScenariosWithSiblings: TestCase = [
 
     expect(getByTestId(testComponentID0).firstChild!.textContent).toBe('200');
     expect(getByTestId(testComponentID1).firstChild!.textContent).toBe('200');
-    expect([triggersCounter, 'foo']).triggersNumberToBe(2);
-    expect([triggersCounter, 77]).triggersNumberToBe(0);
+    expect('foo').triggersNumberToBe(2);
+    expect(77).triggersNumberToBe(0);
     expect(effectCounter0).numberToBeConsideringFlag(1);
     effectCounter0 = 0;
     expect(effectCounter1).numberToBeConsideringFlag(1);
@@ -77,8 +75,8 @@ export const testScenariosWithSiblings: TestCase = [
     rerender(<StrictMode />);
     resetInterstate();
 
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(0);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
 
     rerender(
       <StrictMode>
@@ -102,8 +100,8 @@ export const testScenariosWithSiblings: TestCase = [
 
     expect(getByTestId(testComponentID0).firstChild!.textContent).toBe('111');
     expect(getByTestId(testComponentID1).firstChild!.textContent).toBe('111');
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(2);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(2);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
     expect(effectCounter0).numberToBeConsideringFlag(1);
     effectCounter0 = 0;
     expect(effectCounter1).numberToBeConsideringFlag(1);
@@ -113,8 +111,8 @@ export const testScenariosWithSiblings: TestCase = [
 
     expect(getByTestId(testComponentID0).firstChild!.textContent).toBe('18');
     expect(getByTestId(testComponentID1).firstChild!.textContent).toBe('18');
-    expect([triggersCounter, 'foo']).triggersNumberToBe(2);
-    expect([triggersCounter, 77]).triggersNumberToBe(0);
+    expect('foo').triggersNumberToBe(2);
+    expect(77).triggersNumberToBe(0);
     expect(effectCounter0).numberToBeConsideringFlag(1);
     effectCounter0 = 0;
     expect(effectCounter1).numberToBeConsideringFlag(1);
@@ -123,8 +121,8 @@ export const testScenariosWithSiblings: TestCase = [
     rerender(<StrictMode />);
     resetInterstate();
 
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(0);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
 
     rerender(
       <StrictMode>
@@ -148,8 +146,8 @@ export const testScenariosWithSiblings: TestCase = [
 
     expect(getByTestId(testComponentID0).firstChild!.textContent).toBe('6');
     expect(getByTestId(testComponentID1).firstChild!.textContent).toBe('6');
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(2);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(2);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
     expect(effectCounter0).numberToBeConsideringFlag(2);
     effectCounter0 = 0;
     expect(effectCounter1).numberToBeConsideringFlag(1);
@@ -159,8 +157,8 @@ export const testScenariosWithSiblings: TestCase = [
 
     expect(getByTestId(testComponentID0).firstChild!.textContent).toBe('1000');
     expect(getByTestId(testComponentID1).firstChild!.textContent).toBe('1000');
-    expect([triggersCounter, 'foo']).triggersNumberToBe(2);
-    expect([triggersCounter, 77]).triggersNumberToBe(0);
+    expect('foo').triggersNumberToBe(2);
+    expect(77).triggersNumberToBe(0);
     expect(effectCounter0).numberToBeConsideringFlag(1);
     effectCounter0 = 0;
     expect(effectCounter1).numberToBeConsideringFlag(1);
@@ -169,8 +167,8 @@ export const testScenariosWithSiblings: TestCase = [
     rerender(<StrictMode />);
     resetInterstate();
 
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(0);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
 
     rerender(
       <StrictMode>
@@ -195,8 +193,8 @@ export const testScenariosWithSiblings: TestCase = [
 
     expect(getByTestId(testComponentID0).firstChild!.textContent).toBe('22');
     expect(getByTestId(testComponentID1).firstChild!.textContent).toBe('22');
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(2);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(2);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
     expect(effectCounter0).numberToBeConsideringFlag(1);
     effectCounter0 = 0;
     expect(effectCounter1).numberToBeConsideringFlag(1);
@@ -206,8 +204,8 @@ export const testScenariosWithSiblings: TestCase = [
 
     expect(getByTestId(testComponentID0).firstChild!.textContent).toBe('555');
     expect(getByTestId(testComponentID1).firstChild!.textContent).toBe('555');
-    expect([triggersCounter, 'foo']).triggersNumberToBe(2);
-    expect([triggersCounter, 77]).triggersNumberToBe(0);
+    expect('foo').triggersNumberToBe(2);
+    expect(77).triggersNumberToBe(0);
     expect(effectCounter0).numberToBeConsideringFlag(1);
     effectCounter0 = 0;
     expect(effectCounter1).numberToBeConsideringFlag(1);
@@ -216,8 +214,8 @@ export const testScenariosWithSiblings: TestCase = [
     rerender(<StrictMode />);
     resetInterstate();
 
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(0);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
 
     rerender(
       <StrictMode>
@@ -249,8 +247,8 @@ export const testScenariosWithSiblings: TestCase = [
     expect(getByTestId(testComponentID0).firstChild!.textContent).toBe('800');
     expect(getByTestId(testComponentID1).firstChild!.textContent).toBe('800');
     expect(getByTestId(testComponentID2).firstChild!.textContent).toBe('800');
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(3);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(3);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
     expect(effectCounter0).numberToBeConsideringFlag(2);
     effectCounter0 = 0;
     expect(effectCounter1).numberToBeConsideringFlag(1);
@@ -263,8 +261,8 @@ export const testScenariosWithSiblings: TestCase = [
     expect(getByTestId(testComponentID0).firstChild!.textContent).toBe('5');
     expect(getByTestId(testComponentID1).firstChild!.textContent).toBe('5');
     expect(getByTestId(testComponentID2).firstChild!.textContent).toBe('5');
-    expect([triggersCounter, 'foo']).triggersNumberToBe(3);
-    expect([triggersCounter, 77]).triggersNumberToBe(0);
+    expect('foo').triggersNumberToBe(3);
+    expect(77).triggersNumberToBe(0);
     expect(effectCounter0).numberToBeConsideringFlag(1);
     effectCounter0 = 0;
     expect(effectCounter1).numberToBeConsideringFlag(1);
@@ -275,8 +273,8 @@ export const testScenariosWithSiblings: TestCase = [
     rerender(<StrictMode />);
     resetInterstate({ 77: 'hi' });
 
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(0);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
 
     rerender(
       <StrictMode>
@@ -300,8 +298,8 @@ export const testScenariosWithSiblings: TestCase = [
 
     expect(getByTestId(testComponentID0).firstChild!.textContent).toBe('99');
     expect(getByTestId(testComponentID1).firstChild!.textContent).toBe('99-hi');
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(2);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(2);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter0).numberToBeConsideringFlag(1);
     effectCounter0 = 0;
     expect(effectCounter1).numberToBeConsideringFlag(1);
@@ -311,8 +309,8 @@ export const testScenariosWithSiblings: TestCase = [
 
     expect(getByTestId(testComponentID0).firstChild!.textContent).toBe('777');
     expect(getByTestId(testComponentID1).firstChild!.textContent).toBe('777-hi');
-    expect([triggersCounter, 'foo']).triggersNumberToBe(2);
-    expect([triggersCounter, 77]).triggersNumberToBe(1);
+    expect('foo').triggersNumberToBe(2);
+    expect(77).triggersNumberToBe(1);
     expect(effectCounter0).numberToBeConsideringFlag(1);
     effectCounter0 = 0;
     expect(effectCounter1).numberToBeConsideringFlag(1);
@@ -321,8 +319,8 @@ export const testScenariosWithSiblings: TestCase = [
     rerender(<StrictMode />);
     resetInterstate({ 77: 'lo' });
 
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(0);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
 
     rerender(
       <StrictMode>
@@ -346,8 +344,8 @@ export const testScenariosWithSiblings: TestCase = [
 
     expect(getByTestId(testComponentID0).firstChild!.textContent).toBe('undefined-lo');
     expect(getByTestId(testComponentID1).firstChild!.textContent).toBe('15');
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter0).numberToBeConsideringFlag(1);
     effectCounter0 = 0;
     expect(effectCounter1).numberToBeConsideringFlag(1);
@@ -357,15 +355,15 @@ export const testScenariosWithSiblings: TestCase = [
 
     expect(getByTestId(testComponentID0).firstChild!.textContent).toBe('undefined-lo');
     expect(getByTestId(testComponentID1).firstChild!.textContent).toBe('13');
-    expect([triggersCounter, 'foo']).triggersNumberToBe(1);
-    expect([triggersCounter, 77]).triggersNumberToBe(1);
+    expect('foo').triggersNumberToBe(1);
+    expect(77).triggersNumberToBe(1);
     expect(effectCounter0).numberToBeConsideringFlag(0);
     expect(effectCounter1).numberToBeConsideringFlag(1);
     effectCounter1 = 0;
 
     rerender(<></>);
 
-    expect([triggersCounter, 'foo']).triggersNumberToBe(0);
-    expect([triggersCounter, 77]).triggersNumberToBe(0);
+    expect('foo').triggersNumberToBe(0);
+    expect(77).triggersNumberToBe(0);
   },
 ];

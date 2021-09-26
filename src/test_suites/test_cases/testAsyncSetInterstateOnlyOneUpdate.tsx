@@ -7,7 +7,6 @@ export const testAsyncSetInterstateOnlyOneUpdate: TestCase = [
 
   async ({
     useInterstateImport: { initInterstate },
-    triggersCounterImport: { createTriggersCounter },
 
     createComponentsImport: {
       createListenerComponent,
@@ -30,14 +29,13 @@ export const testAsyncSetInterstateOnlyOneUpdate: TestCase = [
       [symbolKey]: {},
     });
 
-    const triggersCounter = createTriggersCounter();
     const testComponentID = 'test_component';
     const TestComponent = createListenerComponent({ useInterstate });
     let effectCounter = 0;
 
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(0);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(0);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(0);
 
     const { getByTestId, rerender } = render(
       <StrictMode>
@@ -55,9 +53,9 @@ export const testAsyncSetInterstateOnlyOneUpdate: TestCase = [
       '{"77":"","foo":0,"symbol(0)":{}}'
     );
 
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
@@ -75,9 +73,9 @@ export const testAsyncSetInterstateOnlyOneUpdate: TestCase = [
       )
     );
 
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
@@ -91,9 +89,9 @@ export const testAsyncSetInterstateOnlyOneUpdate: TestCase = [
       )
     );
 
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
@@ -113,9 +111,9 @@ export const testAsyncSetInterstateOnlyOneUpdate: TestCase = [
       '{"77":"","foo":0,"symbol(0)":{}}'
     );
 
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
@@ -133,9 +131,9 @@ export const testAsyncSetInterstateOnlyOneUpdate: TestCase = [
       )
     );
 
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
@@ -149,9 +147,9 @@ export const testAsyncSetInterstateOnlyOneUpdate: TestCase = [
       )
     );
 
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
@@ -171,9 +169,9 @@ export const testAsyncSetInterstateOnlyOneUpdate: TestCase = [
       '{"77":"","foo":0,"symbol(0)":{}}'
     );
 
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
@@ -191,9 +189,9 @@ export const testAsyncSetInterstateOnlyOneUpdate: TestCase = [
       )
     );
 
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
@@ -207,16 +205,16 @@ export const testAsyncSetInterstateOnlyOneUpdate: TestCase = [
       )
     );
 
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
     rerender(<></>);
 
-    expect([triggersCounter, 'foo']).triggersNumberToBe(0);
-    expect([triggersCounter, 77]).triggersNumberToBe(0);
-    expect([triggersCounter, symbolKey]).triggersNumberToBe(0);
+    expect('foo').triggersNumberToBe(0);
+    expect(77).triggersNumberToBe(0);
+    expect(symbolKey).triggersNumberToBe(0);
   },
 ];

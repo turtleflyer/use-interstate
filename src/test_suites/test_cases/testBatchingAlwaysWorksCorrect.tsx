@@ -7,7 +7,6 @@ export const testBatchingAlwaysWorksCorrect: TestCase = [
 
   ({
     useInterstateImport: { initInterstate },
-    triggersCounterImport: { createTriggersCounter },
 
     createComponentsImport: {
       createListenerComponent,
@@ -26,13 +25,12 @@ export const testBatchingAlwaysWorksCorrect: TestCase = [
       77: 'aa',
     });
 
-    const triggersCounter = createTriggersCounter();
     const testComponentID = 'test_component';
     const TestComponent = createListenerComponent({ useInterstate });
     let effectCounter = 0;
 
-    expect([triggersCounter, 'foo']).triggersNumberToBe(0);
-    expect([triggersCounter, 77]).triggersNumberToBe(0);
+    expect('foo').triggersNumberToBe(0);
+    expect(77).triggersNumberToBe(0);
 
     const { getByTestId, rerender } = render(
       <StrictMode>
@@ -47,16 +45,16 @@ export const testBatchingAlwaysWorksCorrect: TestCase = [
     );
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('aa');
-    expect([triggersCounter, 'foo']).triggersNumberToBe(0);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBe(0);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
     act(() => setInterstate({ foo: 200, 77: 'bb' }));
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('bb');
-    expect([triggersCounter, 'foo']).triggersNumberToBe(0);
-    expect([triggersCounter, 77]).triggersNumberToBe(1);
+    expect('foo').triggersNumberToBe(0);
+    expect(77).triggersNumberToBe(1);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
@@ -73,16 +71,16 @@ export const testBatchingAlwaysWorksCorrect: TestCase = [
     );
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('200');
-    expect([triggersCounter, 'foo']).triggersNumberToBe(1);
-    expect([triggersCounter, 77]).triggersNumberToBe(0);
+    expect('foo').triggersNumberToBe(1);
+    expect(77).triggersNumberToBe(0);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
     act(() => setInterstate({ foo: 300, 77: 'cc' }));
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('300');
-    expect([triggersCounter, 'foo']).triggersNumberToBe(1);
-    expect([triggersCounter, 77]).triggersNumberToBe(0);
+    expect('foo').triggersNumberToBe(1);
+    expect(77).triggersNumberToBe(0);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
@@ -99,30 +97,30 @@ export const testBatchingAlwaysWorksCorrect: TestCase = [
     );
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"77":"cc","foo":300}');
-    expect([triggersCounter, 'foo']).triggersNumberToBe(1);
-    expect([triggersCounter, 77]).triggersNumberToBe(1);
+    expect('foo').triggersNumberToBe(1);
+    expect(77).triggersNumberToBe(1);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
     act(() => setInterstate({ foo: 300, 77: 'dd' }));
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"77":"dd","foo":300}');
-    expect([triggersCounter, 'foo']).triggersNumberToBe(1);
-    expect([triggersCounter, 77]).triggersNumberToBe(1);
+    expect('foo').triggersNumberToBe(1);
+    expect(77).triggersNumberToBe(1);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
     act(() => setInterstate({ foo: 400, 77: 'dd' }));
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"77":"dd","foo":400}');
-    expect([triggersCounter, 'foo']).triggersNumberToBe(1);
-    expect([triggersCounter, 77]).triggersNumberToBe(1);
+    expect('foo').triggersNumberToBe(1);
+    expect(77).triggersNumberToBe(1);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
     rerender(<></>);
 
-    expect([triggersCounter, 'foo']).triggersNumberToBe(0);
-    expect([triggersCounter, 77]).triggersNumberToBe(0);
+    expect('foo').triggersNumberToBe(0);
+    expect(77).triggersNumberToBe(0);
   },
 ];

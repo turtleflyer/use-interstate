@@ -7,7 +7,6 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
 
   ({
     useInterstateImport: { initInterstate },
-    triggersCounterImport: { createTriggersCounter },
 
     createComponentsImport: {
       createListenerComponent,
@@ -26,14 +25,13 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
 
     const { setInterstate, useInterstate } = initInterstate<TestState>();
 
-    const triggersCounter = createTriggersCounter();
     const testComponentID = 'test_component';
     const TestComponent = createListenerComponent({ useInterstate });
     let effectCounter = 0;
 
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(0);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(0);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(0);
 
     const { getByTestId } = render(
       <StrictMode>
@@ -50,9 +48,9 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
       '{"77":"undefined","foo":"undefined","symbol(0)":"undefined"}'
     );
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
@@ -61,9 +59,9 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
       '{"77":"undefined","foo":100,"symbol(0)":"undefined"}'
     );
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
@@ -72,9 +70,9 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
       '{"77":"undefined","foo":101,"symbol(0)":"undefined"}'
     );
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
@@ -83,9 +81,9 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
       '{"77":"hi","foo":200,"symbol(0)":{"a":true}}'
     );
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
@@ -107,9 +105,9 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
       '{"77":"lo","foo":299,"symbol(0)":{"a":false,"b":true}}'
     );
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
@@ -118,9 +116,9 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
       '{"77":"no","foo":2,"symbol(0)":{"a":false,"b":true}}'
     );
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
@@ -135,9 +133,9 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
       '{"77":"no or yes / 2","foo":10,"symbol(0)":{"all":false}}'
     );
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
@@ -146,9 +144,9 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
       '{"77":"no or yes / 2","foo":10,"symbol(0)":{"all":false}}'
     );
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter).numberToBeConsideringFlag(0);
 
     act(() => setInterstate({ foo: 10, [symbolKey]: { all: false } }));
@@ -156,9 +154,9 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
       '{"77":"no or yes / 2","foo":10,"symbol(0)":{"all":false}}'
     );
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter).numberToBeConsideringFlag(1);
     effectCounter = 0;
 
@@ -167,9 +165,9 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
       '{"77":"no or yes / 2","foo":10,"symbol(0)":{"all":false}}'
     );
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter).numberToBeConsideringFlag(0);
 
     act(() =>
@@ -182,9 +180,9 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
       '{"77":"no or yes / 2","foo":10,"symbol(0)":{"all":false}}'
     );
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter).numberToBeConsideringFlag(0);
 
     act(() => setInterstate((state) => ({ ...state })));
@@ -192,9 +190,9 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
       '{"77":"no or yes / 2","foo":10,"symbol(0)":{"all":false}}'
     );
-    expect([triggersCounter, 'foo']).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, 77]).triggersNumberToBeGreaterThanOrEqual(1);
-    expect([triggersCounter, symbolKey]).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter).numberToBeConsideringFlag(0);
   },
 ];

@@ -1,18 +1,18 @@
 import type { AccessMapHandlerAndGetKeysMethod, State, StateEntry } from './State';
 import type { InterstateKey } from './UseInterstateTypes';
 
-export type MemCreatedMap = { current: { [P in InterstateKey]?: StateEntry<unknown> } };
+type MemCreatedMap = { [P in InterstateKey]?: StateEntry<unknown> };
 
-const _toAccessWhileTesting_memCreatedMap: MemCreatedMap = { current: {} };
+let _toAccessWhileTesting_memCreatedMap: MemCreatedMap | null = null;
 
 export const createState = <M extends object>(): State<M> => {
   type EntriesMap = { [P in keyof M]?: StateEntry<M[P]> };
 
   let entriesMap: EntriesMap = {};
-  let accessMapHandler: EntriesMap = {};
+  let accessMapHandler = {} as M;
   let keysCollector: (key: keyof M) => void;
 
-  _toAccessWhileTesting_memCreatedMap.current = entriesMap;
+  _toAccessWhileTesting_memCreatedMap = entriesMap;
 
   const getStateValue = <K extends keyof M>(key: K): StateEntry<M[K]> => {
     if (key in entriesMap) {
@@ -45,6 +45,7 @@ export const createState = <M extends object>(): State<M> => {
 
         return entry.stateValue?.value;
       },
+
       configurable: false,
     });
   }
@@ -56,21 +57,21 @@ export const createState = <M extends object>(): State<M> => {
       capturedKeys.push(key);
     };
 
-    const getKeys = (): (keyof M)[] => {
+    const getKeysBeingAccessed = (): (keyof M)[] => {
       return capturedKeys;
     };
 
-    return { accessMapHandler: accessMapHandler as M, getKeys };
+    return { accessMapHandler, getKeysBeingAccessed };
   };
 
   const clearState = (): void => {
     entriesMap = {};
-    accessMapHandler = {};
-    _toAccessWhileTesting_memCreatedMap.current = entriesMap;
+    accessMapHandler = {} as M;
+    _toAccessWhileTesting_memCreatedMap = entriesMap;
   };
 
   return { getStateValue, setStateValue, getAccessMapHandler, clearState };
 };
 
-export const _toAccessWhileTesting_getCreatedMap = (): MemCreatedMap =>
+export const _toAccessWhileTesting_getCreatedMap = (): MemCreatedMap | null =>
   _toAccessWhileTesting_memCreatedMap;

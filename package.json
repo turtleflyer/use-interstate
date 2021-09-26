@@ -29,8 +29,9 @@
   ],
   "scripts": {
     "test": "jest",
-    "test:pre": "jest --testPathPattern src/test_suites/pre src/test_suites/assets",
-    "test:post": "jest --testPathPattern src/test_suites/post src/test_suites/assets --no-cache",
+    "test:pre": "jest --testPathPattern src/test_suites/assets src/test_suites/pre",
+    "test:post": "jest --testPathPattern src/test_suites/assets src/test_suites/post --no-cache",
+    "test:all": "jest --testPathPattern src/test_suites/assets src/test_suites/pre src/test_suites/post --no-cache",
     "bundle": "cleanup-dirs ts lib && tsc -p tsconfig.bundle.json && rollup -c && proceed-type-decl && format-space lib *.d.ts && prettier lib --write --ignore-path .prettierignore"
   },
   "workspaces": [

@@ -1,6 +1,6 @@
 import path from 'path';
 import './assets/expectNumberToBeConsideringFlag';
-import './assets/expectTriggersNumber';
+import { _testingAsset_defineTriggersCounter } from './assets/expectTriggersNumber';
 import type { TestFlags } from './assets/testFlags';
 import { flagManager } from './assets/testFlags';
 import type { RunTestCase, TestParameters } from './assets/TestTypes';
@@ -50,6 +50,10 @@ export const testSuites = (
           testParameters.createComponentsImport = require('./assets/createComponents');
           testParameters.testingLibraryReact = require('@testing-library/react');
           ({ cleanup } = testParameters.testingLibraryReact);
+
+          _testingAsset_defineTriggersCounter(
+            testParameters.triggersCounterImport._testingAsset_triggersCounter
+          );
         });
       });
 
