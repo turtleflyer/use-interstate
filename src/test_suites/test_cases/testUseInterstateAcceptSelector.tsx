@@ -57,9 +57,9 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
       '{"77":"hi","foo":100,"symbol(0)":{"a":true}}'
     );
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeInRange([1, 2]);
+    expect(77).triggersNumberToBeInRange([1, 2]);
+    expect(symbolKey).triggersNumberToBeInRange([1, 2]);
     expect(effectCounter).counterToIncreaseBy(1);
     expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
 
@@ -166,7 +166,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     );
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('1000-undefined');
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeInRange([1, 2]);
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
     expect(effectCounter).counterToIncreaseBy(1);
@@ -268,7 +268,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('undefined-bb');
     expect('foo').triggersNumberToBe(0);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(77).triggersNumberToBeInRange([1, 2]);
     expect(symbolKey).triggersNumberToBe(0);
     expect(effectCounter).counterToIncreaseBy(1);
     expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
@@ -332,7 +332,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     );
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('555');
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeInRange([1, 2]);
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
     expect(effectCounter).counterToIncreaseBy(1);

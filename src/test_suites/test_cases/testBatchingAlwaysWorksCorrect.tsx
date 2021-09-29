@@ -47,7 +47,7 @@ export const testBatchingAlwaysWorksCorrect: TestCase = [
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('aa');
     expect('foo').triggersNumberToBe(0);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(77).triggersNumberToBeInRange([1, 2]);
     expect(effectCounter).counterToIncreaseBy(1);
     expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
 

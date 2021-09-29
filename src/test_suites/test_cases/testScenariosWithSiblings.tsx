@@ -55,7 +55,7 @@ export const testScenariosWithSiblings: TestCase = [
 
     expect(getByTestId(testComponentID0).firstChild!.textContent).toBe('undefined');
     expect(getByTestId(testComponentID1).firstChild!.textContent).toBe('undefined');
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(2);
+    expect('foo').triggersNumberToBeInRange([2, 4]);
     expect(77).triggersNumberToBe(0);
     expect(effectCounter0).counterToIncreaseBy(1);
     expect(effectCounter1).counterToIncreaseBy(1);
@@ -99,7 +99,7 @@ export const testScenariosWithSiblings: TestCase = [
 
     expect(getByTestId(testComponentID0).firstChild!.textContent).toBe('111');
     expect(getByTestId(testComponentID1).firstChild!.textContent).toBe('111');
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(2);
+    expect('foo').triggersNumberToBeInRange([2, 4]);
     expect(77).triggersNumberToBe(0);
     expect(effectCounter0).counterToIncreaseBy(1);
     expect(effectCounter1).counterToIncreaseBy(1);
@@ -143,7 +143,7 @@ export const testScenariosWithSiblings: TestCase = [
 
     expect(getByTestId(testComponentID0).firstChild!.textContent).toBe('6');
     expect(getByTestId(testComponentID1).firstChild!.textContent).toBe('6');
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(2);
+    expect('foo').triggersNumberToBeInRange([2, 4]);
     expect(77).triggersNumberToBe(0);
     expect(effectCounter0).counterToIncreaseBy(2);
     expect(effectCounter1).counterToIncreaseBy(1);
@@ -188,7 +188,7 @@ export const testScenariosWithSiblings: TestCase = [
 
     expect(getByTestId(testComponentID0).firstChild!.textContent).toBe('22');
     expect(getByTestId(testComponentID1).firstChild!.textContent).toBe('22');
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(2);
+    expect('foo').triggersNumberToBeInRange([2, 4]);
     expect(77).triggersNumberToBe(0);
     expect(effectCounter0).counterToIncreaseBy(1);
     expect(effectCounter1).counterToIncreaseBy(1);
@@ -240,7 +240,7 @@ export const testScenariosWithSiblings: TestCase = [
     expect(getByTestId(testComponentID0).firstChild!.textContent).toBe('800');
     expect(getByTestId(testComponentID1).firstChild!.textContent).toBe('800');
     expect(getByTestId(testComponentID2).firstChild!.textContent).toBe('800');
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(3);
+    expect('foo').triggersNumberToBeInRange([3, 6]);
     expect(77).triggersNumberToBe(0);
     expect(effectCounter0).counterToIncreaseBy(2);
     expect(effectCounter1).counterToIncreaseBy(1);
@@ -287,8 +287,8 @@ export const testScenariosWithSiblings: TestCase = [
 
     expect(getByTestId(testComponentID0).firstChild!.textContent).toBe('99');
     expect(getByTestId(testComponentID1).firstChild!.textContent).toBe('99-hi');
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(2);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeInRange([2, 4]);
+    expect(77).triggersNumberToBeInRange([1, 2]);
     expect(effectCounter0).counterToIncreaseBy(1);
     expect(effectCounter1).counterToIncreaseBy(1);
     expect(null).numberOfTimesStateWasSubscribedToBeInRange([2, 4]);
@@ -331,8 +331,8 @@ export const testScenariosWithSiblings: TestCase = [
 
     expect(getByTestId(testComponentID0).firstChild!.textContent).toBe('undefined-lo');
     expect(getByTestId(testComponentID1).firstChild!.textContent).toBe('15');
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeInRange([1, 2]);
+    expect(77).triggersNumberToBeInRange([1, 2]);
     expect(effectCounter0).counterToIncreaseBy(1);
     expect(effectCounter1).counterToIncreaseBy(1);
     expect(null).numberOfTimesStateWasSubscribedToBeInRange([2, 4]);

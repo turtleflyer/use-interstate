@@ -38,7 +38,7 @@ expect.extend({
     };
   },
 
-  triggersNumberToBeGreaterThanOrEqual(key: InterstateKey, num: number) {
+  triggersNumberToBeInRange(key: InterstateKey, [rangeStart, rangeEnd]: [number, number]) {
     if (!flagManager.read('SHOULD_TEST_IMPLEMENTATION')) {
       return {
         pass: this.isNot ? false : true,
@@ -48,12 +48,12 @@ expect.extend({
     checkIfCreateStateIsNotMocked();
     const triggersNumber = _testingAsset_triggersCounter(key);
 
-    if (triggersNumber >= num) {
+    if (triggersNumber >= rangeStart && triggersNumber <= rangeEnd) {
       return {
         pass: true,
 
         message: () =>
-          `expected number of triggers for "${key.toString()}" not to be less than ${num} but received ${triggersNumber}`,
+          `expected number of triggers for "${key.toString()}" not to be in range ${rangeStart} - ${rangeEnd} but received ${triggersNumber}`,
       };
     }
 
@@ -61,7 +61,7 @@ expect.extend({
       pass: false,
 
       message: () =>
-        `expected number of triggers for "${key.toString()}" to be equal or greater than ${num} but received ${triggersNumber}`,
+        `expected number of triggers for "${key.toString()}" to be in range ${rangeStart} - ${rangeEnd} but received ${triggersNumber}`,
     };
   },
 });
@@ -77,7 +77,7 @@ declare global {
   namespace jest {
     interface Matchers<R> {
       triggersNumberToBe(num: number): R;
-      triggersNumberToBeGreaterThanOrEqual(num: number): R;
+      triggersNumberToBeInRange(range: [number, number]): R;
     }
   }
 }

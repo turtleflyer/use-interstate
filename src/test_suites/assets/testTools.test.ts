@@ -73,47 +73,52 @@ describe('Test correctness of test tools', () => {
   });
 
   test('triggersNumberToBe matchers work', () => {
-    _testingAsset_defineTriggersCounter((arg) => (arg === '_' ? 1 : NaN));
     flagManager.set({ SHOULD_TEST_IMPLEMENTATION: true });
-
-    expect('_').triggersNumberToBe(1);
-    expect('_').triggersNumberToBeGreaterThanOrEqual(0);
-    expect('_').triggersNumberToBeGreaterThanOrEqual(1);
-    expect('_').not.triggersNumberToBe(2);
-    expect('_').not.triggersNumberToBeGreaterThanOrEqual(2);
-
-    flagManager.set({ SHOULD_TEST_IMPLEMENTATION: false });
-
-    expect('_').triggersNumberToBe(1);
-    expect('_').triggersNumberToBeGreaterThanOrEqual(0);
-    expect('_').triggersNumberToBeGreaterThanOrEqual(1);
-    expect('_').triggersNumberToBe(2);
-    expect('_').triggersNumberToBeGreaterThanOrEqual(2);
-    expect('_').not.triggersNumberToBe(1);
-    expect('_').not.triggersNumberToBeGreaterThanOrEqual(0);
-    expect('_').not.triggersNumberToBeGreaterThanOrEqual(1);
-    expect('_').not.triggersNumberToBe(2);
-    expect('_').not.triggersNumberToBeGreaterThanOrEqual(2);
-
     _testingAsset_defineTriggersCounter((arg) => (arg === '_' ? 0 : NaN));
 
-    flagManager.set({ SHOULD_TEST_IMPLEMENTATION: true });
-
     expect('_').triggersNumberToBe(0);
-    expect('_').triggersNumberToBeGreaterThanOrEqual(0);
+    expect('_').triggersNumberToBeInRange([0, 1]);
     expect('_').not.triggersNumberToBe(1);
-    expect('_').not.triggersNumberToBeGreaterThanOrEqual(1);
+    expect('_').not.triggersNumberToBeInRange([1, 2]);
+
+    _testingAsset_defineTriggersCounter((arg) => (arg === '_' ? 10 : NaN));
+
+    expect('_').triggersNumberToBe(10);
+    expect('_').triggersNumberToBeInRange([0, 10]);
+    expect('_').triggersNumberToBeInRange([10, 20]);
+    expect('_').triggersNumberToBeInRange([8, 15]);
+    expect('_').not.triggersNumberToBe(2);
+    expect('_').not.triggersNumberToBeInRange([0, 9]);
+    expect('_').not.triggersNumberToBeInRange([11, 20]);
 
     flagManager.set({ SHOULD_TEST_IMPLEMENTATION: false });
+    _testingAsset_defineTriggersCounter((arg) => (arg === '_' ? 0 : NaN));
 
     expect('_').triggersNumberToBe(0);
-    expect('_').triggersNumberToBeGreaterThanOrEqual(0);
-    expect('_').triggersNumberToBe(1);
-    expect('_').triggersNumberToBeGreaterThanOrEqual(1);
-    expect('_').not.triggersNumberToBe(0);
-    expect('_').not.triggersNumberToBeGreaterThanOrEqual(0);
+    expect('_').triggersNumberToBeInRange([0, 1]);
     expect('_').not.triggersNumberToBe(1);
-    expect('_').not.triggersNumberToBeGreaterThanOrEqual(1);
+    expect('_').not.triggersNumberToBeInRange([1, 2]);
+    expect('_').not.triggersNumberToBe(0);
+    expect('_').not.triggersNumberToBeInRange([0, 1]);
+    expect('_').triggersNumberToBe(1);
+    expect('_').triggersNumberToBeInRange([1, 2]);
+
+    _testingAsset_defineTriggersCounter((arg) => (arg === '_' ? 10 : NaN));
+
+    expect('_').triggersNumberToBe(10);
+    expect('_').triggersNumberToBeInRange([0, 10]);
+    expect('_').triggersNumberToBeInRange([10, 20]);
+    expect('_').triggersNumberToBeInRange([8, 15]);
+    expect('_').not.triggersNumberToBe(2);
+    expect('_').not.triggersNumberToBeInRange([0, 9]);
+    expect('_').not.triggersNumberToBeInRange([11, 20]);
+    expect('_').not.triggersNumberToBe(10);
+    expect('_').not.triggersNumberToBeInRange([0, 10]);
+    expect('_').not.triggersNumberToBeInRange([10, 20]);
+    expect('_').not.triggersNumberToBeInRange([8, 15]);
+    expect('_').triggersNumberToBe(2);
+    expect('_').triggersNumberToBeInRange([0, 9]);
+    expect('_').triggersNumberToBeInRange([11, 20]);
   });
 
   test('numberOfTimesStateWasSubscribedToBe matchers work', () => {

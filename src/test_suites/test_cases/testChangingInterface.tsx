@@ -51,7 +51,7 @@ export const testChangingInterface: TestCase = [
     );
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('100');
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeInRange([1, 2]);
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
     expect(effectCounter).counterToIncreaseBy(1);

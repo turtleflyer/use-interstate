@@ -49,9 +49,9 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
       '{"77":"undefined","foo":"undefined","symbol(0)":"undefined"}'
     );
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeInRange([1, 2]);
+    expect(77).triggersNumberToBeInRange([1, 2]);
+    expect(symbolKey).triggersNumberToBeInRange([1, 2]);
     expect(effectCounter).counterToIncreaseBy(1);
     expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
 

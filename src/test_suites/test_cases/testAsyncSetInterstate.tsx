@@ -37,7 +37,7 @@ export const testAsyncSetInterstate: TestCase = [
     );
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('undefined');
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBeInRange([1, 2]);
     expect(effectCounter).counterToIncreaseBy(1);
     expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
 
