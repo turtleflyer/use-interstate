@@ -11,6 +11,7 @@ import type {
   ReactSubscribeState,
   ResetValue,
   SetValue,
+  SetValueParm,
   Store,
   SubscribeStateMethods,
   TakeStateAndCalculateValue,
@@ -55,20 +56,24 @@ export const createStore = <M extends object>(initStateValues?: Partial<M>): Sto
     return selector(accessMapHandler);
   };
 
-  const setValue: SetValue<M> = <K extends keyof M>(
-    key: K,
-    value: M[K],
-    lastInSeries: boolean
-  ): void => {
+  const setValue: SetValue<M> = <K extends keyof M>(setValueParam: SetValueParm<M, K>): void => {
+    const { key, needToCalculateValue, lastInSeries } = setValueParam;
     proceedReactCleaningWatchList();
     const stateEntry: StateEntry<M[K]> = getStateValue(key);
-    const oldValue = stateEntry.stateValue;
-    stateEntry.stateValue = { value };
+    const prevValueRecord = stateEntry.stateValue;
+
+    const nextValue = needToCalculateValue
+      ? isFunctionParameter(setValueParam.valueToCalculate)
+        ? setValueParam.valueToCalculate(prevValueRecord?.value as M[K])
+        : setValueParam.valueToCalculate
+      : setValueParam.value;
+
+    stateEntry.stateValue = { value: nextValue };
 
     if (
       stateEntry.reactTriggersList.start &&
       !stateEntry.reactTriggersList.triggersFired &&
-      !(oldValue && Object.is(oldValue.value, value))
+      !(prevValueRecord && Object.is(prevValueRecord.value, nextValue))
     ) {
       stateEntry.reactTriggersList.triggersFired = true;
 

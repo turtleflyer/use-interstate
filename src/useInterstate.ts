@@ -8,7 +8,6 @@ import type {
   UseInterstateDev,
 } from './DevTypes';
 import { getEntriesOfEnumerableKeys, getEnumerableKeys } from './getEntriesOfEnumerableKeys';
-import { isFunctionParameter } from './isFunctionParameter';
 import { InitRecordsForSubscribing, TakeStateAndCalculateValue } from './Store';
 import type {
   InitInterstate,
@@ -74,7 +73,7 @@ export const initInterstate = (<M extends object>(
       case 'object':
         getEntriesOfEnumerableKeys(keyOrSetterSchema).forEach(
           ([key, setterV], index, allKeys): void => {
-            setValue(key, setterV, index === allKeys.length - 1);
+            setValue({ key, value: setterV, lastInSeries: index === allKeys.length - 1 });
           }
         );
 
@@ -83,23 +82,19 @@ export const initInterstate = (<M extends object>(
       case 'function':
         getEntriesOfEnumerableKeys(getStateUsingSelector(keyOrSetterSchema)).forEach(
           ([key, value], index, allKeys) => {
-            setValue(key, value, index === allKeys.length - 1);
+            setValue({ key, value, lastInSeries: index === allKeys.length - 1 });
           }
         );
 
         break;
 
       default: {
-        const normalizedKey = normalizeKey(keyOrSetterSchema);
-        const setterParamMustBeDefined = setterParam as SetInterstateParam<M[K]>;
-
-        setValue(
-          normalizedKey,
-          isFunctionParameter(setterParamMustBeDefined)
-            ? setterParamMustBeDefined(getValue(normalizedKey))
-            : setterParamMustBeDefined,
-          true
-        );
+        setValue({
+          key: normalizeKey(keyOrSetterSchema),
+          valueToCalculate: setterParam as SetInterstateParam<M[K]>,
+          needToCalculateValue: true,
+          lastInSeries: true,
+        });
 
         break;
       }

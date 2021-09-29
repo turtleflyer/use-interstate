@@ -1,5 +1,9 @@
 import type { Trigger } from './State';
-import type { InterstateSelector, UseInterstateInitParam } from './UseInterstateTypes';
+import type {
+  InterstateSelector,
+  SetInterstateParam,
+  UseInterstateInitParam,
+} from './UseInterstateTypes';
 
 export interface Store<M extends object> {
   readonly getValue: GetValue<M>;
@@ -20,10 +24,22 @@ export interface Store<M extends object> {
 export type GetValue<M extends object> = <K extends keyof M>(key: K) => M[K];
 
 export type SetValue<M extends object> = <K extends keyof M>(
-  key: K,
-  value: M[K],
-  lastInSeries: boolean
+  setValueParam: SetValueParm<M, K>
 ) => void;
+
+export type SetValueParm<M extends object, K extends keyof M> =
+  | {
+      key: K;
+      value: M[K];
+      needToCalculateValue?: false;
+      lastInSeries: boolean;
+    }
+  | {
+      key: K;
+      valueToCalculate: SetInterstateParam<M[K]>;
+      needToCalculateValue: true;
+      lastInSeries: boolean;
+    };
 
 export type ResetValue<M extends object> = (initStateValues?: Partial<M>) => void;
 
