@@ -5,27 +5,25 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import type { IsEqual, IsTrue } from '@~internal/check-types';
 import type {
-  InitInterstateDev,
-  InterstateMethodsDev,
-  ReadInterstateDev,
-  ResetInterstateDev,
-  SetInterstateDev,
-  UseInterstateDev,
-} from '../../../lib/DevTypes';
-import type {
   InitInterstate,
+  InitInterstateDev,
   InterstateKey,
   InterstateMethods,
+  InterstateMethodsDev,
   InterstateSelector,
   ReadInterstate,
+  ReadInterstateDev,
   ResetInterstate,
+  ResetInterstateDev,
   SetInterstate,
+  SetInterstateDev,
   SetInterstateParam,
   SetInterstateSchemaParam,
   UseInterstate,
+  UseInterstateDev,
   UseInterstateInitParam,
   UseInterstateSchemaParam,
-} from '../../../lib/UseInterstateTypes';
+} from '../../../lib/use-interstate';
 import { initInterstate } from '../../../lib/use-interstate';
 
 describe('Check types', () => {
@@ -33,6 +31,18 @@ describe('Check types', () => {
     const testSuite = () => {
       const SymbolKey = Symbol('uniqueSymbol');
       type SymbolKey = typeof SymbolKey;
+
+      interface State {
+        0: boolean;
+        a: string;
+        [SymbolKey]: [boolean];
+        2: { two: number };
+        b: string | object;
+        3: number | undefined;
+        c: unknown;
+        d: object;
+        e: () => number;
+      }
 
       type TestCase01 = [
         IsTrue<IsEqual<typeof initInterstate, InitInterstate>>,
@@ -53,26 +63,34 @@ describe('Check types', () => {
       const ii12 = initInterstate<{ 1: number; a: string }>({ 1: undefined, a: 'aa' } as const);
       const ii13 = initInterstate<{ 1: number; a: string }>({ 1: 11 });
       const ii14 = initInterstate({ 1: () => undefined, a: (): string => 'aa' });
+      const ii15 = initInterstate<State>();
+      const ii16 = initInterstate<State>({ a: undefined, 2: { two: 100 } });
 
       type TestCase02 = [
         IsTrue<IsEqual<typeof ii01, InterstateMethods<never>>>,
+
         IsTrue<
           IsEqual<typeof ii02, InterstateMethods<{ 1: number; a: string; [SymbolKey]: boolean }>>
         >,
+
         IsTrue<IsEqual<typeof ii03, InterstateMethods<{ 1: number }>>>,
         IsTrue<IsEqual<typeof ii04, InterstateMethods<{ 1: 11 }>>>,
         IsTrue<IsEqual<typeof ii05, InterstateMethods<{ 1: 11 }>>>,
         IsTrue<IsEqual<typeof ii06, InterstateMethods<{ 1: number }>>>,
         IsTrue<IsEqual<typeof ii07, InterstateMethods<{ 1: unknown }>>>,
         IsTrue<IsEqual<typeof ii08, InterstateMethods<{ 1: undefined }>>>,
+
         IsTrue<
           IsEqual<typeof ii09, InterstateMethods<{ 1: unknown; a: string; [SymbolKey]: boolean }>>
         >,
+
         IsTrue<IsEqual<typeof ii10, InterstateMethods<{ 1: unknown; a: 'aa' }>>>,
         IsTrue<IsEqual<typeof ii11, InterstateMethods<{ 1: number; a: string }>>>,
         IsTrue<IsEqual<typeof ii12, InterstateMethods<{ 1: number; a: string }>>>,
         IsTrue<IsEqual<typeof ii13, InterstateMethods<{ 1: number; a: string }>>>,
-        IsTrue<IsEqual<typeof ii14, InterstateMethods<{ 1: () => undefined; a: () => string }>>>
+        IsTrue<IsEqual<typeof ii14, InterstateMethods<{ 1: () => undefined; a: () => string }>>>,
+        IsTrue<IsEqual<typeof ii15, InterstateMethods<State>>>,
+        IsTrue<IsEqual<typeof ii16, InterstateMethods<State>>>
       ];
 
       // @ts-expect-error
@@ -153,21 +171,9 @@ describe('Check types', () => {
         [SymbolKey]: undefined,
       });
 
-      const ui19 = useInterstate(
-        {
-          a: 'aa',
-          1: 100,
-          b: { b: 'bb' },
-          2: (): boolean => true,
-          [SymbolKey]: undefined,
-        },
-        []
-      );
+      const ui19 = useInterstate({ a: 'aa' } as const);
 
-      const ui20 = useInterstate({ a: 'aa' } as const);
-      const ui21 = useInterstate({ a: 'aa' } as const, [1, 'a']);
-
-      const ui22 = useInterstate(() => ({
+      const ui20 = useInterstate(() => ({
         a: 'aa',
         1: 100,
         b: { b: 'bb' },
@@ -175,7 +181,7 @@ describe('Check types', () => {
         [SymbolKey]: undefined,
       }));
 
-      const ui23 = useInterstate(
+      const ui21 = useInterstate(
         () => ({
           a: 'aa',
           1: 100,
@@ -186,8 +192,8 @@ describe('Check types', () => {
         [1, 'a'] as const
       );
 
-      const ui24 = useInterstate(() => ({ a: 'aa' } as const));
-      const ui25 = useInterstate(() => ({ a: 'aa' } as const), []);
+      const ui22 = useInterstate(() => ({ a: 'aa' } as const));
+      const ui23 = useInterstate(() => ({ a: 'aa' } as const), []);
 
       type TestCase03 = [
         IsTrue<IsEqual<typeof ui01, unknown>>,
@@ -221,25 +227,11 @@ describe('Check types', () => {
           >
         >,
 
-        IsTrue<
-          IsEqual<
-            typeof ui19,
-            {
-              a: string;
-              1: number;
-              b: { b: string };
-              2: () => boolean;
-              [SymbolKey]: undefined;
-            }
-          >
-        >,
-
-        IsTrue<IsEqual<typeof ui20, { a: 'aa' }>>,
-        IsTrue<IsEqual<typeof ui21, { a: 'aa' }>>,
+        IsTrue<IsEqual<typeof ui19, { a: 'aa' }>>,
 
         IsTrue<
           IsEqual<
-            typeof ui22,
+            typeof ui20,
             {
               a: string;
               1: number;
@@ -252,7 +244,7 @@ describe('Check types', () => {
 
         IsTrue<
           IsEqual<
-            typeof ui23,
+            typeof ui21,
             {
               a: string;
               1: number;
@@ -263,8 +255,8 @@ describe('Check types', () => {
           >
         >,
 
-        IsTrue<IsEqual<typeof ui24, { a: 'aa' }>>,
-        IsTrue<IsEqual<typeof ui25, { a: 'aa' }>>
+        IsTrue<IsEqual<typeof ui22, { a: 'aa' }>>,
+        IsTrue<IsEqual<typeof ui23, { a: 'aa' }>>
       ];
 
       // @ts-expect-error
@@ -366,9 +358,13 @@ describe('Check types', () => {
       useInterstate([1], [1]);
       // @ts-expect-error
       useInterstate([1], true);
-
+      // @ts-expect-error
+      useInterstate({ a: 'aa' }, []);
       // @ts-expect-error
       useInterstate({ a: 'aa' }, true);
+
+      // @ts-expect-error
+      useInterstate(() => ({ a: 'aa' }), true);
 
       // @ts-expect-error
       useInterstate('a', 'aa', 'aaa');
@@ -723,18 +719,6 @@ describe('Check types', () => {
       // @ts-expect-error
       resetInterstate<{ a: string }>({ a: 'aa' }, null);
 
-      interface State {
-        0: boolean;
-        a: string;
-        [SymbolKey]: [boolean];
-        2: { two: number };
-        b: string | object;
-        3: number | undefined;
-        c: unknown;
-        d: object;
-        e: () => number;
-      }
-
       const {
         useInterstate: useInterstateDefined,
         readInterstate: readInterstateDefined,
@@ -777,32 +761,13 @@ describe('Check types', () => {
         c: 100,
       });
 
-      const uidef22 = useInterstateDefined(
-        {
-          [SymbolKey]: [true] as const,
-          b: 'bb',
-          3: 100,
-          c: 100,
-        },
-        []
-      );
-
-      const uidef23 = useInterstateDefined({
+      const uidef22 = useInterstateDefined({
         b: { b: 'bb' },
         c: () => 100,
         d: { d: 'dd' },
       });
 
-      const uidef24 = useInterstateDefined(
-        {
-          b: { b: 'bb' },
-          c: () => 100,
-          d: { d: 'dd' },
-        },
-        [1, 'a'] as const
-      );
-
-      const uidef25 = useInterstateDefined(() => ({
+      const uidef23 = useInterstateDefined(() => ({
         a: 'aa',
         [SymbolKey]: [true] as const,
         2: { two: 100 },
@@ -811,10 +776,10 @@ describe('Check types', () => {
         e: () => 100,
       }));
 
-      const uidef26 = useInterstateDefined(() => ({ b: { b: 'bb' }, 3: 100, c: 100 }));
-      const uidef27 = useInterstateDefined(() => ({ b: { b: 'bb' }, 3: 100, c: 100 }), [1, 'a']);
+      const uidef24 = useInterstateDefined(() => ({ b: { b: 'bb' }, 3: 100, c: 100 }));
+      const uidef25 = useInterstateDefined(() => ({ b: { b: 'bb' }, 3: 100, c: 100 }), [1, 'a']);
 
-      const uidef28 = useInterstateDefined(() => ({
+      const uidef26 = useInterstateDefined(() => ({
         b: Math.random() > 0.5 ? 'bb' : { b: 'bb' },
         c: () => 100,
         d: { d: 'dd' },
@@ -893,20 +858,11 @@ describe('Check types', () => {
           >
         >,
 
-        IsTrue<
-          IsEqual<
-            typeof uidef22,
-            { [SymbolKey]: [boolean]; b: string | object; 3: number | undefined; c: unknown }
-          >
-        >,
-
-        IsTrue<IsEqual<typeof uidef23, { b: string | object; c: unknown; d: object }>>,
-
-        IsTrue<IsEqual<typeof uidef24, { b: string | object; c: unknown; d: object }>>,
+        IsTrue<IsEqual<typeof uidef22, { b: string | object; c: unknown; d: object }>>,
 
         IsTrue<
           IsEqual<
-            typeof uidef25,
+            typeof uidef23,
             {
               a: string;
               [SymbolKey]: [boolean];
@@ -918,9 +874,9 @@ describe('Check types', () => {
           >
         >,
 
-        IsTrue<IsEqual<typeof uidef26, { b: string | object; 3: number | undefined; c: unknown }>>,
-        IsTrue<IsEqual<typeof uidef27, { b: string | object; 3: number | undefined; c: unknown }>>,
-        IsTrue<IsEqual<typeof uidef28, { b: string | object; c: unknown; d: object }>>
+        IsTrue<IsEqual<typeof uidef24, { b: string | object; 3: number | undefined; c: unknown }>>,
+        IsTrue<IsEqual<typeof uidef25, { b: string | object; 3: number | undefined; c: unknown }>>,
+        IsTrue<IsEqual<typeof uidef26, { b: string | object; c: unknown; d: object }>>
       ];
 
       // @ts-expect-error
@@ -1043,11 +999,11 @@ describe('Check types', () => {
       useInterstateDefined(['a'] as const, []);
       // @ts-expect-error
       useInterstateDefined([2, 'c'], true);
-
+      // @ts-expect-error
+      useInterstateDefined({ a: 'aa' }, []);
       // @ts-expect-error
       useInterstateDefined({ a: 'aa' }, true);
-      // @ts-expect-error
-      useInterstateDefined({ [SymbolKey]: [true] as const }, 1);
+
       // @ts-expect-error
       useInterstateDefined(() => ({ a: 'aa' }), true);
       // @ts-expect-error
@@ -1761,6 +1717,168 @@ describe('Check types', () => {
         IsTrue<IsEqual<typeof ResID03, ResetInterstateDev<object>>>,
         IsTrue<IsEqual<typeof ResID04, ResetInterstateDev<{ a: number }>>>
       ];
+
+      const initInterstateDev: InitInterstateDev = initInterstate;
+
+      const iidev01 = initInterstateDev();
+      const iidev02 = initInterstateDev({ a: 'aa' });
+      const iidev03 = initInterstateDev<{ a: string }>({ a: 'aa' });
+      const iidev04 = initInterstateDev<{ a: string }>({ a: undefined });
+      const iidev05 = initInterstateDev<State>();
+      const iidev06 = initInterstateDev<State>({ 0: undefined, a: 'aa' });
+
+      type TestCase22 = [
+        IsTrue<IsEqual<typeof iidev01, InterstateMethodsDev<object>>>,
+        IsTrue<IsEqual<typeof iidev02, InterstateMethodsDev<{ a: string }>>>,
+        IsTrue<IsEqual<typeof iidev03, InterstateMethodsDev<{ a: string }>>>,
+        IsTrue<IsEqual<typeof iidev04, InterstateMethodsDev<{ a: string }>>>,
+        IsTrue<IsEqual<typeof iidev05, InterstateMethodsDev<State>>>,
+        IsTrue<IsEqual<typeof iidev06, InterstateMethodsDev<State>>>
+      ];
+
+      const {
+        useInterstate: useInterstateDev,
+        readInterstate: readInterstateDev,
+        setInterstate: setInterstateDev,
+        resetInterstate: resetInterstateDev,
+      } = initInterstateDev<State>();
+
+      const uidev01 = useInterstateDev('a');
+      const uidev02 = useInterstateDev('a', undefined);
+      const uidev03 = useInterstateDev('a', 'aa');
+      const uidev04 = useInterstateDev('a', () => 'aa');
+      const uidev05 = useInterstateDev({} as 'a' | 0);
+      const uidev06 = useInterstateDev({} as 'a' | 0, {} as string | boolean | undefined);
+
+      const uidev07 = useInterstateDev(
+        {} as 'a' | 0,
+        {} as string | boolean | undefined | (() => string) | (() => boolean)
+      );
+
+      const uidev08 = useInterstateDev({} as 'a' | 0, {} as string | (() => boolean));
+      const uidev09 = useInterstateDev(['a']);
+      const uidev10 = useInterstateDev(['a', 0]);
+      const uidev11 = useInterstateDev({ a: 'aa' });
+      const uidev12 = useInterstateDev({ a: 'aa', 0: true });
+      const uidev14 = useInterstateDev(() => ({ a: 'aa' }));
+      const uidev15 = useInterstateDev(() => ({ a: 'aa', 0: true }));
+      const uidev16 = useInterstateDev(() => ({ a: 'aa' }), [1]);
+
+      const uidev17 = useInterstateDev(
+        {} as { a: string; 0: boolean } | (() => { a: string; 0: boolean })
+      );
+
+      const uidev18 = useInterstateDev({} as { a: string; 0: boolean } | (() => { a: string }));
+      const uidev19 = useInterstateDev({} as { a: string } | (() => { 0: boolean }));
+
+      type TestCase23 = [
+        IsTrue<IsEqual<typeof uidev01, string>>,
+        IsTrue<IsEqual<typeof uidev02, string>>,
+        IsTrue<IsEqual<typeof uidev03, string>>,
+        IsTrue<IsEqual<typeof uidev04, string>>,
+        IsTrue<IsEqual<typeof uidev05, string | boolean>>,
+        IsTrue<IsEqual<typeof uidev06, string | boolean>>,
+        IsTrue<IsEqual<typeof uidev07, string | boolean>>,
+        IsTrue<IsEqual<typeof uidev08, string | boolean>>,
+        IsTrue<IsEqual<typeof uidev09, { a: string }>>,
+        IsTrue<IsEqual<typeof uidev10, { 0: boolean; a: string }>>,
+        IsTrue<IsEqual<typeof uidev11, { a: string }>>,
+        IsTrue<IsEqual<typeof uidev12, { 0: boolean; a: string }>>,
+        IsTrue<IsEqual<typeof uidev14, { a: string }>>,
+        IsTrue<IsEqual<typeof uidev15, { 0: boolean; a: string }>>,
+        IsTrue<IsEqual<typeof uidev16, { a: string }>>,
+        IsTrue<IsEqual<typeof uidev17, { 0: boolean; a: string }>>,
+        IsTrue<IsEqual<typeof uidev18, { 0: boolean; a: string }>>,
+        IsTrue<IsEqual<typeof uidev19, { 0: boolean; a: string }>>
+      ];
+
+      const uidevas01 = useInterstateDev.acceptSelector(() => 'a');
+      const uidevas02 = useInterstateDev.acceptSelector((state) => ({ ...state }));
+      const uidevas03 = useInterstateDev.acceptSelector(({ a }) => a);
+      const uidevas04 = useInterstateDev.acceptSelector(({ a, [0]: o }) => [a, o]);
+      const uidevas05 = useInterstateDev.acceptSelector(({ a, [0]: o }) => [a, o] as const);
+      const uidevas06 = useInterstateDev.acceptSelector(({ a, [0]: o }) => [a, o], [1]);
+
+      type TestCase24 = [
+        IsTrue<IsEqual<typeof uidevas01, string>>,
+        IsTrue<IsEqual<typeof uidevas02, State>>,
+        IsTrue<IsEqual<typeof uidevas03, string>>,
+        IsTrue<IsEqual<typeof uidevas04, (string | boolean)[]>>,
+        IsTrue<IsEqual<typeof uidevas05, readonly [string, boolean]>>,
+        IsTrue<IsEqual<typeof uidevas06, (string | boolean)[]>>
+      ];
+
+      const ridev01 = readInterstateDev('a');
+      const ridev02 = readInterstateDev({} as 'a' | 0);
+      const ridev03 = readInterstateDev(['a']);
+      const ridev04 = readInterstateDev(['a', 0]);
+      const ridev05 = readInterstateDev({} as 'a' | 0 | readonly ('a' | 0)[]);
+      const ridev06 = readInterstateDev({} as 'a' | 0 | readonly 'a'[]);
+      const ridev07 = readInterstateDev({} as 'a' | readonly 0[]);
+
+      type TestCase25 = [
+        IsTrue<IsEqual<typeof ridev01, string>>,
+        IsTrue<IsEqual<typeof ridev02, string | boolean>>,
+        IsTrue<IsEqual<typeof ridev03, { a: string }>>,
+        IsTrue<IsEqual<typeof ridev04, { 0: boolean; a: string }>>,
+        IsTrue<IsEqual<typeof ridev05, string | boolean | { 0: boolean; a: string }>>,
+        IsTrue<IsEqual<typeof ridev06, string | boolean | { a: string }>>,
+        IsTrue<IsEqual<typeof ridev07, string | { 0: boolean }>>
+      ];
+
+      const ridevas01 = readInterstateDev.acceptSelector(() => 'a');
+      const ridevas02 = readInterstateDev.acceptSelector((state) => ({ ...state }));
+      const ridevas03 = readInterstateDev.acceptSelector(({ a }) => a);
+      const ridevas04 = readInterstateDev.acceptSelector(({ a, [0]: o }) => [a, o]);
+      const ridevas05 = readInterstateDev.acceptSelector(({ a, [0]: o }) => [a, o] as const);
+
+      type TestCase26 = [
+        IsTrue<IsEqual<typeof ridevas01, string>>,
+        IsTrue<IsEqual<typeof ridevas02, State>>,
+        IsTrue<IsEqual<typeof ridevas03, string>>,
+        IsTrue<IsEqual<typeof ridevas04, (string | boolean)[]>>,
+        IsTrue<IsEqual<typeof ridevas05, readonly [string, boolean]>>
+      ];
+
+      setInterstateDev('a', 'aa');
+      setInterstateDev('a', () => 'aa');
+      setInterstateDev('a', (prevValue) => prevValue + 'aa');
+      setInterstateDev({} as 'a' | 0, {} as string | boolean);
+      setInterstateDev({} as 'a' | 0, () => ({} as string | boolean));
+
+      setInterstateDev(
+        {} as 'a' | 0,
+        {} as string | boolean | ((prevValue: string | boolean) => string | boolean)
+      );
+
+      setInterstateDev({} as 'a' | 0, {} as string | ((prevValue: string | boolean) => boolean));
+      setInterstateDev({ a: 'aa' });
+      setInterstateDev({ a: 'aa', 0: true });
+      setInterstateDev(() => ({ a: 'aa' }));
+      setInterstateDev(() => ({ a: 'aa', 0: true }));
+      setInterstateDev((prevState) => ({ ...prevState, a: 'aa', 0: true }));
+
+      setInterstateDev(
+        {} as { a: string; 0: boolean } | ((prevState: State) => { a: string; 0: boolean })
+      );
+
+      setInterstateDev(
+        {} as
+          | { a: string; 0: boolean }
+          | ((prevState: { a: string; 0: boolean }) => { a: string; 0: boolean })
+      );
+
+      setInterstateDev(
+        {} as { a: string; 0: boolean } | ((prevState: { a: string }) => { a: string })
+      );
+
+      setInterstateDev({} as { a: string } | ((prevState: { 0: boolean }) => { 0: boolean }));
+
+      resetInterstateDev();
+      resetInterstateDev({ a: 'aa' });
+      resetInterstateDev({ 0: true, a: 'aa' });
+      resetInterstateDev({ a: undefined });
+      resetInterstateDev({ 0: undefined, a: 'aa' });
     };
   });
 });

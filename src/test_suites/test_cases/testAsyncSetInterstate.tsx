@@ -26,7 +26,7 @@ export const testAsyncSetInterstate: TestCase = [
     const TestComponent = createListenerComponent({ useInterstate });
     const effectCounter: TestCounter = { count: 0 };
 
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBe(0);
 
     const { getByTestId, rerender } = render(
       <StrictMode>
@@ -39,6 +39,7 @@ export const testAsyncSetInterstate: TestCase = [
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('undefined');
     expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
 
     Promise.resolve().then(() => {
       setInterstate('foo', 100);
@@ -47,6 +48,7 @@ export const testAsyncSetInterstate: TestCase = [
     await waitFor(() => expect(getByTestId(testComponentID).firstChild!.textContent).toBe('100'));
     expect('foo').triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     Promise.resolve().then(() => {
       setInterstate('foo', -1);
@@ -55,6 +57,7 @@ export const testAsyncSetInterstate: TestCase = [
     await waitFor(() => expect(getByTestId(testComponentID).firstChild!.textContent).toBe('-1'));
     expect('foo').triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     rerender(<></>);
 

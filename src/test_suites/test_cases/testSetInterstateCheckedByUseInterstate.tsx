@@ -30,11 +30,11 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
     const TestComponent = createListenerComponent({ useInterstate });
     const effectCounter: TestCounter = { count: 0 };
 
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
-    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBe(0);
+    expect(77).triggersNumberToBe(0);
+    expect(symbolKey).triggersNumberToBe(0);
 
-    const { getByTestId } = render(
+    const { getByTestId, rerender } = render(
       <StrictMode>
         <TestComponent
           {...{
@@ -53,36 +53,40 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
     expect(77).triggersNumberToBeGreaterThanOrEqual(1);
     expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
 
     act(() => setInterstate('foo', 100));
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
       '{"77":"undefined","foo":100,"symbol(0)":"undefined"}'
     );
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBe(1);
+    expect(77).triggersNumberToBe(1);
+    expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     act(() => setInterstate('foo', (p: number) => p + 1));
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
       '{"77":"undefined","foo":101,"symbol(0)":"undefined"}'
     );
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBe(1);
+    expect(77).triggersNumberToBe(1);
+    expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     act(() => setInterstate({ foo: 200, 77: 'hi', [symbolKey]: { a: true } }));
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
       '{"77":"hi","foo":200,"symbol(0)":{"a":true}}'
     );
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBe(1);
+    expect(77).triggersNumberToBe(1);
+    expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     act(() =>
       setInterstate((prevState) => {
@@ -102,20 +106,22 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
       '{"77":"lo","foo":299,"symbol(0)":{"a":false,"b":true}}'
     );
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBe(1);
+    expect(77).triggersNumberToBe(1);
+    expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     act(() => setInterstate({ foo: 2, 77: 'no' }));
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
       '{"77":"no","foo":2,"symbol(0)":{"a":false,"b":true}}'
     );
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBe(1);
+    expect(77).triggersNumberToBe(1);
+    expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     act(() =>
       setInterstate((state: { foo: number; 77: string }) => ({
@@ -128,40 +134,44 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
       '{"77":"no or yes / 2","foo":10,"symbol(0)":{"all":false}}'
     );
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBe(1);
+    expect(77).triggersNumberToBe(1);
+    expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     act(() => setInterstate('foo', 10));
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
       '{"77":"no or yes / 2","foo":10,"symbol(0)":{"all":false}}'
     );
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBe(1);
+    expect(77).triggersNumberToBe(1);
+    expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(0);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     act(() => setInterstate({ foo: 10, [symbolKey]: { all: false } }));
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
       '{"77":"no or yes / 2","foo":10,"symbol(0)":{"all":false}}'
     );
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBe(1);
+    expect(77).triggersNumberToBe(1);
+    expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     act(() => setInterstate({ foo: 10, 77: 'no or yes / 2' }));
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
       '{"77":"no or yes / 2","foo":10,"symbol(0)":{"all":false}}'
     );
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBe(1);
+    expect(77).triggersNumberToBe(1);
+    expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(0);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     act(() =>
       setInterstate(({ foo: prevFooV, [symbolKey]: prevSymbV }) => ({
@@ -173,19 +183,27 @@ export const testSetInterstateCheckedByUseInterstate: TestCase = [
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
       '{"77":"no or yes / 2","foo":10,"symbol(0)":{"all":false}}'
     );
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBe(1);
+    expect(77).triggersNumberToBe(1);
+    expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(0);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     act(() => setInterstate((state) => ({ ...state })));
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
       '{"77":"no or yes / 2","foo":10,"symbol(0)":{"all":false}}'
     );
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBe(1);
+    expect(77).triggersNumberToBe(1);
+    expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(0);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
+
+    rerender(<></>);
+
+    expect('foo').triggersNumberToBe(0);
+    expect(77).triggersNumberToBe(0);
+    expect(symbolKey).triggersNumberToBe(0);
   },
 ];

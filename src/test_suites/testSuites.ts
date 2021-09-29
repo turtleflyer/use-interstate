@@ -1,5 +1,10 @@
 import path from 'path';
 import './assets/expectCounterToIncreaseBy';
+import './assets/expectNumberOfTimesStateWasSubscribedToBe';
+import {
+  _testingAssets_resetResubscribedTimesCounter,
+  _testingAssets_resubscribedTimesCounter,
+} from './assets/expectNumberOfTimesStateWasSubscribedToBe';
 import { _testingAsset_defineTriggersCounter } from './assets/expectTriggersNumber';
 import type { TestFlags } from './assets/testFlags';
 import { flagManager } from './assets/testFlags';
@@ -49,15 +54,24 @@ export const testSuites = (
           testParameters.triggersCounterImport = require('../createState');
           testParameters.createComponentsImport = require('./assets/createComponents');
           testParameters.testingLibraryReact = require('@testing-library/react');
+          testParameters.reactSubscribeStateNotifierImport = require('../createStore');
           ({ cleanup } = testParameters.testingLibraryReact);
 
           _testingAsset_defineTriggersCounter(
             testParameters.triggersCounterImport._testingAsset_triggersCounter
           );
+
+          testParameters.reactSubscribeStateNotifierImport._toAccessWhileTesting_passReactSubscribeStateNotifier(
+            _testingAssets_resubscribedTimesCounter
+          );
+
+          _testingAssets_resetResubscribedTimesCounter();
         });
       });
 
-      afterEach(() => cleanup());
+      afterEach(() => {
+        cleanup();
+      });
 
       const allTests = [
         testCreateAndInitInterstate,

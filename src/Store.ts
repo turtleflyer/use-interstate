@@ -43,8 +43,8 @@ export type InitRecordsForSubscribing<M extends object, K extends keyof M> = rea
 >[];
 
 export type InitRecord<M extends object, K extends keyof M> =
-  | readonly [key: K, initValue?: M[K], needToCalculateValue?: false]
-  | readonly [key: K, initValue: UseInterstateInitParam<M[K]>, needToCalculateValue: true];
+  | { key: K; initValue?: M[K]; needToCalculateValue?: false }
+  | { key: K; initValueToCalculate: UseInterstateInitParam<M[K]>; needToCalculateValue: true };
 
 export interface SubscribeStateMethods<R> {
   retrieveValue: () => R;

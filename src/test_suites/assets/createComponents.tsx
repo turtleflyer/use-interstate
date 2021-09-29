@@ -2,11 +2,7 @@ import type { PropsWithChildren, ReactElement } from 'react';
 import * as reactImport from 'react';
 import { useEffect } from 'react';
 import type { UseInterstateDev } from '../../DevTypes';
-import type {
-  InterstateSelector,
-  UseInterstateInitParam,
-  UseInterstateSchemaParam,
-} from '../../UseInterstateTypes';
+import type { InterstateSelector, UseInterstateInitParam } from '../../UseInterstateTypes';
 
 interface TestProps {
   testId: string;
@@ -22,8 +18,14 @@ interface StateKeyProps<M extends object = any, K extends keyof M = any> {
   interpretResult?: (v: M[K]) => string;
 }
 
-interface SchemaProps<M extends object = any, K extends keyof M = any> {
-  initSchema: UseInterstateSchemaParam<M, K>;
+interface SchemaObjProps<M extends object = any, K extends keyof M = any> {
+  initSchemaObj: Pick<M, K>;
+
+  interpretResult?: (s: Pick<M, K>) => string;
+}
+
+interface SchemaFnProps<M extends object = any, K extends keyof M = any> {
+  initSchemaFn: () => Pick<M, K>;
 
   deps?: any[];
 
@@ -45,12 +47,14 @@ interface SelectorProps<M extends object = any, R = any> {
 }
 
 type PropsWithRemainingUndefined<
-  C extends StateKeyProps | SchemaProps | KeysProps | SelectorProps
+  C extends StateKeyProps | SchemaObjProps | SchemaFnProps | KeysProps | SelectorProps
 > = C &
   TestProps & {
-    [P in keyof (StateKeyProps & SchemaProps & KeysProps & SelectorProps) as P extends keyof C
-      ? never
-      : P]?: undefined;
+    [P in keyof (StateKeyProps &
+      SchemaObjProps &
+      SchemaFnProps &
+      KeysProps &
+      SelectorProps) as P extends keyof C ? never : P]?: undefined;
   };
 
 let symbolsCounter = 0;
@@ -115,7 +119,8 @@ export const createListenerComponent = <M extends object>({
 
   <K extends keyof M, R>(
     props: PropsWithChildren<
-      | PropsWithRemainingUndefined<SchemaProps<M, K>>
+      | PropsWithRemainingUndefined<SchemaObjProps<M, K>>
+      | PropsWithRemainingUndefined<SchemaFnProps<M, K>>
       | PropsWithRemainingUndefined<KeysProps<M, K>>
       | PropsWithRemainingUndefined<SelectorProps<M, R>>
     >
@@ -124,7 +129,8 @@ export const createListenerComponent = <M extends object>({
   function ListenerComponent<K extends keyof M, R>(
     props: PropsWithChildren<
       | PropsWithRemainingUndefined<StateKeyProps<M, K>>
-      | PropsWithRemainingUndefined<SchemaProps<M, K>>
+      | PropsWithRemainingUndefined<SchemaObjProps<M, K>>
+      | PropsWithRemainingUndefined<SchemaFnProps<M, K>>
       | PropsWithRemainingUndefined<KeysProps<M, K>>
       | PropsWithRemainingUndefined<SelectorProps<M, R>>
     >
@@ -137,9 +143,13 @@ export const createListenerComponent = <M extends object>({
 
     const interpretResult = props.interpretResult ?? stringifyState;
 
-    const stringifiedState = props.initSchema
+    const stringifiedState = props.initSchemaObj
       ? (interpretResult as NonNullable<typeof props.interpretResult>)(
-          useInterstate(props.initSchema, props.deps)
+          useInterstate(props.initSchemaObj)
+        )
+      : props.initSchemaFn
+      ? (interpretResult as NonNullable<typeof props.interpretResult>)(
+          useInterstate(props.initSchemaFn, props.deps)
         )
       : props.keys
       ? (interpretResult as NonNullable<typeof props.interpretResult>)(useInterstate(props.keys))

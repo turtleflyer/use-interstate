@@ -2,6 +2,7 @@
 import { stringifyState } from './createComponents';
 import './expectCounterToIncreaseBy';
 import type { TestCounter } from './expectCounterToIncreaseBy';
+import { _testingAssets_resubscribedTimesCounter } from './expectNumberOfTimesStateWasSubscribedToBe';
 import { _testingAsset_defineTriggersCounter } from './expectTriggersNumber';
 import { flagManager } from './testFlags';
 
@@ -115,6 +116,75 @@ describe('Test correctness of test tools', () => {
     expect('_').not.triggersNumberToBeGreaterThanOrEqual(1);
   });
 
+  test('numberOfTimesStateWasSubscribedToBe matchers work', () => {
+    flagManager.set({ SHOULD_TEST_IMPLEMENTATION: true });
+
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([0, 0]);
+    expect(null).not.numberOfTimesStateWasSubscribedToBe(1);
+    expect(null).not.numberOfTimesStateWasSubscribedToBeInRange([1, 5]);
+
+    repeatSubscribeNTimes(3);
+    expect(null).numberOfTimesStateWasSubscribedToBe(3);
+
+    repeatSubscribeNTimes(4);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([3, 4]);
+
+    repeatSubscribeNTimes(4);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([4, 5]);
+
+    repeatSubscribeNTimes(4);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 10]);
+
+    repeatSubscribeNTimes(2);
+    expect(null).not.numberOfTimesStateWasSubscribedToBe(1);
+
+    repeatSubscribeNTimes(2);
+    expect(null).not.numberOfTimesStateWasSubscribedToBeInRange([3, 4]);
+
+    repeatSubscribeNTimes(2);
+    expect(null).not.numberOfTimesStateWasSubscribedToBeInRange([0, 1]);
+
+    flagManager.set({ SHOULD_TEST_IMPLEMENTATION: false });
+
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([0, 0]);
+    expect(null).not.numberOfTimesStateWasSubscribedToBe(1);
+    expect(null).not.numberOfTimesStateWasSubscribedToBeInRange([1, 5]);
+    expect(null).not.numberOfTimesStateWasSubscribedToBe(0);
+    expect(null).not.numberOfTimesStateWasSubscribedToBeInRange([0, 0]);
+    expect(null).numberOfTimesStateWasSubscribedToBe(1);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 5]);
+
+    repeatSubscribeNTimes(3);
+    expect(null).numberOfTimesStateWasSubscribedToBe(3);
+    expect(null).not.numberOfTimesStateWasSubscribedToBe(3);
+
+    repeatSubscribeNTimes(4);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([3, 4]);
+    expect(null).not.numberOfTimesStateWasSubscribedToBeInRange([3, 4]);
+
+    repeatSubscribeNTimes(4);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([4, 5]);
+    expect(null).not.numberOfTimesStateWasSubscribedToBeInRange([4, 5]);
+
+    repeatSubscribeNTimes(4);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 10]);
+    expect(null).not.numberOfTimesStateWasSubscribedToBeInRange([1, 10]);
+
+    repeatSubscribeNTimes(2);
+    expect(null).not.numberOfTimesStateWasSubscribedToBe(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(1);
+
+    repeatSubscribeNTimes(2);
+    expect(null).not.numberOfTimesStateWasSubscribedToBeInRange([3, 4]);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([3, 4]);
+
+    repeatSubscribeNTimes(2);
+    expect(null).not.numberOfTimesStateWasSubscribedToBeInRange([0, 1]);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([0, 1]);
+  });
+
   test('defInterpretResult works', () => {
     expect(stringifyState(undefined)).toBe('undefined');
     expect(stringifyState(null)).toBe('null');
@@ -140,3 +210,9 @@ describe('Test correctness of test tools', () => {
     );
   });
 });
+
+function repeatSubscribeNTimes(n: number): void {
+  for (let i = 0; i < n; i++) {
+    _testingAssets_resubscribedTimesCounter();
+  }
+}

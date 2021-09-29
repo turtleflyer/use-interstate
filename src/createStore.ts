@@ -15,9 +15,11 @@ import type {
   SubscribeStateMethods,
   TakeStateAndCalculateValue,
 } from './Store';
-import type { InterstateSelector, UseInterstateInitParam } from './UseInterstateTypes';
+import type { InterstateSelector } from './UseInterstateTypes';
 
-export function createStore<M extends object>(initStateValues?: Partial<M>): Store<M> {
+let _toAccessWhileTesting_toNotifyReactSubscribeState: (() => void) | null = null;
+
+export const createStore = <M extends object>(initStateValues?: Partial<M>): Store<M> => {
   const { getStateValue, setStateValue, getAccessMapHandler, clearState } = createState<M>();
   initState(initStateValues);
 
@@ -58,6 +60,7 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
     value: M[K],
     lastInSeries: boolean
   ): void => {
+    proceedReactCleaningWatchList();
     const stateEntry: StateEntry<M[K]> = getStateValue(key);
     const oldValue = stateEntry.stateValue;
     stateEntry.stateValue = { value };
@@ -95,12 +98,7 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
   const reactRenderTask = (): void => {
     if (!reactRenderTaskDone) {
       [reactRenderTaskDone, reactEffectTaskDone] = [true, false];
-
-      traverseLinkedList(reactCleaningWatchList, ({ removeTriggerFromKeyList }) => {
-        removeTriggerFromKeyList();
-      });
-
-      reactCleaningWatchList = {};
+      proceedReactCleaningWatchList();
     }
   };
 
@@ -124,16 +122,18 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
 
     if (initRecords) {
       const stateSlice = Object.fromEntries(
-        initRecords.map(([key, initValue, needToCalculateValue]) => {
+        initRecords.map((rec) => {
+          const { key, needToCalculateValue } = rec;
           const stateEntry = getStateValue(key);
 
-          if (initValue !== undefined && !stateEntry.stateValue) {
+          if (!stateEntry.stateValue && (needToCalculateValue || rec.initValue !== undefined)) {
             stateEntry.stateValue = {
               value: needToCalculateValue
-                ? isFunctionParameter(initValue as UseInterstateInitParam<M[K]>)
-                  ? (initValue as () => M[K])()
-                  : (initValue as M[K])
-                : (initValue as M[K]),
+                ? isFunctionParameter(rec.initValueToCalculate)
+                  ? rec.initValueToCalculate()
+                  : rec.initValueToCalculate
+                : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                  rec.initValue!,
             };
 
             traverseLinkedList(stateEntry.reactTriggersList, ({ trigger }) => {
@@ -159,6 +159,39 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
         unsubscribeFromKeys.push(createUnsubscribingFunction(stateEntry));
       });
     }
+
+    const unsubscribe = (): void => {
+      unsubscribeFromKeys.forEach((unsubscribeFromKey) => {
+        unsubscribeFromKey();
+      });
+
+      unsubscribeFromKeys = [];
+    };
+
+    const watchListEntry = addLinkedListEntry(reactCleaningWatchList, {
+      removeTriggerFromKeyList: unsubscribe,
+    });
+
+    const removeFromWatchList = (): void => {
+      removeLinkedListEntry(
+        reactCleaningWatchList as LinkedListNonempty<ReactCleaningWatchListEntry>,
+        watchListEntry
+      );
+    };
+
+    const retrieveValue = (): R => {
+      if (mustRecalculate) {
+        mustRecalculate = false;
+        const { accessMapHandler } = getAccessMapHandler();
+        calculatedValue = getValueFromState(accessMapHandler);
+      }
+
+      return calculatedValue;
+    };
+
+    _toAccessWhileTesting_toNotifyReactSubscribeState?.();
+
+    return { retrieveValue, unsubscribe, removeFromWatchList };
 
     function createUnsubscribingFunction<KS extends keyof M>(
       stateEntry: StateEntry<M[KS]>
@@ -191,41 +224,6 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
         );
       };
     }
-
-    const unsubscribe = (): void => {
-      unsubscribeFromKeys.forEach((unsubscribeFromKey) => {
-        unsubscribeFromKey();
-      });
-
-      unsubscribeFromKeys = [];
-    };
-
-    const removeTriggerFromKeyList = (): void => {
-      unsubscribe();
-    };
-
-    const watchListEntry = addLinkedListEntry(reactCleaningWatchList, {
-      removeTriggerFromKeyList,
-    });
-
-    const removeFromWatchList = (): void => {
-      removeLinkedListEntry(
-        reactCleaningWatchList as LinkedListNonempty<ReactCleaningWatchListEntry>,
-        watchListEntry
-      );
-    };
-
-    const retrieveValue = (): R => {
-      if (mustRecalculate) {
-        mustRecalculate = false;
-        const { accessMapHandler } = getAccessMapHandler();
-        calculatedValue = getValueFromState(accessMapHandler);
-      }
-
-      return calculatedValue;
-    };
-
-    return { retrieveValue, unsubscribe, removeFromWatchList };
   };
 
   return {
@@ -246,4 +244,18 @@ export function createStore<M extends object>(initStateValues?: Partial<M>): Sto
         }
       );
   }
-}
+
+  function proceedReactCleaningWatchList(): void {
+    traverseLinkedList(reactCleaningWatchList, ({ removeTriggerFromKeyList }) => {
+      removeTriggerFromKeyList();
+    });
+
+    reactCleaningWatchList = {};
+  }
+};
+
+export const _toAccessWhileTesting_passReactSubscribeStateNotifier = (
+  notifier: () => void
+): void => {
+  _toAccessWhileTesting_toNotifyReactSubscribeState = notifier;
+};

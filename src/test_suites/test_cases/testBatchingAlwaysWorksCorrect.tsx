@@ -49,6 +49,7 @@ export const testBatchingAlwaysWorksCorrect: TestCase = [
     expect('foo').triggersNumberToBe(0);
     expect(77).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
 
     act(() => setInterstate({ foo: 200, 77: 'bb' }));
 
@@ -56,6 +57,7 @@ export const testBatchingAlwaysWorksCorrect: TestCase = [
     expect('foo').triggersNumberToBe(0);
     expect(77).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     rerender(
       <StrictMode>
@@ -73,6 +75,7 @@ export const testBatchingAlwaysWorksCorrect: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(0);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(1);
 
     act(() => setInterstate({ foo: 300, 77: 'cc' }));
 
@@ -80,6 +83,7 @@ export const testBatchingAlwaysWorksCorrect: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(0);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     rerender(
       <StrictMode>
@@ -97,6 +101,7 @@ export const testBatchingAlwaysWorksCorrect: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(1);
 
     act(() => setInterstate({ foo: 300, 77: 'dd' }));
 
@@ -104,6 +109,7 @@ export const testBatchingAlwaysWorksCorrect: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     act(() => setInterstate({ foo: 400, 77: 'dd' }));
 
@@ -111,6 +117,7 @@ export const testBatchingAlwaysWorksCorrect: TestCase = [
     expect('foo').triggersNumberToBe(1);
     expect(77).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     rerender(<></>);
 

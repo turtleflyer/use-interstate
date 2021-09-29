@@ -7,7 +7,7 @@ import type {
   SetInterstateDev,
   UseInterstateDev,
 } from './DevTypes';
-import { getEntriesOfEnumerableKeys } from './getEntriesOfEnumerableKeys';
+import { getEntriesOfEnumerableKeys, getEnumerableKeys } from './getEntriesOfEnumerableKeys';
 import { isFunctionParameter } from './isFunctionParameter';
 import { InitRecordsForSubscribing, TakeStateAndCalculateValue } from './Store';
 import type {
@@ -17,7 +17,6 @@ import type {
   SetInterstateParam,
   SetInterstateSchemaParam,
   UseInterstateInitParam,
-  UseInterstateSchemaParam,
 } from './UseInterstateTypes';
 
 export const initInterstate = (<M extends object>(
@@ -33,20 +32,11 @@ export const initInterstate = (<M extends object>(
     reactEffectTask,
   } = createStore(initStateValues);
 
-  type UseRetrieveState<K extends keyof M, R> = (
-    subscribingParams: SubscribingParam<K, R> | null
-  ) => R;
-
-  interface SubscribingParam<K extends keyof M, R> {
-    takeStateAndCalculateValue: TakeStateAndCalculateValue<M, R>;
-
-    initRecords?: InitRecordsForSubscribing<M, K>;
-  }
-
   type UseInterstateArgs<K extends keyof M> =
     | [key: K, initParam?: UseInterstateInitParam<M[K]>]
     | [keys: readonly K[]]
-    | [initState: UseInterstateSchemaParam<M, K>, deps?: readonly any[]];
+    | [initState: Pick<M, K>]
+    | [createInitState: () => Pick<M, K>, deps?: readonly any[]];
 
   type UnifiedInterfaceForUseInterstate<K extends keyof M, R = unknown> =
     | { interfaceType: 'single key'; key: K; initParam?: UseInterstateInitParam<M[K]> }
@@ -54,16 +44,19 @@ export const initInterstate = (<M extends object>(
     | {
         interfaceType: 'object interface';
         initState: Pick<M, K>;
+      }
+    | {
+        interfaceType: 'function interface';
+        createInitState: () => Pick<M, K>;
         deps?: readonly any[];
       }
-    | { interfaceType: 'function interface'; initState: () => Pick<M, K>; deps?: readonly any[] }
     | { interfaceType: 'selector'; selector: InterstateSelector<M, R>; deps?: readonly any[] };
 
   const useInterstate = (<K extends keyof M, Args extends UseInterstateArgs<K>>(
     ...args: Args
   ): M[K] | Pick<M, K> =>
     useInterstateTakingUnifiedInterface(
-      unifyUseInterstateInterface(...args) as UnifiedInterfaceForUseInterstate<K, any> & {
+      unifyUseInterstateInterface(...args) as UnifiedInterfaceForUseInterstate<K> & {
         interfaceType: 'single key' | 'keys list' | 'object interface' | 'function interface';
       }
     )) as UseInterstateDev<M>;
@@ -157,35 +150,57 @@ export const initInterstate = (<M extends object>(
     reactRenderTask();
     useEffect(reactEffectTask);
 
-    type ReturnType = M[K] | Pick<M, K> | R;
+    type UseInterstateReturn = M[K] | Pick<M, K> | R;
 
     type DetermineNeedToResubscribe = (
       paramToCheck: UnifiedInterfaceForUseInterstate<K, R>
-    ) => boolean;
+    ) => DetermineNeedToResubscribeReturn;
+
+    interface DetermineNeedToResubscribeReturn {
+      determination: boolean;
+      calculatedKeys?: K[];
+    }
+
+    interface SubscribingParam {
+      takeStateAndCalculateValue: TakeStateAndCalculateValue<M, UseInterstateReturn>;
+
+      initRecords?: InitRecordsForSubscribing<M, K>;
+    }
 
     const [{ useInRender }] = useState(() => {
       const useRetrieveState = createUseRetrieveState();
-      let determineNeedToResubscribe: DetermineNeedToResubscribe = () => true;
+      let determineNeedToResubscribe: DetermineNeedToResubscribe = () => ({ determination: true });
 
       // eslint-disable-next-line no-shadow
-      const useInRender = (paramInRender: UnifiedInterfaceForUseInterstate<K, R>): ReturnType => {
-        let paramForUseRetrieveState: SubscribingParam<K, ReturnType> | null = null;
+      const useInRender = (
+        paramInRender: UnifiedInterfaceForUseInterstate<K, R>
+      ): UseInterstateReturn => {
+        let paramForUseRetrieveState: SubscribingParam | null = null;
+        const { determination, calculatedKeys } = determineNeedToResubscribe(paramInRender);
 
-        if (determineNeedToResubscribe(paramInRender)) {
+        if (determination) {
           switch (paramInRender.interfaceType) {
             case 'single key': {
               const normalizedKey = normalizeKey(paramInRender.key);
               const { initParam } = paramInRender;
 
-              determineNeedToResubscribe = (paramToCheck) =>
-                paramToCheck.interfaceType !== 'single key' ||
-                paramToCheck.key !== paramInRender.key;
+              determineNeedToResubscribe = (paramToCheck) => ({
+                determination:
+                  paramToCheck.interfaceType !== 'single key' ||
+                  paramToCheck.key !== paramInRender.key,
+              });
 
               paramForUseRetrieveState = {
                 takeStateAndCalculateValue: (state) => state[normalizedKey],
 
                 initRecords: [
-                  initParam === undefined ? [normalizedKey] : [normalizedKey, initParam, true],
+                  initParam === undefined
+                    ? { key: normalizedKey }
+                    : {
+                        key: normalizedKey,
+                        initValueToCalculate: initParam,
+                        needToCalculateValue: true,
+                      },
                 ],
               };
 
@@ -193,11 +208,18 @@ export const initInterstate = (<M extends object>(
             }
 
             case 'keys list': {
-              determineNeedToResubscribe = (paramToCheck) =>
-                paramToCheck.interfaceType !== 'keys list' ||
-                checkDepsChanged(paramToCheck.keys, paramInRender.keys);
+              const keysSet = new Set(paramInRender.keys);
 
-              const initRecords = paramInRender.keys.map((key) => [normalizeKey(key)] as const);
+              const initRecords = paramInRender.keys.map((key) => ({
+                key: normalizeKey(key),
+              }));
+
+              determineNeedToResubscribe = (paramToCheck) => ({
+                determination:
+                  paramToCheck.interfaceType !== 'keys list' ||
+                  paramToCheck.keys.length !== keysSet.size ||
+                  paramToCheck.keys.some((key) => !keysSet.has(key)),
+              });
 
               paramForUseRetrieveState = {
                 takeStateAndCalculateValue:
@@ -210,12 +232,25 @@ export const initInterstate = (<M extends object>(
             }
 
             case 'object interface': {
-              determineNeedToResubscribe = createDetermineNeedToResubscribeWithDepsInvolved(
-                paramInRender.deps,
-                ['object interface', 'function interface']
-              );
+              const { initState } = paramInRender;
+              const keys = calculatedKeys ?? getEnumerableKeys(initState);
+              const keysSet = new Set(keys);
+              const initRecords = keys.map((key) => ({ key, initValue: initState[key] }));
 
-              const initRecords = getEntriesOfEnumerableKeys(paramInRender.initState);
+              determineNeedToResubscribe = (paramToCheck) => {
+                if (paramToCheck.interfaceType === 'object interface') {
+                  const nextKeys = getEnumerableKeys(paramToCheck.initState);
+
+                  return {
+                    determination:
+                      nextKeys.length !== keysSet.size || nextKeys.some((key) => !keysSet.has(key)),
+
+                    calculatedKeys: nextKeys,
+                  };
+                }
+
+                return { determination: true };
+              };
 
               paramForUseRetrieveState = {
                 takeStateAndCalculateValue:
@@ -228,12 +263,17 @@ export const initInterstate = (<M extends object>(
             }
 
             case 'function interface': {
+              const initState = paramInRender.createInitState();
+
+              const initRecords = getEnumerableKeys(initState).map((key) => ({
+                key,
+                initValue: initState[key],
+              }));
+
               determineNeedToResubscribe = createDetermineNeedToResubscribeWithDepsInvolved(
                 paramInRender.deps,
-                ['object interface', 'function interface']
+                'function interface'
               );
-
-              const initRecords = getEntriesOfEnumerableKeys(paramInRender.initState());
 
               paramForUseRetrieveState = {
                 takeStateAndCalculateValue:
@@ -248,7 +288,7 @@ export const initInterstate = (<M extends object>(
             case 'selector':
               determineNeedToResubscribe = createDetermineNeedToResubscribeWithDepsInvolved(
                 paramInRender.deps,
-                ['selector']
+                'selector'
               );
 
               paramForUseRetrieveState = { takeStateAndCalculateValue: paramInRender.selector };
@@ -268,15 +308,15 @@ export const initInterstate = (<M extends object>(
 
     return useInRender(param);
 
-    function createUseRetrieveState(): UseRetrieveState<K, ReturnType> {
-      let retrieveValue: () => ReturnType;
+    type UseRetrieveState = (subscribingParams: SubscribingParam | null) => UseInterstateReturn;
+
+    function createUseRetrieveState(): UseRetrieveState {
+      let retrieveValue: () => UseInterstateReturn;
       let unsubscribe: () => void;
       let removeFromWatchList: () => void;
 
       // eslint-disable-next-line no-shadow
-      const useRetrieveState = (
-        subscribingParams: SubscribingParam<K, ReturnType> | null
-      ): ReturnType => {
+      const useRetrieveState: UseRetrieveState = (subscribingParams) => {
         /**
          * Emit setter using to trigger rendering of component signaling when value of `key` changed
          * in global state
@@ -318,26 +358,22 @@ export const initInterstate = (<M extends object>(
       initRecords: InitRecordsForSubscribing<M, K>
     ): TakeStateAndCalculateValue<M, Pick<M, K>> {
       return (state) =>
-        Object.fromEntries(initRecords.map(([key]) => [key, state[key]])) as Pick<M, K>;
+        Object.fromEntries(initRecords.map(({ key }) => [key, state[key]])) as Pick<M, K>;
     }
 
     function createDetermineNeedToResubscribeWithDepsInvolved(
       depsToCheckWith: readonly any[] | undefined,
-      allowedInterfaceTypes: readonly ('object interface' | 'function interface' | 'selector')[]
+      allowedInterfaceTypes: 'function interface' | 'selector'
     ): DetermineNeedToResubscribe {
       return depsToCheckWith
-        ? (paramToCheck) => {
-            if (allowedInterfaceTypes.some((it) => it === paramToCheck.interfaceType)) {
-              const { deps } = paramToCheck as UnifiedInterfaceForUseInterstate<K, R> & {
-                interfaceType: 'object interface' | 'function interface' | 'selector';
-              };
-
-              return !deps || checkDepsChanged(deps, depsToCheckWith);
-            }
-
-            return true;
-          }
-        : () => true;
+        ? (paramToCheck) => ({
+            determination:
+              paramToCheck.interfaceType !== allowedInterfaceTypes ||
+              !paramToCheck.deps ||
+              paramToCheck.deps.length !== depsToCheckWith.length ||
+              paramToCheck.deps.some((dep, index) => !Object.is(dep, depsToCheckWith[index])),
+          })
+        : () => ({ determination: true });
     }
   }
 
@@ -351,13 +387,12 @@ export const initInterstate = (<M extends object>(
           : {
               interfaceType: 'object interface',
               initState: firstArg,
-              deps: secondArg as any[] | undefined,
             };
 
       case 'function':
         return {
           interfaceType: 'function interface',
-          initState: firstArg,
+          createInitState: firstArg,
           deps: secondArg as any[] | undefined,
         };
 
@@ -371,20 +406,12 @@ export const initInterstate = (<M extends object>(
   }
 }) as InitInterstate;
 
-function checkDepsChanged(depsToCheck: readonly any[], depsToCheckWith: readonly any[]): boolean {
-  if (depsToCheck.length === depsToCheckWith.length) {
-    return depsToCheck.some((dep, index) => !Object.is(dep, depsToCheckWith[index]));
-  }
-
-  return true;
+function normalizeKey<K extends InterstateKey>(key: K): K {
+  return (typeof key === 'number' ? `${key}` : key) as K;
 }
 
 function isArray<T, Arr extends readonly any[]>(keyOrKeys: T | Arr): keyOrKeys is Arr {
   return Array.isArray(keyOrKeys);
-}
-
-function normalizeKey<K extends InterstateKey>(key: K): K {
-  return (typeof key === 'number' ? `${key}` : key) as K;
 }
 
 export * from './DevTypes';

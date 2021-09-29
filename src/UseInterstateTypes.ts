@@ -33,7 +33,7 @@ export interface InitInterstate {
   ): InterstateMethods<{ -readonly [P in keyof S]: S[P] extends undefined ? unknown : S[P] }>;
 
   <S extends object = never, DetectExplicitGenericUse = [S] extends [never] ? false : true>(
-    initStateValues: [
+    initState: [
       DetectExplicitGenericUse,
       FilterOut<S, 'must have keys' | 'must not be array' | 'must not be function'>,
       S
@@ -43,7 +43,7 @@ export interface InitInterstate {
   ): InterstateMethods<S>;
 
   <G = never, DetectExplicitGenericUse = [G] extends [never] ? false : true>(
-    ...wrongArgs: DetectExplicitGenericUse extends true
+    ...args: DetectExplicitGenericUse extends true
       ? [never] &
           (FilterOut<
             G,
@@ -86,11 +86,11 @@ export interface InterstateMethods<M extends object = never> {
 
 export type UseInterstate<M extends object = never> = ([M] extends [never]
   ? {
-      <T = unknown>(key: InterstateKey, initParam?: undefined): T;
+      <T = unknown>(key: InterstateKey, initValue?: undefined): T;
 
       <PreventExplicitGenericUse extends never, T>(
         key: InterstateKey,
-        initParam: FilterOut<T, 'must not be function'> extends true ? T : never
+        initValue: FilterOut<T, 'must not be function'> extends true ? T : never
       ): T;
 
       <PreventExplicitGenericUse extends never, T>(key: InterstateKey, init: () => T): T;
@@ -113,10 +113,21 @@ export type UseInterstate<M extends object = never> = ([M] extends [never]
           S,
           'must have keys' | 'must not be array' | 'must not be function'
         > extends true
-          ? S | (() => S)
+          ? () => S
           : never,
 
         deps?: readonly any[]
+      ): {
+        -readonly [P in keyof S]: S[P];
+      };
+
+      <PreventExplicitGenericUse extends never, S extends object>(
+        initState: FilterOut<
+          S,
+          'must have keys' | 'must not be array' | 'must not be function'
+        > extends true
+          ? S
+          : never
       ): {
         -readonly [P in keyof S]: S[P];
       };
@@ -178,7 +189,7 @@ export type UseInterstate<M extends object = never> = ([M] extends [never]
                     | 'must not be array'
                     | 'must not be function'
                   > extends true
-                  ? 'valid init parameter'
+                  ? 'valid parameter'
                   : 'wrong parameter'
                 : 'not a case'
             ] extends [InterstateKey, any, any] | [any, true, any] | [any, any, 'valid parameter']
@@ -197,7 +208,7 @@ export type UseInterstate<M extends object = never> = ([M] extends [never]
                   SA
                 >
             : never
-          : FilterOut<FA, 'must be array'> extends true
+          : FilterOut<FA, 'must be object' | 'must not be function'> extends true
           ? TypeError<'💣💥🙈 No second argument is allowed'>
           : TypeError<
               '💣💥🙈 The second argument is optional and expected to be a list of deps; but the wrong type is provided:',
@@ -249,7 +260,7 @@ export type UseInterstate<M extends object = never> = ([M] extends [never]
   : {
       <PreventExplicitGenericUse extends never, K extends keyof M>(
         key: K,
-        initParam?: undefined
+        initValue?: undefined
       ): M[K];
 
       <
@@ -258,7 +269,7 @@ export type UseInterstate<M extends object = never> = ([M] extends [never]
         IP extends ReadonlyIfArray<M[K]>
       >(
         key: K,
-        initParam: FilterOut<IP, 'must not be function'> extends true ? IP : never
+        initValue: FilterOut<IP, 'must not be function'> extends true ? IP : never
       ): M[K];
 
       <
@@ -267,7 +278,7 @@ export type UseInterstate<M extends object = never> = ([M] extends [never]
         IP extends () => ReadonlyIfArray<M[K]>
       >(
         key: K,
-        initParam: IP
+        initValue: IP
       ): M[K];
 
       <PreventExplicitGenericUse extends never, K extends keyof M>(
@@ -275,19 +286,20 @@ export type UseInterstate<M extends object = never> = ([M] extends [never]
       ): Pick<M, K>;
 
       <PreventExplicitGenericUse extends never, K extends keyof M>(
-        initState: [K] extends [never]
-          ? never
-          : PickWithReadonlyArrays<M, K> | (() => PickWithReadonlyArrays<M, K>),
-
+        initState: [K] extends [never] ? never : () => PickWithReadonlyArrays<M, K>,
         deps?: readonly any[]
       ): Pick<M, K>;
 
+      <PreventExplicitGenericUse extends never, K extends keyof M>(
+        initState: [K] extends [never] ? never : PickWithReadonlyArrays<M, K>
+      ): Pick<M, K>;
+
       <G = never, DetectExplicitGenericUse = [G] extends [never] ? false : true>(
-        firstParam: DetectExplicitGenericUse extends true
+        firstArg: DetectExplicitGenericUse extends true
           ? TypeError<'💣💥🙈 No explicit generic type is allowed'>
           : never,
 
-        secondParam?: any
+        secondArg?: any
       ): never;
 
       <PreventExplicitGenericUse extends never, A>(
@@ -337,19 +349,19 @@ export type UseInterstate<M extends object = never> = ([M] extends [never]
               FAD,
               FilterOut<FAD, 'must have keys'>,
               FAD extends (keyof FAD extends keyof M ? PickWithReadonlyArrays<M, keyof FAD> : never)
-                ? 'valid init parameter'
+                ? 'valid parameter'
                 : 'not a case',
               FAD extends () => infer FAR
                 ? FAR extends (
                     keyof FAR extends keyof M ? PickWithReadonlyArrays<M, keyof FAR> : never
                   )
-                  ? 'valid init parameter'
+                  ? 'valid parameter'
                   : 'wrong parameter'
                 : 'not a case'
             ] extends
               | [keyof M, any, any, any]
-              | [any, true, 'valid init parameter', any]
-              | [any, any, any, 'valid init parameter']
+              | [any, true, 'valid parameter', any]
+              | [any, any, any, 'valid parameter']
             ? FAD
             : TypeError<
                 '💣💥🙈 The first argument is expected to be either a valid key:',
@@ -376,7 +388,7 @@ export type UseInterstate<M extends object = never> = ([M] extends [never]
                 '; but the wrong type is provided:',
                 SA
               >
-          : FilterOut<FA, 'must be array'> extends true
+          : FilterOut<FA, 'must be object' | 'must not be function'> extends true
           ? TypeError<'💣💥🙈 No second argument is allowed'>
           : TypeError<
               '💣💥🙈 The second argument is optional and expected to be a list of deps; but the wrong type is provided:',
@@ -523,7 +535,7 @@ export type ReadInterstate<M extends object = never> = ([M] extends [never]
       ): Pick<M, K>;
 
       <G = never, DetectExplicitGenericUse = [G] extends [never] ? false : true>(
-        initState: DetectExplicitGenericUse extends true
+        arg: DetectExplicitGenericUse extends true
           ? TypeError<'💣💥🙈 No explicit generic type is allowed'>
           : never
       ): never;
@@ -566,7 +578,7 @@ export type ReadInterstate<M extends object = never> = ([M] extends [never]
 
   acceptSelector: {
     <G = never, DetectExplicitGenericUse = [G] extends [never] ? false : true>(
-      selector: DetectExplicitGenericUse extends true
+      arg: DetectExplicitGenericUse extends true
         ? TypeError<'💣💥🙈 No explicit generic type is allowed'>
         : never
     ): never;
@@ -579,16 +591,16 @@ export type SetInterstate<M extends object = never> = ([M] extends [never]
   ? {
       <PreventExplicitGenericUse extends never, T>(
         key: InterstateKey,
-        setter: FilterOut<T, 'must not be function'> extends true ? T : never
+        setValue: FilterOut<T, 'must not be function'> extends true ? T : never
       ): void;
 
       <PreventExplicitGenericUse extends never, T>(
         key: InterstateKey,
-        setter: (prevValue: T) => T
+        setValue: (prevValue: T) => T
       ): void;
 
       <PreventExplicitGenericUse extends never, S extends object>(
-        setter: FilterOut<
+        setState: FilterOut<
           S,
           'must have keys' | 'must not be array' | 'must not be function'
         > extends true
@@ -597,7 +609,7 @@ export type SetInterstate<M extends object = never> = ([M] extends [never]
       ): void;
 
       <PreventExplicitGenericUse extends never, SParam extends object, SReturn extends object>(
-        setter: [
+        setState: [
           FilterOut<SParam, 'must have keys' | 'must not be array' | 'must not be function'>,
           FilterOut<SReturn, 'must have keys' | 'must not be array' | 'must not be function'>
         ] extends [true, true]
@@ -656,22 +668,22 @@ export type SetInterstate<M extends object = never> = ([M] extends [never]
       <PreventExplicitGenericUse extends never, K extends keyof M, SP>(
         key: K,
 
-        setter: [FilterOut<SP, 'must not be function'>, SP] extends [true, ReadonlyIfArray<M[K]>]
+        setValue: [FilterOut<SP, 'must not be function'>, SP] extends [true, ReadonlyIfArray<M[K]>]
           ? SP
           : never
       ): void;
 
       <PreventExplicitGenericUse extends never, K extends keyof M>(
         key: K,
-        setter: (prevValue: M[K]) => ReadonlyIfArray<M[K]>
+        setValue: (prevValue: M[K]) => ReadonlyIfArray<M[K]>
       ): void;
 
       <PreventExplicitGenericUse extends never, K extends keyof M>(
-        setter: [K] extends [never] ? never : PickWithReadonlyArrays<M, K>
+        setState: [K] extends [never] ? never : PickWithReadonlyArrays<M, K>
       ): void;
 
       <PreventExplicitGenericUse extends never, K extends keyof M>(
-        setter: [K] extends [never] ? never : (prevState: M) => PickWithReadonlyArrays<M, K>
+        setState: [K] extends [never] ? never : (prevState: M) => PickWithReadonlyArrays<M, K>
       ): void;
 
       <G = never, DetectExplicitGenericUse = [G] extends [never] ? false : true>(
@@ -769,7 +781,7 @@ export type SetInterstateSchemaParam<M extends object, K extends keyof M = keyof
 export type ResetInterstate<M extends object = never> = ([M] extends [never]
   ? {
       <PreventExplicitGenericUse extends never, S extends object>(
-        initStateValues: FilterOut<
+        resetState: FilterOut<
           S,
           'must have keys' | 'must not be array' | 'must not be function'
         > extends true
@@ -788,7 +800,7 @@ export type ResetInterstate<M extends object = never> = ([M] extends [never]
     }
   : {
       <PreventExplicitGenericUse extends never, ISV extends object>(
-        initStateValues: FilterOut<
+        resetState: FilterOut<
           ISV,
           'must have keys' | 'must not be array' | 'must not be function'
         > extends true
@@ -812,7 +824,7 @@ export type ResetInterstate<M extends object = never> = ([M] extends [never]
   (): void;
 
   <G = never, DetectExplicitGenericUse = [G] extends [never] ? false : true>(
-    ...wrongArgs: DetectExplicitGenericUse extends true
+    ...args: DetectExplicitGenericUse extends true
       ? [never] & TypeError<'💣💥🙈 No explicit generic type is allowed'>
       : never
   ): never;

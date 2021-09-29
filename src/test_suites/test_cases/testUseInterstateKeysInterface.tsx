@@ -30,9 +30,9 @@ export const testUseInterstateKeysInterface: TestCase = [
     const TestComponent = createListenerComponent({ useInterstate });
     const effectCounter: TestCounter = { count: 0 };
 
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
-    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBe(0);
+    expect(77).triggersNumberToBe(0);
+    expect(symbolKey).triggersNumberToBe(0);
 
     const { getByTestId, rerender } = render(
       <StrictMode>
@@ -53,6 +53,7 @@ export const testUseInterstateKeysInterface: TestCase = [
     expect(77).triggersNumberToBeGreaterThanOrEqual(1);
     expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
 
     act(() => setInterstate('foo', 100));
 
@@ -63,6 +64,7 @@ export const testUseInterstateKeysInterface: TestCase = [
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     act(() => setInterstate('foo', 100));
 
@@ -73,6 +75,7 @@ export const testUseInterstateKeysInterface: TestCase = [
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(0);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     act(() => setInterstate(77, 'hi'));
 
@@ -83,6 +86,7 @@ export const testUseInterstateKeysInterface: TestCase = [
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     act(() => setInterstate(symbolKey, { a: true }));
 
@@ -93,6 +97,7 @@ export const testUseInterstateKeysInterface: TestCase = [
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     act(() =>
       setInterstate(({ foo: prevFooV }) => ({
@@ -109,6 +114,7 @@ export const testUseInterstateKeysInterface: TestCase = [
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     act(() => setInterstate({ 77: 'lo' }));
 
@@ -119,6 +125,7 @@ export const testUseInterstateKeysInterface: TestCase = [
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(0);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     act(() => setInterstate({ foo: 15, 77: 'lo', [symbolKey]: { 1: null } }));
 
@@ -129,6 +136,49 @@ export const testUseInterstateKeysInterface: TestCase = [
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
+
+    rerender(
+      <StrictMode>
+        <TestComponent
+          {...{
+            testId: testComponentID,
+            keys: ['foo', 77, symbolKey],
+            effectFn: () => effectCounter.count++,
+          }}
+        />
+      </StrictMode>
+    );
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
+      '{"77":"lo","foo":15,"symbol(0)":{"1":null}}'
+    );
+    expect('foo').triggersNumberToBe(1);
+    expect(77).triggersNumberToBe(1);
+    expect(symbolKey).triggersNumberToBe(1);
+    expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
+
+    rerender(
+      <StrictMode>
+        <TestComponent
+          {...{
+            testId: testComponentID,
+            keys: [77, symbolKey, 'foo'],
+            effectFn: () => effectCounter.count++,
+          }}
+        />
+      </StrictMode>
+    );
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
+      '{"77":"lo","foo":15,"symbol(0)":{"1":null}}'
+    );
+    expect('foo').triggersNumberToBe(1);
+    expect(77).triggersNumberToBe(1);
+    expect(symbolKey).triggersNumberToBe(1);
+    expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     rerender(
       <StrictMode>
@@ -147,6 +197,7 @@ export const testUseInterstateKeysInterface: TestCase = [
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(1);
 
     act(() => setInterstate({ foo: 111, 77: 'go' }));
 
@@ -155,6 +206,7 @@ export const testUseInterstateKeysInterface: TestCase = [
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     act(() => setInterstate({ 77: 'nope' }));
 
@@ -163,6 +215,7 @@ export const testUseInterstateKeysInterface: TestCase = [
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
     expect(effectCounter).counterToIncreaseBy(0);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     act(() => setInterstate({ foo: -1 }));
 
@@ -171,6 +224,7 @@ export const testUseInterstateKeysInterface: TestCase = [
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     rerender(<></>);
 

@@ -31,8 +31,8 @@ export const testScenariosWithSiblings: TestCase = [
     const effectCounter1: TestCounter = { count: 0 };
     const effectCounter2: TestCounter = { count: 0 };
 
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBe(0);
+    expect(77).triggersNumberToBe(0);
 
     const { getByTestId, rerender } = render(
       <StrictMode>
@@ -56,9 +56,10 @@ export const testScenariosWithSiblings: TestCase = [
     expect(getByTestId(testComponentID0).firstChild!.textContent).toBe('undefined');
     expect(getByTestId(testComponentID1).firstChild!.textContent).toBe('undefined');
     expect('foo').triggersNumberToBeGreaterThanOrEqual(2);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
+    expect(77).triggersNumberToBe(0);
     expect(effectCounter0).counterToIncreaseBy(1);
     expect(effectCounter1).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([2, 4]);
 
     act(() => setInterstate('foo', 200));
 
@@ -68,12 +69,13 @@ export const testScenariosWithSiblings: TestCase = [
     expect(77).triggersNumberToBe(0);
     expect(effectCounter0).counterToIncreaseBy(1);
     expect(effectCounter1).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     rerender(<StrictMode />);
     resetInterstate();
 
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBe(0);
+    expect(77).triggersNumberToBe(0);
 
     rerender(
       <StrictMode>
@@ -98,9 +100,10 @@ export const testScenariosWithSiblings: TestCase = [
     expect(getByTestId(testComponentID0).firstChild!.textContent).toBe('111');
     expect(getByTestId(testComponentID1).firstChild!.textContent).toBe('111');
     expect('foo').triggersNumberToBeGreaterThanOrEqual(2);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
+    expect(77).triggersNumberToBe(0);
     expect(effectCounter0).counterToIncreaseBy(1);
     expect(effectCounter1).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([2, 4]);
 
     act(() => setInterstate('foo', 18));
 
@@ -110,12 +113,13 @@ export const testScenariosWithSiblings: TestCase = [
     expect(77).triggersNumberToBe(0);
     expect(effectCounter0).counterToIncreaseBy(1);
     expect(effectCounter1).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     rerender(<StrictMode />);
     resetInterstate();
 
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBe(0);
+    expect(77).triggersNumberToBe(0);
 
     rerender(
       <StrictMode>
@@ -140,9 +144,10 @@ export const testScenariosWithSiblings: TestCase = [
     expect(getByTestId(testComponentID0).firstChild!.textContent).toBe('6');
     expect(getByTestId(testComponentID1).firstChild!.textContent).toBe('6');
     expect('foo').triggersNumberToBeGreaterThanOrEqual(2);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
+    expect(77).triggersNumberToBe(0);
     expect(effectCounter0).counterToIncreaseBy(2);
     expect(effectCounter1).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([2, 4]);
 
     act(() => setInterstate('foo', 1000));
 
@@ -152,12 +157,13 @@ export const testScenariosWithSiblings: TestCase = [
     expect(77).triggersNumberToBe(0);
     expect(effectCounter0).counterToIncreaseBy(1);
     expect(effectCounter1).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     rerender(<StrictMode />);
     resetInterstate();
 
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBe(0);
+    expect(77).triggersNumberToBe(0);
 
     rerender(
       <StrictMode>
@@ -183,9 +189,10 @@ export const testScenariosWithSiblings: TestCase = [
     expect(getByTestId(testComponentID0).firstChild!.textContent).toBe('22');
     expect(getByTestId(testComponentID1).firstChild!.textContent).toBe('22');
     expect('foo').triggersNumberToBeGreaterThanOrEqual(2);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
+    expect(77).triggersNumberToBe(0);
     expect(effectCounter0).counterToIncreaseBy(1);
     expect(effectCounter1).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([2, 4]);
 
     act(() => setInterstate('foo', 555));
 
@@ -195,12 +202,13 @@ export const testScenariosWithSiblings: TestCase = [
     expect(77).triggersNumberToBe(0);
     expect(effectCounter0).counterToIncreaseBy(1);
     expect(effectCounter1).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     rerender(<StrictMode />);
     resetInterstate();
 
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBe(0);
+    expect(77).triggersNumberToBe(0);
 
     rerender(
       <StrictMode>
@@ -233,10 +241,11 @@ export const testScenariosWithSiblings: TestCase = [
     expect(getByTestId(testComponentID1).firstChild!.textContent).toBe('800');
     expect(getByTestId(testComponentID2).firstChild!.textContent).toBe('800');
     expect('foo').triggersNumberToBeGreaterThanOrEqual(3);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
+    expect(77).triggersNumberToBe(0);
     expect(effectCounter0).counterToIncreaseBy(2);
     expect(effectCounter1).counterToIncreaseBy(1);
     expect(effectCounter2).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([3, 6]);
 
     act(() => setInterstate('foo', 5));
 
@@ -248,12 +257,13 @@ export const testScenariosWithSiblings: TestCase = [
     expect(effectCounter0).counterToIncreaseBy(1);
     expect(effectCounter1).counterToIncreaseBy(1);
     expect(effectCounter2).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     rerender(<StrictMode />);
     resetInterstate({ 77: 'hi' });
 
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBe(0);
+    expect(77).triggersNumberToBe(0);
 
     rerender(
       <StrictMode>
@@ -281,6 +291,7 @@ export const testScenariosWithSiblings: TestCase = [
     expect(77).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter0).counterToIncreaseBy(1);
     expect(effectCounter1).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([2, 4]);
 
     act(() => setInterstate('foo', 777));
 
@@ -290,12 +301,13 @@ export const testScenariosWithSiblings: TestCase = [
     expect(77).triggersNumberToBe(1);
     expect(effectCounter0).counterToIncreaseBy(1);
     expect(effectCounter1).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
 
     rerender(<StrictMode />);
     resetInterstate({ 77: 'lo' });
 
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBe(0);
+    expect(77).triggersNumberToBe(0);
 
     rerender(
       <StrictMode>
@@ -323,6 +335,7 @@ export const testScenariosWithSiblings: TestCase = [
     expect(77).triggersNumberToBeGreaterThanOrEqual(1);
     expect(effectCounter0).counterToIncreaseBy(1);
     expect(effectCounter1).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([2, 4]);
 
     act(() => setInterstate('foo', 13));
 
@@ -332,6 +345,7 @@ export const testScenariosWithSiblings: TestCase = [
     expect(77).triggersNumberToBe(1);
     expect(effectCounter0).counterToIncreaseBy(0);
     expect(effectCounter1).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     rerender(<></>);
 

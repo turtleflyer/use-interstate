@@ -34,9 +34,9 @@ export const testChangingInterface: TestCase = [
     const TestComponent = createListenerComponent({ useInterstate });
     const effectCounter: TestCounter = { count: 0 };
 
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
-    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBe(0);
+    expect(77).triggersNumberToBe(0);
+    expect(symbolKey).triggersNumberToBe(0);
 
     const { getByTestId, rerender } = render(
       <StrictMode>
@@ -52,9 +52,10 @@ export const testChangingInterface: TestCase = [
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('100');
     expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
-    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(0);
+    expect(77).triggersNumberToBe(0);
+    expect(symbolKey).triggersNumberToBe(0);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
 
     act(() => setInterstate('foo', 200));
 
@@ -63,6 +64,7 @@ export const testChangingInterface: TestCase = [
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     rerender(
       <StrictMode>
@@ -79,55 +81,18 @@ export const testChangingInterface: TestCase = [
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe(
       '{"77":"hi","symbol(0)":{"a":true}}'
     );
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBe(0);
+    expect(77).triggersNumberToBe(1);
+    expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(1);
 
     rerender(
       <StrictMode>
         <TestComponent
           {...{
             testId: testComponentID,
-            initSchema: { foo: 0, 77: '' },
-            deps: [],
-            effectFn: () => effectCounter.count++,
-          }}
-        />
-      </StrictMode>
-    );
-
-    expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"77":"hi","foo":200}');
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(0);
-    expect(effectCounter).counterToIncreaseBy(1);
-
-    rerender(
-      <StrictMode>
-        <TestComponent
-          {...{
-            testId: testComponentID,
-            initSchema: () => ({ [symbolKey]: {} }),
-            deps: [],
-            effectFn: () => effectCounter.count++,
-          }}
-        />
-      </StrictMode>
-    );
-
-    expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"77":"hi","foo":200}');
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(0);
-    expect(effectCounter).counterToIncreaseBy(1);
-
-    rerender(
-      <StrictMode>
-        <TestComponent
-          {...{
-            testId: testComponentID,
-            initSchema: { [symbolKey]: {} },
+            initSchemaObj: { [symbolKey]: {} },
             effectFn: () => effectCounter.count++,
           }}
         />
@@ -135,17 +100,18 @@ export const testChangingInterface: TestCase = [
     );
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"symbol(0)":{"a":true}}');
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
-    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
+    expect('foo').triggersNumberToBe(0);
+    expect(77).triggersNumberToBe(0);
+    expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(1);
 
     rerender(
       <StrictMode>
         <TestComponent
           {...{
             testId: testComponentID,
-            initSchema: () => ({ 77: '' }),
+            initSchemaFn: () => ({ 77: '' }),
             effectFn: () => effectCounter.count++,
           }}
         />
@@ -153,10 +119,69 @@ export const testChangingInterface: TestCase = [
     );
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"77":"hi"}');
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBe(0);
+    expect(77).triggersNumberToBe(1);
+    expect(symbolKey).triggersNumberToBe(0);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
+
+    rerender(
+      <StrictMode>
+        <TestComponent
+          {...{
+            testId: testComponentID,
+            initSchemaObj: { foo: 0, 77: '' },
+            effectFn: () => effectCounter.count++,
+          }}
+        />
+      </StrictMode>
+    );
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"77":"hi","foo":200}');
+    expect('foo').triggersNumberToBe(1);
+    expect(77).triggersNumberToBe(1);
+    expect(symbolKey).triggersNumberToBe(0);
+    expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(1);
+
+    rerender(
+      <StrictMode>
+        <TestComponent
+          {...{
+            testId: testComponentID,
+            initSchemaFn: () => ({ [symbolKey]: {} }),
+            deps: [],
+            effectFn: () => effectCounter.count++,
+          }}
+        />
+      </StrictMode>
+    );
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"symbol(0)":{"a":true}}');
+    expect('foo').triggersNumberToBe(0);
+    expect(77).triggersNumberToBe(0);
+    expect(symbolKey).triggersNumberToBe(1);
+    expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(1);
+
+    rerender(
+      <StrictMode>
+        <TestComponent
+          {...{
+            testId: testComponentID,
+            initSchemaObj: { foo: 0, 77: '' },
+            effectFn: () => effectCounter.count++,
+          }}
+        />
+      </StrictMode>
+    );
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"77":"hi","foo":200}');
+    expect('foo').triggersNumberToBe(1);
+    expect(77).triggersNumberToBe(1);
+    expect(symbolKey).triggersNumberToBe(0);
+    expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(1);
 
     rerender(
       <StrictMode>
@@ -171,10 +196,30 @@ export const testChangingInterface: TestCase = [
     );
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('200');
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
-    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBe(1);
+    expect(77).triggersNumberToBe(0);
+    expect(symbolKey).triggersNumberToBe(0);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
+
+    rerender(
+      <StrictMode>
+        <TestComponent
+          {...{
+            testId: testComponentID,
+            initSchemaObj: { [symbolKey]: {} },
+            effectFn: () => effectCounter.count++,
+          }}
+        />
+      </StrictMode>
+    );
+
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"symbol(0)":{"a":true}}');
+    expect('foo').triggersNumberToBe(0);
+    expect(77).triggersNumberToBe(0);
+    expect(symbolKey).triggersNumberToBe(1);
+    expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(1);
 
     rerender(
       <StrictMode>
@@ -190,29 +235,11 @@ export const testChangingInterface: TestCase = [
     );
 
     expect(getByTestId(testComponentID).firstChild!.textContent).toBe('hi');
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(0);
+    expect('foo').triggersNumberToBe(0);
+    expect(77).triggersNumberToBe(1);
+    expect(symbolKey).triggersNumberToBe(0);
     expect(effectCounter).counterToIncreaseBy(1);
-
-    rerender(
-      <StrictMode>
-        <TestComponent
-          {...{
-            testId: testComponentID,
-            initSchema: { foo: 0, 77: '' },
-            deps: [],
-            effectFn: () => effectCounter.count++,
-          }}
-        />
-      </StrictMode>
-    );
-
-    expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"77":"hi","foo":200}');
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(1);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(1);
-    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(0);
-    expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(1);
 
     rerender(
       <StrictMode>
@@ -227,11 +254,12 @@ export const testChangingInterface: TestCase = [
       </StrictMode>
     );
 
-    expect(getByTestId(testComponentID).firstChild!.textContent).toBe('{"a":true}');
-    expect('foo').triggersNumberToBeGreaterThanOrEqual(0);
-    expect(77).triggersNumberToBeGreaterThanOrEqual(0);
-    expect(symbolKey).triggersNumberToBeGreaterThanOrEqual(1);
+    expect(getByTestId(testComponentID).firstChild!.textContent).toBe('hi');
+    expect('foo').triggersNumberToBe(0);
+    expect(77).triggersNumberToBe(1);
+    expect(symbolKey).triggersNumberToBe(0);
     expect(effectCounter).counterToIncreaseBy(1);
+    expect(null).numberOfTimesStateWasSubscribedToBe(0);
 
     rerender(<></>);
 
