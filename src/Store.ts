@@ -16,6 +16,8 @@ export interface Store<M extends object> {
 
   readonly reactSubscribeState: ReactSubscribeState<M>;
 
+  readonly proceedWatchList: () => void;
+
   readonly reactEffectTask: () => void;
 
   readonly reactRenderTask: () => void;
@@ -67,8 +69,10 @@ export interface SubscribeStateMethods<R> {
 
   unsubscribe: () => void;
 
-  removeFromWatchList: () => void;
+  addToWatchList: AddToWatchList;
 }
+
+export type AddToWatchList = () => { removeFromWatchList: () => void };
 
 export interface ReactKeyMethods {
   readonly addTrigger: (trigger: Trigger) => ReactTriggerMethods;

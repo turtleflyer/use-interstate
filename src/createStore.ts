@@ -5,6 +5,7 @@ import type { LinkedList, LinkedListEntry, LinkedListNonempty } from './LinkedLi
 import { addLinkedListEntry, removeLinkedListEntry, traverseLinkedList } from './LinkedList';
 import type { StateEntry, TriggersListEntry } from './State';
 import type {
+  AddToWatchList,
   GetStateUsingSelector,
   GetValue,
   InitRecordsForSubscribing,
@@ -58,7 +59,6 @@ export const createStore = <M extends object>(initStateValues?: Partial<M>): Sto
 
   const setValue: SetValue<M> = <K extends keyof M>(setValueParam: SetValueParm<M, K>): void => {
     const { key, needToCalculateValue, lastInSeries } = setValueParam;
-    proceedReactCleaningWatchList();
     const stateEntry: StateEntry<M[K]> = getStateValue(key);
     const prevValueRecord = stateEntry.stateValue;
 
@@ -98,21 +98,6 @@ export const createStore = <M extends object>(initStateValues?: Partial<M>): Sto
     reactCleaningWatchList = {};
     [reactRenderTaskDone, reactEffectTaskDone] = [false, false];
     reactEffectTasksPool = [];
-  };
-
-  const reactRenderTask = (): void => {
-    if (!reactRenderTaskDone) {
-      [reactRenderTaskDone, reactEffectTaskDone] = [true, false];
-      proceedReactCleaningWatchList();
-    }
-  };
-
-  const reactEffectTask = (): void => {
-    if (!reactEffectTaskDone) {
-      [reactEffectTaskDone, reactRenderTaskDone] = [true, false];
-      reactEffectTasksPool.forEach((task) => task());
-      reactEffectTasksPool = [];
-    }
   };
 
   const reactSubscribeState: ReactSubscribeState<M> = <K extends keyof M, R>(
@@ -165,25 +150,6 @@ export const createStore = <M extends object>(initStateValues?: Partial<M>): Sto
       });
     }
 
-    const unsubscribe = (): void => {
-      unsubscribeFromKeys.forEach((unsubscribeFromKey) => {
-        unsubscribeFromKey();
-      });
-
-      unsubscribeFromKeys = [];
-    };
-
-    const watchListEntry = addLinkedListEntry(reactCleaningWatchList, {
-      removeTriggerFromKeyList: unsubscribe,
-    });
-
-    const removeFromWatchList = (): void => {
-      removeLinkedListEntry(
-        reactCleaningWatchList as LinkedListNonempty<ReactCleaningWatchListEntry>,
-        watchListEntry
-      );
-    };
-
     const retrieveValue = (): R => {
       if (mustRecalculate) {
         mustRecalculate = false;
@@ -194,9 +160,34 @@ export const createStore = <M extends object>(initStateValues?: Partial<M>): Sto
       return calculatedValue;
     };
 
+    const unsubscribe = (): void => {
+      unsubscribeFromKeys.forEach((unsubscribeFromKey) => {
+        unsubscribeFromKey();
+      });
+
+      unsubscribeFromKeys = [];
+    };
+
+    let watchListEntry: ReactCleaningWatchListEntry;
+
+    const addToWatchList: AddToWatchList = () => {
+      watchListEntry = addLinkedListEntry(reactCleaningWatchList, {
+        removeTriggerFromKeyList: unsubscribe,
+      });
+
+      return {
+        removeFromWatchList(): void {
+          removeLinkedListEntry(
+            reactCleaningWatchList as LinkedListNonempty<ReactCleaningWatchListEntry>,
+            watchListEntry
+          );
+        },
+      };
+    };
+
     _toAccessWhileTesting_toNotifyReactSubscribeState?.();
 
-    return { retrieveValue, unsubscribe, removeFromWatchList };
+    return { retrieveValue, unsubscribe, addToWatchList };
 
     function createUnsubscribingFunction<KS extends keyof M>(
       stateEntry: StateEntry<M[KS]>
@@ -231,12 +222,36 @@ export const createStore = <M extends object>(initStateValues?: Partial<M>): Sto
     }
   };
 
+  const proceedWatchList = (): void => {
+    traverseLinkedList(reactCleaningWatchList, ({ removeTriggerFromKeyList }) => {
+      removeTriggerFromKeyList();
+    });
+
+    reactCleaningWatchList = {};
+  };
+
+  const reactRenderTask = (): void => {
+    if (!reactRenderTaskDone) {
+      [reactRenderTaskDone, reactEffectTaskDone] = [true, false];
+      proceedWatchList();
+    }
+  };
+
+  const reactEffectTask = (): void => {
+    if (!reactEffectTaskDone) {
+      [reactEffectTaskDone, reactRenderTaskDone] = [true, false];
+      reactEffectTasksPool.forEach((task) => task());
+      reactEffectTasksPool = [];
+    }
+  };
+
   return {
     getValue,
     getStateUsingSelector,
     setValue,
     resetValue,
     reactSubscribeState,
+    proceedWatchList,
     reactRenderTask,
     reactEffectTask,
   };
@@ -248,14 +263,6 @@ export const createStore = <M extends object>(initStateValues?: Partial<M>): Sto
           value !== undefined && setStateValue(key, { stateValue: { value } });
         }
       );
-  }
-
-  function proceedReactCleaningWatchList(): void {
-    traverseLinkedList(reactCleaningWatchList, ({ removeTriggerFromKeyList }) => {
-      removeTriggerFromKeyList();
-    });
-
-    reactCleaningWatchList = {};
   }
 };
 

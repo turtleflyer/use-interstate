@@ -8,7 +8,11 @@ import type {
   UseInterstateDev,
 } from './DevTypes';
 import { getEntriesOfEnumerableKeys, getEnumerableKeys } from './getEntriesOfEnumerableKeys';
-import { InitRecordsForSubscribing, TakeStateAndCalculateValue } from './Store';
+import type {
+  AddToWatchList,
+  InitRecordsForSubscribing,
+  TakeStateAndCalculateValue,
+} from './Store';
 import type {
   InitInterstate,
   InterstateKey,
@@ -27,6 +31,7 @@ export const initInterstate = (<M extends object>(
     resetValue,
     getStateUsingSelector,
     reactSubscribeState,
+    proceedWatchList,
     reactRenderTask,
     reactEffectTask,
   } = createStore(initStateValues);
@@ -69,6 +74,8 @@ export const initInterstate = (<M extends object>(
     keyOrSetterSchema: K | SetInterstateSchemaParam<M, K>,
     setterParam?: SetInterstateParam<M[K]>
   ): void => {
+    proceedWatchList();
+
     switch (typeof keyOrSetterSchema) {
       case 'object':
         getEntriesOfEnumerableKeys(keyOrSetterSchema).forEach(
@@ -308,7 +315,9 @@ export const initInterstate = (<M extends object>(
     function createUseRetrieveState(): UseRetrieveState {
       let retrieveValue: () => UseInterstateReturn;
       let unsubscribe: () => void;
+      let addToWatchList: AddToWatchList;
       let removeFromWatchList: () => void;
+      let firstRun = true;
 
       // eslint-disable-next-line no-shadow
       const useRetrieveState: UseRetrieveState = (subscribingParams) => {
@@ -322,24 +331,29 @@ export const initInterstate = (<M extends object>(
           unsubscribe?.();
           const { takeStateAndCalculateValue, initRecords } = subscribingParams;
 
-          ({ retrieveValue, unsubscribe, removeFromWatchList } = reactSubscribeState(
+          ({ retrieveValue, unsubscribe, addToWatchList } = reactSubscribeState(
             () => {
               setState({});
             },
 
             takeStateAndCalculateValue,
-
             initRecords
           ));
+
+          if (firstRun) {
+            ({ removeFromWatchList } = addToWatchList());
+          }
         }
 
-        useEffect(removeFromWatchList, [removeFromWatchList]);
+        useEffect(() => {
+          firstRun && removeFromWatchList();
+          firstRun = false;
+        }, [firstRun]);
 
         useEffect(
           () => () => {
             unsubscribe();
           },
-
           []
         );
 
