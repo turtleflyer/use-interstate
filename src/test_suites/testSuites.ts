@@ -14,6 +14,7 @@ import { testAsyncSetInterstateOnlyOneUpdate } from './test_cases/testAsyncSetIn
 import { testBatchingAlwaysWorksCorrect } from './test_cases/testBatchingAlwaysWorksCorrect';
 import { testChangingInterface } from './test_cases/testChangingInterface';
 import { testCreateAndInitInterstate } from './test_cases/testCreateAndInitInterstate';
+import { testFunctionsRun } from './test_cases/testFunctionsRun';
 import { testInitInterstate } from './test_cases/testInitInterstate';
 import { testReadInterstateAcceptSelector } from './test_cases/testReadInterstateAcceptSelector';
 import { testReadInterstateKeyInterface } from './test_cases/testReadInterstateKeyInterface';
@@ -92,6 +93,7 @@ export const testSuites = (
         testAsyncSetInterstate,
         testAsyncSetInterstateOnlyOneUpdate,
         testBatchingAlwaysWorksCorrect,
+        testFunctionsRun,
       ];
 
       /**
