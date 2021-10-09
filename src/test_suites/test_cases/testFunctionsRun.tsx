@@ -72,6 +72,8 @@ export const testFunctionsRun: TestCase = [
             stateKey: 77,
             initParam: () => {
               fnToCall2();
+
+              return 100;
             },
           }}
         />
@@ -80,6 +82,8 @@ export const testFunctionsRun: TestCase = [
 
     expect(fnToCall2).not.toHaveBeenCalledTimes(0);
 
+    rerender(<StrictMode />);
+
     const fnToCall3 = jest.fn();
 
     rerender(
@@ -87,17 +91,16 @@ export const testFunctionsRun: TestCase = [
         <TestComponent
           {...{
             testId: testComponentID,
-            initSchemaFn: () => {
+            stateKey: 77,
+            initParam: () => {
               fnToCall3();
-
-              return { foo: null };
             },
           }}
         />
       </StrictMode>
     );
 
-    expect(fnToCall3).not.toHaveBeenCalledTimes(0);
+    expect(fnToCall3).toHaveBeenCalledTimes(0);
 
     const fnToCall4 = jest.fn();
 
@@ -130,7 +133,6 @@ export const testFunctionsRun: TestCase = [
 
               return { foo: null };
             },
-            deps: [1],
           }}
         />
       </StrictMode>
@@ -148,7 +150,7 @@ export const testFunctionsRun: TestCase = [
             initSchemaFn: () => {
               fnToCall6();
 
-              return { 77: null };
+              return { foo: null };
             },
             deps: [1],
           }}
@@ -156,7 +158,7 @@ export const testFunctionsRun: TestCase = [
       </StrictMode>
     );
 
-    expect(fnToCall6).toHaveBeenCalledTimes(0);
+    expect(fnToCall6).not.toHaveBeenCalledTimes(0);
 
     const fnToCall7 = jest.fn();
 
@@ -170,12 +172,130 @@ export const testFunctionsRun: TestCase = [
 
               return { 77: null };
             },
+            deps: [1],
+          }}
+        />
+      </StrictMode>
+    );
+
+    expect(fnToCall7).toHaveBeenCalledTimes(0);
+
+    const fnToCall8 = jest.fn();
+
+    rerender(
+      <StrictMode>
+        <TestComponent
+          {...{
+            testId: testComponentID,
+            initSchemaFn: () => {
+              fnToCall8();
+
+              return { 77: null };
+            },
             deps: [2],
           }}
         />
       </StrictMode>
     );
 
-    expect(fnToCall7).not.toHaveBeenCalledTimes(0);
+    expect(fnToCall8).not.toHaveBeenCalledTimes(0);
+
+    const fnToCall9 = jest.fn();
+
+    rerender(
+      <StrictMode>
+        <TestComponent
+          {...{
+            testId: testComponentID,
+            selector: () => {
+              fnToCall9();
+
+              return null;
+            },
+          }}
+        />
+      </StrictMode>
+    );
+
+    expect(fnToCall9).not.toHaveBeenCalledTimes(0);
+
+    const fnToCall10 = jest.fn();
+
+    rerender(
+      <StrictMode>
+        <TestComponent
+          {...{
+            testId: testComponentID,
+            selector: () => {
+              fnToCall10();
+
+              return null;
+            },
+          }}
+        />
+      </StrictMode>
+    );
+
+    expect(fnToCall10).not.toHaveBeenCalledTimes(0);
+
+    const fnToCall11 = jest.fn();
+
+    rerender(
+      <StrictMode>
+        <TestComponent
+          {...{
+            testId: testComponentID,
+            selector: () => {
+              fnToCall11();
+
+              return null;
+            },
+            deps: [1],
+          }}
+        />
+      </StrictMode>
+    );
+
+    expect(fnToCall11).not.toHaveBeenCalledTimes(0);
+
+    const fnToCall12 = jest.fn();
+
+    rerender(
+      <StrictMode>
+        <TestComponent
+          {...{
+            testId: testComponentID,
+            selector: () => {
+              fnToCall12();
+
+              return null;
+            },
+            deps: [1],
+          }}
+        />
+      </StrictMode>
+    );
+
+    expect(fnToCall12).toHaveBeenCalledTimes(0);
+
+    const fnToCall13 = jest.fn();
+
+    rerender(
+      <StrictMode>
+        <TestComponent
+          {...{
+            testId: testComponentID,
+            selector: () => {
+              fnToCall13();
+
+              return null;
+            },
+            deps: [2],
+          }}
+        />
+      </StrictMode>
+    );
+
+    expect(fnToCall13).not.toHaveBeenCalledTimes(0);
   },
 ];
