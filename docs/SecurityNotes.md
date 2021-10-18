@@ -21,7 +21,7 @@ provide access to the state is initializing the state and returning the methods 
 to re-export all these tools using a modular approach:
 
 ```ts
-import { initInterstate } from '../lib/use-interstate';
+import { initInterstate } from 'use-interstate';
 
 export type NoteTitleID = `note-title-${number}`;
 

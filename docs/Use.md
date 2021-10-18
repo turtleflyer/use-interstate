@@ -14,7 +14,7 @@ the case of using *TypeScript*, initializing the app state allows setting cement
 shape to ensure the safety of use.
 
 ```js
-import { initInterstate } from '../src/useInterstate';
+import { initInterstate } from 'use-interstate';
 
 const { useInterstate, readInterstate, setInterstate, resetInterstate } = initInterstate({
   // initial state
