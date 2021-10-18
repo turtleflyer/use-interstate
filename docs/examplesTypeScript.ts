@@ -11,17 +11,20 @@ import { initInterstate } from '../src/useInterstate';
 
 const example1 = () => {
   /**
-   * useInterstate: UseInterstate<{
-   *   color: string;
-   *   density: number;
-   *   integrity: boolean;
-   * }>
+   * The shape of the state inferred from the type of the value passed to `initInterstate`
    */
   const { useInterstate, readInterstate, setInterstate, resetInterstate } = initInterstate({
     color: 'red',
     density: 100,
     integrity: true,
   });
+
+  const density = readInterstate('density');
+
+  /**
+   * `density` is inferred to be a number
+   */
+  const densityRatio = density / 100;
 };
 
 const example2 = () => {
@@ -31,7 +34,22 @@ const example2 = () => {
     integrity: boolean;
   }
 
+  /**
+   * Explicitly specify the shape of the state
+   */
   const { useInterstate, readInterstate, setInterstate, resetInterstate } = initInterstate<State>();
+
+  const density = readInterstate('density');
+
+  /**
+   * `density` is inferred to be a number
+   */
+  const densityRatio = density / 100;
+
+  /**
+   * `prevValue` is inferred to be a string, so it is an error to divide by 100
+   */
+  setInterstate('color', (prevValue) => prevValue / 100);
 };
 
 const example3 = () => {
@@ -43,7 +61,7 @@ const example3 = () => {
 
   const { useInterstate } = initInterstate<State>();
 
-  /** ... */
+  /* ... */
 
   useInterstate('colour');
 };

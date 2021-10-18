@@ -2,7 +2,7 @@
 
 *use-interstate* is a state management library for *React*.
 
-![use-interstate](use-interstate.png)
+![use-interstate](https://github.com/turtleflyer/use-interstate/blob/master/use-interstate.png)
 
 > *:warning: The library is now at the beta stage. Any implementations in projects are welcome.
 > Please feel free to share your experience with us
@@ -37,21 +37,21 @@
 npm i use-interstate
 ```
 
-- [Use](https://github.com/turtleflyer/use-interstate/blob/master/docs/Use.md)
-  - [`initInterstate`](https://github.com/turtleflyer/use-interstate/blob/master/docs/Use.md#initinterstate)
-  - [`useInterstate`](https://github.com/turtleflyer/use-interstate/blob/master/docs/Use.md#useinterstate)
-  - [`readInterstate`](https://github.com/turtleflyer/use-interstate/blob/master/docs/Use.md#readinterstate)
-  - [`acceptSelector`
+* [Use](https://github.com/turtleflyer/use-interstate/blob/master/docs/Use.md)
+  + [`initInterstate`](https://github.com/turtleflyer/use-interstate/blob/master/docs/Use.md#initinterstate)
+  + [`useInterstate`](https://github.com/turtleflyer/use-interstate/blob/master/docs/Use.md#useinterstate)
+  + [`readInterstate`](https://github.com/turtleflyer/use-interstate/blob/master/docs/Use.md#readinterstate)
+  + [`acceptSelector`
     method](https://github.com/turtleflyer/use-interstate/blob/master/docs/Use.md#acceptselector-method)
-  - [`setInterstate`](https://github.com/turtleflyer/use-interstate/blob/master/docs/Use.md#setinterstate)
-  - [`resetInterstate`](https://github.com/turtleflyer/use-interstate/blob/master/docs/Use.md#resetinterstate)
-  - [deps](https://github.com/turtleflyer/use-interstate/blob/master/docs/Use.md#deps)
+  + [`setInterstate`](https://github.com/turtleflyer/use-interstate/blob/master/docs/Use.md#setinterstate)
+  + [`resetInterstate`](https://github.com/turtleflyer/use-interstate/blob/master/docs/Use.md#resetinterstate)
+  + [deps](https://github.com/turtleflyer/use-interstate/blob/master/docs/Use.md#deps)
 
-- [*use-interstate* and
+* [*use-interstate* and
   *TypeScript*](https://github.com/turtleflyer/use-interstate/blob/master/docs/UseWithTypeScript.md#use-interstate-and-typescript)
-  - [Error
+  + [Error
     messages](https://github.com/turtleflyer/use-interstate/blob/master/docs/UseWithTypeScript.md#error-messages)
-  - [Dev
+  + [Dev
     types](https://github.com/turtleflyer/use-interstate/blob/master/docs/UseWithTypeScript.md#dev-types)
-- [Why not *Context
+* [Why not *Context
   Provider*](https://github.com/turtleflyer/use-interstate/blob/master/docs/SecurityNotes.md#why-not-context-provider)
