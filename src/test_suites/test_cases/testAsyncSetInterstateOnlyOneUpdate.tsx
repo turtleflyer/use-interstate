@@ -174,7 +174,7 @@ export const testAsyncSetInterstateOnlyOneUpdate: TestCase = [
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
-    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
+    expect(null).numberOfTimesStateWasSubscribedToBe(1);
 
     Promise.resolve().then(() => {
       setInterstate(({ foo, 77: ss, [symbolKey]: sk }) => ({
@@ -194,7 +194,7 @@ export const testAsyncSetInterstateOnlyOneUpdate: TestCase = [
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
-    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
+    expect(null).numberOfTimesStateWasSubscribedToBe(1);
 
     Promise.resolve().then(() => {
       setInterstate({ foo: 0, 77: '', [symbolKey]: {} });
@@ -210,7 +210,7 @@ export const testAsyncSetInterstateOnlyOneUpdate: TestCase = [
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
-    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
+    expect(null).numberOfTimesStateWasSubscribedToBe(1);
 
     rerender(<></>);
 

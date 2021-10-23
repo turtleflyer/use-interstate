@@ -72,7 +72,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
-    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
+    expect(null).numberOfTimesStateWasSubscribedToBe(1);
 
     act(() => setInterstate('foo', 200));
 
@@ -94,7 +94,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
-    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
+    expect(null).numberOfTimesStateWasSubscribedToBe(1);
 
     act(() => setInterstate(symbolKey, { b: false }));
 
@@ -105,7 +105,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
-    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
+    expect(null).numberOfTimesStateWasSubscribedToBe(1);
 
     act(() =>
       setInterstate(({ foo: prevFooV }) => ({
@@ -122,7 +122,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
-    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
+    expect(null).numberOfTimesStateWasSubscribedToBe(1);
 
     act(() => setInterstate({ 77: 'no' }));
 
@@ -144,7 +144,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
-    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
+    expect(null).numberOfTimesStateWasSubscribedToBe(1);
 
     rerender(<StrictMode />);
     resetInterstate({ foo: 1000 });
@@ -179,7 +179,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
     expect(effectCounter).counterToIncreaseBy(1);
-    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
+    expect(null).numberOfTimesStateWasSubscribedToBe(1);
 
     rerender(
       <StrictMode>
@@ -198,7 +198,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
     expect(effectCounter).counterToIncreaseBy(1);
-    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
+    expect(null).numberOfTimesStateWasSubscribedToBe(1);
 
     act(() => setInterstate(77, 'run'));
 
@@ -226,7 +226,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(0);
     expect(effectCounter).counterToIncreaseBy(1);
-    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
+    expect(null).numberOfTimesStateWasSubscribedToBe(1);
 
     act(() => setInterstate('foo', -1));
 
@@ -235,7 +235,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(0);
     expect(effectCounter).counterToIncreaseBy(1);
-    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
+    expect(null).numberOfTimesStateWasSubscribedToBe(1);
 
     act(() => setInterstate(77, 'aa'));
 
@@ -244,7 +244,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(0);
     expect(effectCounter).counterToIncreaseBy(1);
-    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
+    expect(null).numberOfTimesStateWasSubscribedToBe(1);
 
     rerender(<StrictMode />);
     resetInterstate({ 77: 'bb' });
@@ -421,7 +421,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(0);
     expect(effectCounter).counterToIncreaseBy(1);
-    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
+    expect(null).numberOfTimesStateWasSubscribedToBe(1);
 
     rerender(
       <StrictMode>
@@ -441,7 +441,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
     expect(effectCounter).counterToIncreaseBy(1);
-    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
+    expect(null).numberOfTimesStateWasSubscribedToBe(1);
 
     rerender(
       <StrictMode>
@@ -490,7 +490,7 @@ export const testUseInterstateAcceptSelector: TestCase = [
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
-    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
+    expect(null).numberOfTimesStateWasSubscribedToBe(1);
 
     rerender(<></>);
 

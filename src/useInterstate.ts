@@ -172,6 +172,7 @@ export const initInterstate = (<M extends object>(
     const [{ useInRender }] = useState(() => {
       const useRetrieveState = createUseRetrieveState();
       let determineNeedToResubscribe: DetermineNeedToResubscribe = () => ({ determination: true });
+      let isTheSecondRenderInConcurrentMode = false;
 
       // eslint-disable-next-line no-shadow
       const useInRender = (
@@ -180,7 +181,7 @@ export const initInterstate = (<M extends object>(
         let paramForUseRetrieveState: SubscribingParam | null = null;
         const { determination, calculatedKeys } = determineNeedToResubscribe(paramInRender);
 
-        if (determination) {
+        if (determination && !isTheSecondRenderInConcurrentMode) {
           switch (paramInRender.interfaceType) {
             case 'single key': {
               const normalizedKey = normalizeKey(paramInRender.key);
@@ -300,7 +301,13 @@ export const initInterstate = (<M extends object>(
             default:
               break;
           }
+
+          isTheSecondRenderInConcurrentMode = true;
         }
+
+        useEffect(() => {
+          isTheSecondRenderInConcurrentMode = false;
+        });
 
         return useRetrieveState(paramForUseRetrieveState);
       };
