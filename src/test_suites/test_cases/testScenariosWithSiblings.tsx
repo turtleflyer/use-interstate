@@ -301,7 +301,7 @@ export const testScenariosWithSiblings: TestCase = [
     expect(77).triggersNumberToBe(1);
     expect(effectCounter0).counterToIncreaseBy(1);
     expect(effectCounter1).counterToIncreaseBy(1);
-    expect(null).numberOfTimesStateWasSubscribedToBe(1);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
 
     rerender(<StrictMode />);
     resetInterstate({ 77: 'lo' });

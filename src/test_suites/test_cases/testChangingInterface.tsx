@@ -123,7 +123,7 @@ export const testChangingInterface: TestCase = [
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(0);
     expect(effectCounter).counterToIncreaseBy(1);
-    expect(null).numberOfTimesStateWasSubscribedToBe(1);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
 
     rerender(
       <StrictMode>
@@ -200,7 +200,7 @@ export const testChangingInterface: TestCase = [
     expect(77).triggersNumberToBe(0);
     expect(symbolKey).triggersNumberToBe(0);
     expect(effectCounter).counterToIncreaseBy(1);
-    expect(null).numberOfTimesStateWasSubscribedToBe(1);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
 
     rerender(
       <StrictMode>

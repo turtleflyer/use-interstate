@@ -64,7 +64,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
-    expect(null).numberOfTimesStateWasSubscribedToBe(1);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
 
     act(() => setInterstate('foo', 200));
 
@@ -86,7 +86,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
-    expect(null).numberOfTimesStateWasSubscribedToBe(1);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
 
     act(() => setInterstate(symbolKey, { b: false }));
 
@@ -97,7 +97,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
-    expect(null).numberOfTimesStateWasSubscribedToBe(1);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
 
     act(() =>
       setInterstate(({ foo: prevFooV }) => ({
@@ -114,7 +114,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
-    expect(null).numberOfTimesStateWasSubscribedToBe(1);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
 
     act(() => setInterstate({ 77: 'no' }));
 
@@ -136,7 +136,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
-    expect(null).numberOfTimesStateWasSubscribedToBe(1);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
 
     rerender(
       <StrictMode>
@@ -157,7 +157,7 @@ export const testUseInterstateSchemaFnInterface: TestCase = [
     expect(77).triggersNumberToBe(1);
     expect(symbolKey).triggersNumberToBe(1);
     expect(effectCounter).counterToIncreaseBy(1);
-    expect(null).numberOfTimesStateWasSubscribedToBe(1);
+    expect(null).numberOfTimesStateWasSubscribedToBeInRange([1, 2]);
 
     rerender(
       <StrictMode>
