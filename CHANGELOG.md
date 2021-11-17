@@ -1,3 +1,9 @@
+## 0.1.1-beta.2 (Nov 16, 2021)
+
+### Change
+
+* Previous version is deprecated.
+  
 ## 0.1.1-beta.1 (Oct 21, 2021)
 
 ### Add
