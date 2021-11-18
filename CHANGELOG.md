@@ -1,3 +1,9 @@
+## 0.1.1-beta.3 (Nov 18, 2021)
+
+### Fix
+
+* setInterstate inside ref function and useEffect in complex component to not trigger the state update.
+  
 ## 0.1.1-beta.2 (Nov 16, 2021)
 
 ### Change
