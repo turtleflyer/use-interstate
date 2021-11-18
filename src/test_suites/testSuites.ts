@@ -28,6 +28,8 @@ import { testUseInterstateKeyInterface } from './test_cases/testUseInterstateKey
 import { testUseInterstateKeysInterface } from './test_cases/testUseInterstateKeysInterface';
 import { testUseInterstateSchemaFnInterface } from './test_cases/testUseInterstateSchemaFnInterface';
 import { testUseInterstateSchemaObjInterface } from './test_cases/testUseInterstateSchemaObjInterface';
+import { testUseWithRef } from './test_cases/testUseWithRef';
+import { testUseWithUseEffect } from './test_cases/testUseWithUseEffect';
 
 jest.mock('../createState.ts');
 
@@ -94,6 +96,8 @@ export const testSuites = (
         testAsyncSetInterstateOnlyOneUpdate,
         testBatchingAlwaysWorksCorrect,
         testFunctionsRun,
+        testUseWithRef,
+        testUseWithUseEffect,
       ];
 
       /**
@@ -112,6 +116,8 @@ export const testSuites = (
           testAsyncSetInterstate,
           testAsyncSetInterstateOnlyOneUpdate,
           testBatchingAlwaysWorksCorrect,
+          testUseWithRef,
+          testUseWithUseEffect,
         ],
 
         SHOULD_TEST_PERFORMANCE: [
@@ -126,6 +132,8 @@ export const testSuites = (
           testAsyncSetInterstate,
           testAsyncSetInterstateOnlyOneUpdate,
           testBatchingAlwaysWorksCorrect,
+          testUseWithRef,
+          testUseWithUseEffect,
         ],
       };
 

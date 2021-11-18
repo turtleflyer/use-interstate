@@ -223,25 +223,26 @@ export const createStore = <M extends object>(initStateValues?: Partial<M>): Sto
   };
 
   const proceedWatchList = (): void => {
-    traverseLinkedList(reactCleaningWatchList, ({ removeTriggerFromKeyList }) => {
-      removeTriggerFromKeyList();
-    });
+    reactEffectTaskDone &&
+      traverseLinkedList(reactCleaningWatchList, ({ removeTriggerFromKeyList }) => {
+        removeTriggerFromKeyList();
+      });
 
     reactCleaningWatchList = {};
   };
 
   const reactRenderTask = (): void => {
     if (!reactRenderTaskDone) {
-      [reactRenderTaskDone, reactEffectTaskDone] = [true, false];
       proceedWatchList();
+      [reactRenderTaskDone, reactEffectTaskDone] = [true, false];
     }
   };
 
   const reactEffectTask = (): void => {
     if (!reactEffectTaskDone) {
-      [reactEffectTaskDone, reactRenderTaskDone] = [true, false];
       reactEffectTasksPool.forEach((task) => task());
       reactEffectTasksPool = [];
+      [reactEffectTaskDone, reactRenderTaskDone] = [true, false];
     }
   };
 
