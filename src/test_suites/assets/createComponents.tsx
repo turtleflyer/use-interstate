@@ -144,7 +144,7 @@ export const createListenerComponent = <M extends object>({
     const interpretResult = props.interpretResult ?? stringifyState;
 
     const stringifiedState = props.initSchemaObj
-      ? (interpretResult as NonNullable<typeof props.interpretResult>)(
+      ? (interpretResult as NonNullable<SchemaObjProps['interpretResult']>)(
           useInterstate(props.initSchemaObj)
         )
       : props.initSchemaFn
@@ -157,8 +157,8 @@ export const createListenerComponent = <M extends object>({
       ? (interpretResult as NonNullable<typeof props.interpretResult>)(
           useInterstate.acceptSelector(props.selector, props.deps)
         )
-      : (interpretResult as NonNullable<typeof props.interpretResult>)(
-          useInterstate(props.stateKey, props.initParam)
+      : (interpretResult as NonNullable<StateKeyProps['interpretResult']>)(
+          useInterstate(props.stateKey as StateKeyProps['stateKey'], props.initParam)
         );
 
     return (
